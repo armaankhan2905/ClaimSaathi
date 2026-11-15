@@ -24,6 +24,15 @@
   color-scheme: light;
   box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+:root[data-theme="dark"] {
+  --bg: #101722; --surface: #172231; --surface-2: #202e40; --line: #314257;
+  --fg: #e6edf6; --muted: #a0afc2;
+  --accent: #78aaff; --sage: #83a9df; --accent-ink: #0c1b30;
+  --paper: #242b2b; --paper-ink: #e5ece6; --paper-muted: #b5c0b5;
+  --ok: #59bd91; --warn: #e8b55e; --bad: #f18378;
+  --ok-bg: rgba(89,189,145,.13); --warn-bg: rgba(232,181,94,.13); --bad-bg: rgba(241,131,120,.13);
+  color-scheme: dark;
+}
 * { box-sizing: border-box; }
 html { }
 body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
@@ -59,6 +68,8 @@ p { margin: 0; }
 #pg-complaint:checked ~ * .nav label[for="pg-complaint"] { color: var(--accent-ink); background: var(--accent); }
 label.brand { cursor: pointer; }
 .bar-right { display: flex; align-items: center; gap: 10px; }
+.theme-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; font-size: 12.5px; }
+.theme-toggle .theme-icon { font-size: 16px; line-height: 1; }
 .seg { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
 .seg button { border: 0; background: transparent; padding: 5px 10px; border-radius: 7px; font-size: 12.5px; cursor: pointer; color: var(--muted); }
 .seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); box-shadow: inset 0 0 0 1px var(--line); }
@@ -201,15 +212,16 @@ td.better { color: var(--ok); }
 td.worse { color: var(--bad); }
 .chat-layout { display: grid; grid-template-columns: 1fr 280px; gap: 16px; }
 @media (max-width: 860px) { .chat-layout { grid-template-columns: 1fr; } }
-.chat { display: flex; flex-direction: column; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; }
+.chat { display: flex; flex-direction: column; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; height: min(72vh, 760px); min-height: 420px; }
+.chat-messages { display: flex; flex: 1; flex-direction: column; gap: 14px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; scrollbar-gutter: stable; }
 .msg { max-width: 82%; padding: 12px 14px; border-radius: 14px; font-size: 14.5px; }
 .msg.user { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 4px; }
 .msg.bot { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line); border-bottom-left-radius: 4px; display: grid; gap: 10px; }
 .msg.bot .answer-tag { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .msg.bot blockquote { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--paper); color: var(--paper-ink); font-family: Georgia, "Times New Roman", serif; font-size: 13px; }
 .msg.bot blockquote .mono { display: block; color: var(--paper-muted); font-size: 11px; margin-bottom: 4px; }
-@media (max-width: 560px) { .msg { max-width: 94%; } }
-.composer { display: flex; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 6px 14px; background: var(--bg); }
+@media (max-width: 560px) { .chat { height: min(72vh, 720px); min-height: 360px; padding: 14px; } .msg { max-width: 94%; } }
+.composer { position: sticky; bottom: 0; z-index: 2; display: flex; flex: none; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 6px 14px; background: var(--bg); box-shadow: 0 -8px 18px var(--surface); }
 .composer input { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--fg); font: inherit; outline: none; padding: 8px 0; }
 .icon-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); display: grid; place-items: center; cursor: pointer; flex: none; }
 .icon-btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
@@ -416,6 +428,8 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
 .feature:hover { transform: translateY(-4px); }
 #home .hero { position: relative; overflow: hidden; border-radius: 28px; padding: 44px 40px; background: linear-gradient(165deg,#e6f0fc 0%,#f4f8fd 60%,#e3f2eb 100%); border: 1px solid var(--line); }
 #home .hero::before { content: ""; position: absolute; right: 8%; top: 8%; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 40% 35%,#d6e7fc,#aecbf3 70%,#8db6ec); box-shadow: 0 0 90px 30px rgba(141,182,236,.35); opacity: .8; }
+:root[data-theme="dark"] #home .hero { background: linear-gradient(165deg,#17263b 0%,#111b2a 60%,#14271f 100%); }
+:root[data-theme="dark"] #home .hero::before { background: radial-gradient(circle at 40% 35%,#304a6c,#243a56 70%,#1c3049); box-shadow: 0 0 90px 30px rgba(58,101,158,.25); }
 #home .hero > * { position: relative; }
 .scene { perspective: 1100px; height: 430px; }
 .stage { position: relative; height: 100%; transform-style: preserve-3d; transition: transform .15s ease-out; }
@@ -470,6 +484,7 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
       <label for="pg-complaint" data-i18n="nav_comp">File a Complaint</label>
     </nav>
     <div class="bar-right">
+      <button class="btn theme-toggle" type="button" id="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false" title="Switch to dark mode"><span class="theme-icon" id="theme-icon" aria-hidden="true">☾</span><span id="theme-label">Dark</span></button>
       <div class="seg" role="group" aria-label="Language">
         <button type="button" data-lang="en" aria-pressed="true">EN</button>
         <button type="button" data-lang="hi" aria-pressed="false">हिं</button>
@@ -759,32 +774,34 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
   <div class="tabpanel" id="tab-ask" role="region" aria-labelledby="t-ask">
     <div class="chat-layout">
       <div class="chat">
-        <div class="msg user">Is my knee replacement covered? I've had this policy since 2022.</div>
-        <div class="msg bot">
-          <div class="answer-tag"><span class="chip ok"><span class="dot"></span>Likely covered</span><span class="muted" style="font-size:12.5px">Based on 2 clauses in your policy</span></div>
-          <p>Yes. Joint replacement has a 24-month waiting period, counted from your first policy on <b>12 Mar 2022</b>. That ended on <b>12 Mar 2024</b>, so surgery after that date falls inside your cover, subject to your room-rent limit.</p>
-          <blockquote><span class="mono">Section 4.3(iv) · p. 17</span>“…excluded until the expiry of 24 months of continuous coverage after the date of inception of the first policy…”</blockquote>
-          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="cite">§4.3(iv)</span><span class="cite">§4.1</span></div>
-        </div>
-        <div class="msg user">Agar main private room lun to kitna milega?</div>
-        <div class="msg bot">
-          <div class="answer-tag"><span class="chip warn"><span class="dot"></span>Limit applies</span><span class="muted" style="font-size:12.5px">Hinglish mein jawab</span></div>
-          <p>Aapki policy mein room ka limit <b>₹5,000 per day</b> hai (Sum Insured ka 1%). Agar room ₹8,000 ka hai, to baaki bills bhi usi ratio mein kat sakte hain. Isliye ₹5,000 tak ka room lena safe rahega.</p>
-          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="cite">§4.1</span></div>
+        <div class="chat-messages" id="chat-messages" aria-label="Conversation">
+          <div class="msg user">Is my knee replacement covered? I've had this policy since 2022.</div>
+          <div class="msg bot">
+            <div class="answer-tag"><span class="chip ok"><span class="dot"></span>Likely covered</span><span class="muted" style="font-size:12.5px">Based on 2 clauses in your policy</span></div>
+            <p>Yes. Joint replacement has a 24-month waiting period, counted from your first policy on <b>12 Mar 2022</b>. That ended on <b>12 Mar 2024</b>, so surgery after that date falls inside your cover, subject to your room-rent limit.</p>
+            <blockquote><span class="mono">Section 4.3(iv) · p. 17</span>“…excluded until the expiry of 24 months of continuous coverage after the date of inception of the first policy…”</blockquote>
+            <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="cite">§4.3(iv)</span><span class="cite">§4.1</span></div>
+          </div>
+          <div class="msg user">Agar main private room lun to kitna milega?</div>
+          <div class="msg bot">
+            <div class="answer-tag"><span class="chip warn"><span class="dot"></span>Limit applies</span><span class="muted" style="font-size:12.5px">Hinglish mein jawab</span></div>
+            <p>Aapki policy mein room ka limit <b>₹5,000 per day</b> hai (Sum Insured ka 1%). Agar room ₹8,000 ka hai, to baaki bills bhi usi ratio mein kat sakte hain. Isliye ₹5,000 tak ka room lena safe rahega.</p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="cite">§4.1</span></div>
+          </div>
         </div>
         <div class="composer">
           <input id="ask-input" type="text" placeholder="Ask about your policy in English, हिंदी or Hinglish" aria-label="Ask a question">
           <button class="icon-btn" type="button" aria-label="Speak your question" data-toast><svg><use href="#i-mic"/></svg></button>
-          <button class="icon-btn primary" type="button" aria-label="Send" data-toast><svg><use href="#i-send"/></svg></button>
+          <button class="icon-btn primary" type="button" id="ask-send" aria-label="Send"><svg><use href="#i-send"/></svg></button>
         </div>
       </div>
       <aside class="panel">
         <h3 style="margin-bottom:12px">Try asking</h3>
         <div class="suggest">
-          <button type="button" data-toast>Does my plan cover dengue hospitalisation?</button>
-          <button type="button" data-toast>What happens if I miss my renewal by 10 days?</button>
-          <button type="button" data-toast>Kya cataract surgery ka poora paisa milega?</button>
-          <button type="button" data-toast>Which documents do I need for a cashless claim?</button>
+          <button type="button" data-question="dengue">Does my plan cover dengue hospitalisation?</button>
+          <button type="button" data-question="renewal">What happens if I miss my renewal by 10 days?</button>
+          <button type="button" data-question="cataract">Kya cataract surgery ka poora paisa milega?</button>
+          <button type="button" data-question="cashless">Which documents do I need for a cashless claim?</button>
         </div>
         <p class="muted" style="font-size:12.5px;margin-top:14px">Every answer quotes the clause it relies on, so you can check it yourself.</p>
       </aside>
@@ -1184,12 +1201,115 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
     toastEl.textContent = msg; toastEl.classList.add("show");
     clearTimeout(tt); tt = setTimeout(function () { toastEl.classList.remove("show"); }, 2400);
   }
+
+  // Demo-only theme toggle. Keep the choice on this browser, with light mode as the default.
+  var themeToggle = $("#theme-toggle"), themeIcon = $("#theme-icon"), themeLabel = $("#theme-label");
+  function setTheme(theme, persist) {
+    var dark = theme === "dark";
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    themeToggle.setAttribute("aria-pressed", String(dark));
+    themeToggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    themeToggle.title = dark ? "Switch to light mode" : "Switch to dark mode";
+    themeIcon.textContent = dark ? "☀" : "☾";
+    themeLabel.textContent = dark ? "Light" : "Dark";
+    if (persist) {
+      try { localStorage.setItem("claimsaathi-theme", dark ? "dark" : "light"); } catch (err) {}
+    }
+  }
+  var savedTheme = "light";
+  try { savedTheme = localStorage.getItem("claimsaathi-theme") === "dark" ? "dark" : "light"; } catch (err) {}
+  setTheme(savedTheme, false);
+  themeToggle.addEventListener("click", function () {
+    setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark", true);
+  });
+
+  // Predefined sample answers keep the Ask flow clickable without a live service.
+  var demoAnswers = {
+    dengue: {
+      question: "Does my plan cover dengue hospitalisation?",
+      answer: "In this demo policy, inpatient treatment for dengue is covered after any applicable waiting period, subject to room-rent limits and exclusions.",
+      reference: "Sample clause 3.2 · p. 12",
+      quote: "Hospitalisation expenses for infectious diseases are payable as listed in the schedule, subject to policy limits."
+    },
+    renewal: {
+      question: "What happens if I miss my renewal by 10 days?",
+      answer: "This demo policy provides a 30-day renewal grace period for waiting-period continuity. Check the actual policy wording for whether treatment during a gap is covered.",
+      reference: "Sample clause 2.1 · p. 5",
+      quote: "Renewal within the stated grace period preserves continuity benefits, subject to the policy terms."
+    },
+    cataract: {
+      question: "Kya cataract surgery ka poora paisa milega?",
+      answer: "Haan. Is demo policy mein cataract surgery cover hai, lekin waiting period aur per-eye limit apply ho sakte hain. Schedule mein limit check karein.",
+      reference: "Sample clause 4.2 · p. 18",
+      quote: "Cataract treatment is subject to the per-eye limit shown in the schedule."
+    },
+    cashless: {
+      question: "Which documents do I need for a cashless claim?",
+      answer: "Keep your health card or policy details, photo ID, the doctor's admission advice, relevant test reports, and the hospital pre-authorisation form ready.",
+      reference: "Sample clause 6.1 · p. 21",
+      quote: "Submit policy details, identification, medical advice and supporting hospital records."
+    }
+  };
+  var chatMessages = $("#chat-messages"), ai = $("#ask-input");
+  function submitQuestion(question, presetKey) {
+    var prompt = (question || "").trim();
+    if (!prompt) { toast("Type a question or choose one of the suggested questions."); return; }
+    var answer = demoAnswers[presetKey];
+    if (!answer) {
+      var normalized = prompt.toLowerCase();
+      Object.keys(demoAnswers).some(function (key) {
+        if (demoAnswers[key].question.toLowerCase() === normalized) { answer = demoAnswers[key]; return true; }
+        return false;
+      });
+    }
+    if (ai) ai.value = "";
+
+    var userMessage = document.createElement("div");
+    userMessage.className = "msg user";
+    userMessage.textContent = prompt;
+    chatMessages.appendChild(userMessage);
+
+    var botMessage = document.createElement("div");
+    botMessage.className = "msg bot";
+    botMessage.setAttribute("aria-live", "polite");
+    var answerTag = document.createElement("div");
+    answerTag.className = "answer-tag";
+    var chip = document.createElement("span");
+    chip.className = "chip sage";
+    chip.textContent = answer ? "Sample answer" : "Demo response";
+    var sourceLabel = document.createElement("span");
+    sourceLabel.className = "muted";
+    sourceLabel.style.fontSize = "12.5px";
+    sourceLabel.textContent = answer ? "Predefined demo answer" : "Predefined answers only";
+    answerTag.appendChild(chip);
+    answerTag.appendChild(sourceLabel);
+    botMessage.appendChild(answerTag);
+
+    var answerText = document.createElement("p");
+    answerText.textContent = answer ? answer.answer : "This preview has predefined answers for the suggested questions. Choose a prompt from Try asking to see a sample response.";
+    botMessage.appendChild(answerText);
+    if (answer) {
+      var quote = document.createElement("blockquote");
+      var reference = document.createElement("span");
+      reference.className = "mono";
+      reference.textContent = answer.reference;
+      quote.appendChild(reference);
+      quote.appendChild(document.createTextNode(answer.quote));
+      botMessage.appendChild(quote);
+    }
+    chatMessages.appendChild(botMessage);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
   document.addEventListener("click", function (e) {
+    var suggestion = e.target.closest("[data-question]");
+    if (suggestion) { submitQuestion(demoAnswers[suggestion.dataset.question].question, suggestion.dataset.question); return; }
+    if (e.target.closest("#ask-send")) { submitQuestion(ai.value); return; }
     if (e.target.closest("[data-toast]")) toast("UI preview: this action isn't connected yet.");
   });
   $("#complaint-form").addEventListener("submit", function (e) { e.preventDefault(); });
-  var ai = $("#ask-input");
-  if (ai) ai.addEventListener("keydown", function (e) { if (e.key === "Enter") toast("UI preview: answers aren't live yet."); });
+  if (ai) ai.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); submitQuestion(ai.value); }
+  });
   var cp = $("[data-copy]");
   if (cp) cp.addEventListener("click", function () {
     var txt = $("#letter").innerText;
