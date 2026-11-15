@@ -1,6 +1,6 @@
-# Covera – Hackathon Presentation Content
+# ClaimSaathi – Hackathon Presentation Content
 
-**Project:** Covera  
+**Project:** ClaimSaathi  
 **Tagline:** Understand Your Coverage. Defend Your Rights.  
 **Description:** AI-Powered Insurance Policy Intelligence & Policyholder Protection Platform  
 **Track:** Human Empowerment & Assistive Innovation
@@ -11,11 +11,11 @@
 
 ## Slide 1 – Project Title
 
-### Covera – Your AI Insurance Rights Companion
+### ClaimSaathi – Your AI Insurance Rights Companion
 
 **Subtitle:** Making Insurance Transparent, Understandable and Accountable
 
-Covera is an AI-powered platform that helps Indian policyholders decode complicated insurance policies, compare coverage options, verify rejected claims against policy conditions and prepare evidence-backed complaints through official grievance channels.
+ClaimSaathi is an AI-powered platform that helps Indian policyholders decode complicated insurance policies, compare coverage options, verify rejected claims against policy conditions and prepare evidence-backed complaints through official grievance channels.
 
 **Include on slide:** Team name, member details, institution and hackathon logo, according to the organiser's requirements.
 
@@ -42,9 +42,9 @@ Insurance is purchased for financial security, yet many policyholders struggle t
 
 ## Slide 3 – Proposed Solution
 
-### Introducing Covera
+### Introducing ClaimSaathi
 
-Covera creates a policyholder-first intelligence layer between complex insurance contracts and everyday users.
+ClaimSaathi creates a policyholder-first intelligence layer between complex insurance contracts and everyday users.
 
 **Four pillars:**
 
@@ -72,8 +72,8 @@ Covera creates a policyholder-first intelligence layer between complex insurance
 | Feature | Function | User benefit |
 |---|---|---|
 | Policy Decoder | Extracts coverage, exclusions, limits and waiting periods | Understand complex insurance documents |
-| Ask Covera | Answers scenario-based policy questions with citations | Get clear answers before emergencies |
-| Covera Compare | Compares two uploaded policies | Identify relevant coverage differences |
+| Ask ClaimSaathi | Answers scenario-based policy questions with citations | Get clear answers before emergencies |
+| ClaimSaathi Compare | Compares two uploaded policies | Identify relevant coverage differences |
 | Rejection Analyzer | Cross-checks rejection grounds against policy evidence | Discover potentially questionable decisions |
 | Evidence Report | Documents findings, contradictions and missing information | Understand whether a dispute merits review |
 | Grievance Assistant | Drafts complaints and provides official filing guidance | Take informed action |
@@ -83,7 +83,7 @@ Covera creates a policyholder-first intelligence layer between complex insurance
 
 ---
 
-## Slide 5 – How Covera Works
+## Slide 5 – How ClaimSaathi Works
 
 ### From Complex Documents to Actionable Guidance
 
@@ -94,13 +94,13 @@ Covera creates a policyholder-first intelligence layer between complex insurance
 5. **User-Facing Results:** Simple explanations, comparisons and evidence-backed reports.
 6. **Grievance Assistance:** Complaint drafting, document checklist and official escalation guidance.
 
-**Key technical principle:** Covera retrieves relevant passages from the user's actual policy and cites them rather than relying entirely on an AI model's general insurance knowledge.
+**Key technical principle:** ClaimSaathi retrieves relevant passages from the user's actual policy and cites them rather than relying entirely on an AI model's general insurance knowledge.
 
 ---
 
 ## Slide 6 – Technology Stack & Architecture
 
-### Technology Behind Covera
+### Technology Behind ClaimSaathi
 
 | Layer | Technology | Role |
 |---|---|---|
@@ -121,7 +121,7 @@ Covera creates a policyholder-first intelligence layer between complex insurance
 
 ### Beyond a Generic Insurance Chatbot
 
-Existing tools already offer AI-based policy summaries and some claim appeal assistance. Covera's proposed differentiation is a transparent, evidence-centred verification workflow.
+Existing tools already offer AI-based policy summaries and some claim appeal assistance. ClaimSaathi's proposed differentiation is a transparent, evidence-centred verification workflow.
 
 **Innovation 1 – Clause-to-Claim Evidence Mapping**
 
@@ -133,13 +133,13 @@ The platform reconstructs key dates: policy commencement, renewals, waiting-peri
 
 **Innovation 3 – Scenario-Based Policy Comparison**
 
-Instead of simply comparing policy brochures, Covera evaluates situations such as waterlogged engine damage, maternity expenses or specific medical procedures against both policies.
+Instead of simply comparing policy brochures, ClaimSaathi evaluates situations such as waterlogged engine damage, maternity expenses or specific medical procedures against both policies.
 
 **Innovation 4 – Actionable Grievance Package**
 
 The final output includes the disputed grounds, clause references, missing-evidence checklist and a human-reviewable complaint draft.
 
-> Covera doesn't just tell users what an insurance document says. It helps them understand what those terms mean for their specific situation and what evidence supports their next step.
+> ClaimSaathi doesn't just tell users what an insurance document says. It helps them understand what those terms mean for their specific situation and what evidence supports their next step.
 
 ---
 
@@ -151,7 +151,7 @@ The final output includes the disputed grounds, clause references, missing-evide
 
 A policyholder undergoes hospital treatment costing **₹1,80,000**. The insurer rejects the claim, citing a two-year waiting-period restriction. The policyholder believes they have maintained continuous coverage for three years.
 
-**How Covera responds:**
+**How ClaimSaathi responds:**
 
 1. Extracts the rejection reason and applicable waiting-period clause.
 2. Reviews policy start dates, renewal records and possible waiting-period exceptions.
@@ -167,7 +167,7 @@ A policyholder undergoes hospital treatment costing **₹1,80,000**. The insurer
 
 ## Slide 9 – Feasibility & Implementation Plan
 
-### Building Covera as a Practical, Scalable Solution
+### Building ClaimSaathi as a Practical, Scalable Solution
 
 **Phase 1 – Document Intelligence**
 
@@ -219,7 +219,7 @@ Test accuracy against annotated documents, assess evidence completeness, add mul
 | Policy comparison correctness | Review scenario-specific results against source documents |
 | Rejection assessment reliability | Test against expert-labelled fictional cases |
 | Citation validity | Check whether cited passages support each conclusion |
-| User understanding | Measure comprehension before and after using Covera |
+| User understanding | Measure comprehension before and after using ClaimSaathi |
 | Complaint completeness | Check generated drafts against a predefined document and information checklist |
 
 Do not present these as achieved results until the MVP has been tested.
@@ -232,7 +232,7 @@ Do not present these as achieved results until the MVP has been tested.
 
 ### The Future of Policyholder Empowerment
 
-After validating the hackathon MVP, Covera could expand into:
+After validating the hackathon MVP, ClaimSaathi could expand into:
 
 - Support for additional insurance categories and regional languages.
 - Speech-based explanations for users with limited literacy.
@@ -244,9 +244,9 @@ After validating the hackathon MVP, Covera could expand into:
 
 **Conclusion:**
 
-Insurance should provide confidence, not confusion. Covera aims to empower people throughout the insurance journey—from understanding and comparing policies to verifying rejected claims and pursuing fair resolution.
+Insurance should provide confidence, not confusion. ClaimSaathi aims to empower people throughout the insurance journey—from understanding and comparing policies to verifying rejected claims and pursuing fair resolution.
 
-**Covera — Understand Your Coverage. Defend Your Rights.**
+**ClaimSaathi — Understand Your Coverage. Defend Your Rights.**
 
 AI for Insurance Transparency & Policyholder Empowerment.
 

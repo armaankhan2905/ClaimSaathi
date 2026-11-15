@@ -1,0 +1,1236 @@
+<title>ClaimSaathi App Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap">
+<style>
+/* Layout: sticky app bar, hash-routed pages; each page = header strip + working area on dark "vault" ground, documents shown as paper */
+:root {
+  --bg: #0e110f;
+  --surface: #161a17;
+  --surface-2: #1d221e;
+  --line: #2b332d;
+  --fg: #e7ece3;
+  --muted: #98a39a;
+  --accent: #cfe0ac;      /* deck headline sage */
+  --sage: #7e997e;        /* deck accent */
+  --accent-ink: #10140f;
+  --paper: #f7f8f4;
+  --paper-ink: #1f2621;
+  --paper-muted: #5d6860;
+  --ok: #86c99c;
+  --warn: #e9b864;
+  --bad: #e77d70;
+  --ok-bg: rgba(134,201,156,.12);
+  --warn-bg: rgba(233,184,100,.12);
+  --bad-bg: rgba(231,125,112,.12);
+  --display: "Archivo", "Arial Black", system-ui, sans-serif;
+  --body: "Inter", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 14px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+a { color: var(--accent); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-weight: 900; font-size: clamp(28px, 4.2vw, 44px); letter-spacing: -.01em; }
+h2 { font-weight: 700; font-size: 22px; }
+h3 { font-weight: 700; font-size: 16px; }
+p { margin: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--sage); font-weight: 600; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-size: 12.5px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- App bar ---------- */
+.appbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.appbar .wrap { display: flex; align-items: center; gap: 18px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); }
+.brand-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); display: grid; place-items: center; }
+.brand-mark svg { width: 18px; height: 18px; }
+.brand b { font-family: var(--display); font-weight: 900; font-size: 19px; letter-spacing: .02em; }
+.nav { display: flex; gap: 4px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav label { cursor: pointer; color: var(--muted); padding: 8px 12px; border-radius: 9px; font-weight: 500; white-space: nowrap; font-size: 14px; }
+.nav label:hover { color: var(--fg); background: var(--surface-2); }
+#pg-home:checked ~ * .nav label[for="pg-home"],
+#pg-policy:checked ~ * .nav label[for="pg-policy"],
+#pg-rejection:checked ~ * .nav label[for="pg-rejection"],
+#pg-complaint:checked ~ * .nav label[for="pg-complaint"] { color: var(--accent-ink); background: var(--accent); }
+label.brand { cursor: pointer; }
+.bar-right { display: flex; align-items: center; gap: 10px; }
+.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+.seg button { border: 0; background: transparent; padding: 5px 10px; border-radius: 7px; font-size: 12.5px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); box-shadow: inset 0 0 0 1px var(--line); }
+.proto-pill { font-size: 11.5px; color: var(--warn); border: 1px solid rgba(233,184,100,.35); background: var(--warn-bg); padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+@media (max-width: 760px) {
+  .appbar .wrap { gap: 10px; }
+  .nav { order: 3; flex-basis: 100%; }
+  .bar-right { margin-left: auto; }
+  .proto-pill { display: none; }
+}
+
+/* ---------- Generic blocks ---------- */
+main { padding-block: 28px 64px; }
+.page { display: none; }
+/* Routing without JavaScript: the page named in the URL hash is shown; Home when there is none */
+/* Page, tab and step switching uses hidden radio buttons: works in every browser, no script needed */
+#pg-home:checked ~ * #home,
+#pg-policy:checked ~ * #policy,
+#pg-rejection:checked ~ * #rejection,
+#pg-complaint:checked ~ * #complaint { display: block; }
+.pg-radio { position: absolute; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; margin: 0; }
+.vh { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; margin: 0; }
+@keyframes fade { from { opacity: .4; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+.page-head .lede { color: var(--muted); max-width: 62ch; margin-top: 8px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; min-width: 0; }
+.panel-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.grid { display: grid; gap: 16px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); padding: 9px 14px; border-radius: 10px; cursor: pointer; font-weight: 500; font-size: 14px; text-decoration: none; white-space: nowrap; }
+.btn:hover { border-color: var(--sage); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.05); }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.ok { color: var(--ok); border-color: rgba(134,201,156,.35); background: var(--ok-bg); }
+.chip.warn { color: var(--warn); border-color: rgba(233,184,100,.35); background: var(--warn-bg); }
+.chip.bad { color: var(--bad); border-color: rgba(231,125,112,.35); background: var(--bad-bg); }
+.chip.sage { color: var(--accent); border-color: rgba(207,224,172,.3); background: rgba(207,224,172,.08); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.kv div { background: var(--surface); padding: 14px 16px; min-width: 0; }
+.kv dt { font-size: 12px; color: var(--muted); }
+.kv dd { margin: 4px 0 0; font-weight: 600; font-size: 15.5px; }
+.kv dd small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.cite { font-family: var(--mono); font-size: 11.5px; color: var(--accent); background: rgba(207,224,172,.08); border: 1px solid rgba(207,224,172,.25); padding: 1px 7px; border-radius: 6px; white-space: nowrap; }
+.drop { border: 1.5px dashed var(--line); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--surface); }
+.drop .file { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.file-ico { width: 38px; height: 46px; border-radius: 6px; background: var(--paper); color: var(--paper-ink); display: grid; place-items: end center; font-size: 9px; font-weight: 700; padding-bottom: 6px; flex: none; position: relative; }
+.file-ico::after { content: ""; position: absolute; top: 0; right: 0; border-width: 0 10px 10px 0; border-style: solid; border-color: var(--bg) var(--bg) #c9d0c6 #c9d0c6; }
+.file b { display: block; font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.file span { font-size: 12.5px; color: var(--muted); }
+.disclaimer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; margin-top: 22px; }
+
+/* ---------- Home ---------- */
+.hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 28px; align-items: center; padding-block: 18px 34px; }
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--muted); font-size: 16.5px; margin-top: 14px; max-width: 54ch; }
+.hero .actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+.hero-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; }
+.alert-row { display: flex; gap: 12px; align-items: flex-start; }
+.alert-ico { width: 36px; height: 36px; border-radius: 10px; background: var(--bad-bg); color: var(--bad); display: grid; place-items: center; flex: none; }
+.alert-ico svg { width: 18px; height: 18px; }
+.mini-timeline { margin-top: 16px; display: grid; gap: 8px; }
+.mini-timeline div { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; border-bottom: 1px dashed var(--line); padding-bottom: 7px; }
+.mini-timeline div:last-child { border: 0; }
+.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feature { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; text-decoration: none; color: var(--fg); transition: border-color .2s, transform .2s; }
+.feature:hover { border-color: var(--sage); }
+.feature .f-ico { width: 44px; height: 44px; border-radius: 12px; background: rgba(207,224,172,.1); color: var(--accent); display: grid; place-items: center; }
+.feature .f-ico svg { width: 22px; height: 22px; }
+.feature ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; display: grid; gap: 4px; }
+.feature .go { margin-top: auto; color: var(--accent); font-weight: 600; font-size: 14px; }
+.section-label { margin: 34px 0 14px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.policies { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.policy-card { display: grid; gap: 12px; }
+.policy-card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.policy-card .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.policy-card .stats div { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+.policy-card .stats dt { font-size: 11.5px; color: var(--muted); }
+.policy-card .stats dd { margin: 2px 0 0; font-weight: 600; }
+@media (max-width: 900px) { .hero, .features, .policies { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .policy-card .stats { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- Policy Insights ---------- */
+.policy-switch { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+select { font: inherit; background: var(--surface-2); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; max-width: 100%; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: 20px 0 22px; overflow-x: auto; scrollbar-width: none; }
+.tabs label { border: 0; background: none; padding: 11px 14px; cursor: pointer; color: var(--muted); font-weight: 500; font-size: 15px; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+.tabs label svg { width: 16px; height: 16px; }
+.tabs label:hover { color: var(--fg); }
+#pt-details:checked ~ .tabs label[for="pt-details"],
+#pt-clauses:checked ~ .tabs label[for="pt-clauses"],
+#pt-compare:checked ~ .tabs label[for="pt-compare"],
+#pt-ask:checked ~ .tabs label[for="pt-ask"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tabs input:focus-visible + label, .steps input:focus-visible + .fs { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tabpanel { display: none; }
+#pt-details:checked ~ #tab-details,
+#pt-clauses:checked ~ #tab-clauses,
+#pt-compare:checked ~ #tab-compare,
+#pt-ask:checked ~ #tab-ask { display: block; }
+.cover-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+.cover-col h3 { display: flex; align-items: center; gap: 8px; font-size: 14.5px; margin-bottom: 10px; }
+.cover-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 13.5px; }
+.cover-col li { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.cover-col li:last-child { border: 0; padding-bottom: 0; }
+@media (max-width: 1000px) { .cover-cols { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .cover-cols { grid-template-columns: 1fr; } }
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.search { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; }
+.search svg { width: 16px; height: 16px; color: var(--muted); flex: none; }
+.search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--fg); padding: 10px 0; font: inherit; outline: none; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button { border: 1px solid var(--line); background: transparent; padding: 6px 12px; border-radius: 999px; cursor: pointer; font-size: 13px; color: var(--muted); }
+.filters button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); border-color: var(--sage); }
+.clauses { display: grid; gap: 12px; }
+.clause { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.clause .orig { background: var(--paper); color: var(--paper-ink); padding: 16px 18px; min-width: 0; }
+.clause .orig .ref { font-family: var(--mono); font-size: 11.5px; color: var(--paper-muted); }
+.clause .orig h3 { margin: 4px 0 8px; font-size: 15px; }
+.clause .orig p { font-family: Georgia, "Times New Roman", serif; font-size: 13.5px; line-height: 1.6; color: #39433c; }
+.clause .plain { background: var(--surface); padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.clause .plain .lbl { font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--sage); font-weight: 600; }
+@media (max-width: 760px) { .clause { grid-template-columns: 1fr; } }
+.scen { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.scen button { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: 13.5px; color: var(--muted); }
+.scen button[aria-pressed="true"] { border-color: var(--accent); color: var(--fg); background: var(--surface-2); }
+.verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+.verdict .panel { display: grid; gap: 10px; align-content: start; }
+.verdict .who { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.verdict .big { font-family: var(--display); font-weight: 700; font-size: 20px; }
+@media (max-width: 700px) { .verdict { grid-template-columns: 1fr; } }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+table { width: 100%; border-collapse: collapse; min-width: 620px; font-size: 14px; }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { background: var(--surface-2); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+tbody tr:last-child td { border-bottom: 0; }
+td.better { color: var(--ok); }
+td.worse { color: var(--bad); }
+.chat-layout { display: grid; grid-template-columns: 1fr 280px; gap: 16px; }
+@media (max-width: 860px) { .chat-layout { grid-template-columns: 1fr; } }
+.chat { display: flex; flex-direction: column; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; }
+.msg { max-width: 82%; padding: 12px 14px; border-radius: 14px; font-size: 14.5px; }
+.msg.user { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line); border-bottom-left-radius: 4px; display: grid; gap: 10px; }
+.msg.bot .answer-tag { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.msg.bot blockquote { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--paper); color: var(--paper-ink); font-family: Georgia, "Times New Roman", serif; font-size: 13px; }
+.msg.bot blockquote .mono { display: block; color: var(--paper-muted); font-size: 11px; margin-bottom: 4px; }
+@media (max-width: 560px) { .msg { max-width: 94%; } }
+.composer { display: flex; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 6px 14px; background: var(--bg); }
+.composer input { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--fg); font: inherit; outline: none; padding: 8px 0; }
+.icon-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); display: grid; place-items: center; cursor: pointer; flex: none; }
+.icon-btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.icon-btn svg { width: 17px; height: 17px; }
+.suggest { display: grid; gap: 8px; }
+.suggest button { text-align: left; border: 1px solid var(--line); background: var(--surface); padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 13.5px; color: var(--fg); }
+.suggest button:hover { border-color: var(--sage); }
+
+/* ---------- Rejection check ---------- */
+.stepper { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 22px; counter-reset: s; }
+.stepper div { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: 13.5px; min-width: 0; }
+.stepper div::before { counter-increment: s; content: counter(s); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--surface-2); color: var(--muted); flex: none; }
+.stepper div.done::before { content: "✓"; background: var(--sage); color: var(--accent-ink); }
+.stepper div.now { border-color: var(--accent); }
+.stepper div.now::before { background: var(--accent); color: var(--accent-ink); }
+@media (max-width: 760px) { .stepper { grid-template-columns: 1fr 1fr; } }
+.rj-grid { display: grid; grid-template-columns: 340px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 960px) { .rj-grid { grid-template-columns: 1fr; } }
+.doclist { display: grid; gap: 10px; }
+.doclist .file { padding: 10px; border-radius: 10px; background: var(--surface-2); }
+.letter { background: var(--paper); color: var(--paper-ink); border-radius: 12px; padding: 16px; font-size: 13px; line-height: 1.6; }
+.letter .mono { color: var(--paper-muted); font-size: 11px; }
+.letter mark { background: #f6dd9b; color: var(--paper-ink); padding: 0 2px; border-radius: 3px; }
+.assess { display: flex; gap: 16px; align-items: flex-start; padding: 18px 20px; border-radius: var(--r); background: var(--warn-bg); border: 1px solid rgba(233,184,100,.35); flex-wrap: wrap; }
+.assess .a-ico { width: 44px; height: 44px; border-radius: 12px; background: rgba(233,184,100,.18); color: var(--warn); display: grid; place-items: center; flex: none; }
+.assess .a-ico svg { width: 22px; height: 22px; }
+.assess .txt { flex: 1; min-width: 220px; }
+.assess h2 { color: var(--warn); font-size: 20px; }
+.assess p { color: var(--fg); margin-top: 6px; font-size: 14.5px; }
+.assess .score { text-align: right; }
+.assess .score b { font-family: var(--display); font-size: 30px; color: var(--warn); display: block; line-height: 1; }
+.tl { position: relative; padding: 8px 0 4px; overflow-x: auto; }
+.tl-track { position: relative; min-width: 620px; height: 150px; margin: 0 52px; }
+.grid > *, .cp-grid > *, .rj-grid > *, .split > *, .verdict > *, .features > *, .policies > * { min-width: 0; }
+@media (max-width: 960px) { .sticky-col { position: static !important; } }
+.tl-axis { position: absolute; left: 0; right: 0; top: 74px; height: 2px; background: var(--line); }
+.tl-wait { position: absolute; top: 66px; height: 18px; border-radius: 9px; background: repeating-linear-gradient(135deg, rgba(126,153,126,.35) 0 6px, rgba(126,153,126,.18) 6px 12px); border: 1px solid var(--sage); }
+.tl-wait span { position: absolute; top: -24px; left: 0; font-size: 11.5px; color: var(--accent); white-space: nowrap; }
+.tl-ev { position: absolute; top: 0; height: 150px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; width: 120px; text-align: center; }
+.tl-ev .pin { position: absolute; top: 68px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
+.tl-ev.alert .pin { border-color: var(--bad); background: var(--bad); }
+.tl-ev.warnp .pin { border-color: var(--warn); background: var(--warn); }
+.tl-ev .lab { position: absolute; top: 96px; font-size: 12px; line-height: 1.35; }
+.tl-ev .lab b { display: block; font-size: 12.5px; }
+.tl-ev .lab span { color: var(--muted); }
+.tl-ev.up .lab { top: 0; }
+.evmap td:first-child { font-weight: 600; }
+.check { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.check li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--line); flex: none; margin-top: 2px; display: grid; place-items: center; font-size: 11px; }
+.box.on { background: var(--sage); border-color: var(--sage); color: var(--accent-ink); }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .split { grid-template-columns: 1fr; } }
+.cta-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+/* ---------- Complaint ---------- */
+.route { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px; }
+.route .stage { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 6px; align-content: start; }
+.route .stage.now { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(207,224,172,.08); }
+.route .stage .tag { justify-self: start; }
+.route .stage h3 { font-size: 15.5px; }
+.route .stage p { font-size: 13.5px; color: var(--muted); }
+@media (max-width: 760px) { .route { grid-template-columns: 1fr; } }
+.cp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 960px) { .cp-grid { grid-template-columns: 1fr; } }
+form .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+form .full { grid-column: 1 / -1; }
+@media (max-width: 520px) { form .fields { grid-template-columns: 1fr; } }
+label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 500; }
+input[type="text"], textarea, select.field { font: inherit; font-size: 14.5px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+textarea { min-height: 120px; resize: vertical; line-height: 1.55; }
+input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: var(--sage); }
+.attach { display: grid; gap: 8px; }
+.attach div { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 12px; background: var(--surface-2); border-radius: 10px; font-size: 13.5px; flex-wrap: wrap; }
+.paper { background: var(--paper); color: var(--paper-ink); border-radius: 14px; padding: 26px 28px; font-family: Georgia, "Times New Roman", serif; font-size: 14px; line-height: 1.65; border: 1px solid #dfe3dc; }
+.paper .meta { font-family: var(--body); font-size: 12px; color: var(--paper-muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #dfe3dc; padding-bottom: 10px; margin-bottom: 14px; }
+.paper h3 { font-family: var(--body); font-size: 15px; margin: 14px 0 6px; }
+.paper p + p { margin-top: 10px; }
+.paper ol { padding-left: 20px; margin: 8px 0; }
+.paper .ref { font-family: var(--mono); font-size: 11.5px; background: #e8eedf; padding: 0 5px; border-radius: 4px; }
+.track { display: grid; gap: 0; }
+.track div { display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; align-items: start; padding-bottom: 14px; position: relative; font-size: 14px; }
+.track div::before { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); margin-top: 4px; justify-self: center; background: var(--surface); }
+.track div::after { content: ""; position: absolute; left: 10px; top: 20px; bottom: 0; width: 2px; background: var(--line); }
+.track div:last-child::after { display: none; }
+.track div.done::before { background: var(--sage); border-color: var(--sage); }
+.track div.now::before { border-color: var(--accent); background: var(--accent); }
+.track span { color: var(--muted); font-size: 12.5px; }
+
+/* ---------- Step flow ---------- */
+.flow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 22px; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.flow .steps { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; min-width: 0; }
+.flow .fs { display: inline-flex; align-items: center; gap: 9px; border: 1px solid transparent; background: transparent; padding: 7px 12px 7px 8px; border-radius: 10px; cursor: pointer; color: var(--muted); font-size: 13.5px; font-weight: 500; }
+.flow .fs i { font-style: normal; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--surface-2); color: var(--muted); flex: none; }
+.flow .fs:hover { color: var(--fg); }
+.flow .fs.past i { background: var(--sage); color: var(--accent-ink); }
+#ps-processing:checked ~ .flow .fs[for="ps-upload"] i,
+#ps-results:checked ~ .flow .fs[for="ps-upload"] i,
+#ps-results:checked ~ .flow .fs[for="ps-processing"] i,
+#rs-processing:checked ~ .flow .fs[for="rs-upload"] i,
+#rs-results:checked ~ .flow .fs[for="rs-upload"] i,
+#rs-results:checked ~ .flow .fs[for="rs-processing"] i,
+#cs-draft:checked ~ .flow .fs[for="cs-route"] i,
+#cs-track:checked ~ .flow .fs[for="cs-route"] i,
+#cs-track:checked ~ .flow .fs[for="cs-draft"] i { background: var(--sage); color: var(--accent-ink); }
+#ps-upload:checked ~ .flow .fs[for="ps-upload"],
+#ps-processing:checked ~ .flow .fs[for="ps-processing"],
+#ps-results:checked ~ .flow .fs[for="ps-results"],
+#rs-upload:checked ~ .flow .fs[for="rs-upload"],
+#rs-processing:checked ~ .flow .fs[for="rs-processing"],
+#rs-results:checked ~ .flow .fs[for="rs-results"],
+#cs-route:checked ~ .flow .fs[for="cs-route"],
+#cs-draft:checked ~ .flow .fs[for="cs-draft"],
+#cs-track:checked ~ .flow .fs[for="cs-track"] { background: var(--surface-2); border-color: var(--accent); color: var(--fg); }
+#ps-upload:checked ~ .flow .fs[for="ps-upload"] i,
+#ps-processing:checked ~ .flow .fs[for="ps-processing"] i,
+#ps-results:checked ~ .flow .fs[for="ps-results"] i,
+#rs-upload:checked ~ .flow .fs[for="rs-upload"] i,
+#rs-processing:checked ~ .flow .fs[for="rs-processing"] i,
+#rs-results:checked ~ .flow .fs[for="rs-results"] i,
+#cs-route:checked ~ .flow .fs[for="cs-route"] i,
+#cs-draft:checked ~ .flow .fs[for="cs-draft"] i,
+#cs-track:checked ~ .flow .fs[for="cs-track"] i { background: var(--accent); color: var(--accent-ink); }
+.flow .sep { color: var(--line); align-self: center; }
+.flow .play { padding: 7px 12px; font-size: 13px; }
+.step { display: none; }
+#ps-upload:checked ~ .step[data-step="upload"],
+#ps-processing:checked ~ .step[data-step="processing"],
+#ps-results:checked ~ .step[data-step="results"],
+#rs-upload:checked ~ .step[data-step="upload"],
+#rs-processing:checked ~ .step[data-step="processing"],
+#rs-results:checked ~ .step[data-step="results"],
+#cs-route:checked ~ .step[data-step="route"],
+#cs-draft:checked ~ .step[data-step="draft"],
+#cs-track:checked ~ .step[data-step="track"] { display: block; }
+.up-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 860px) { .up-grid { grid-template-columns: 1fr; } }
+.bigdrop { border: 2px dashed rgba(207,224,172,.35); border-radius: 18px; padding: 44px 24px; text-align: center; display: grid; justify-items: center; gap: 12px; background: radial-gradient(ellipse at top, rgba(207,224,172,.06), transparent 70%), var(--surface); }
+.bigdrop .up-ico { width: 64px; height: 64px; border-radius: 18px; background: rgba(207,224,172,.1); color: var(--accent); display: grid; place-items: center; }
+.bigdrop .up-ico svg { width: 30px; height: 30px; }
+.bigdrop h2 { font-size: 21px; }
+.bigdrop .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.req { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.req li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface-2); border-radius: 10px; font-size: 14px; flex-wrap: wrap; }
+.req li small { display: block; color: var(--muted); font-size: 12.5px; }
+.note { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--muted); background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+.note svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--accent); }
+.proc-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 860px) { .proc-grid { grid-template-columns: 1fr; } }
+.pbar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; margin: 6px 0 18px; }
+.pbar b { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; animation: fill 4s linear .3s forwards; }
+@keyframes fill { to { width: 100%; } }
+.proc { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.proc li { display: grid; grid-template-columns: 26px 1fr; gap: 12px; align-items: start; color: var(--muted); transition: color .3s; }
+.proc li .st { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: transparent; animation: stDone .3s ease forwards; animation-delay: calc(.6s + var(--i) * .8s); }
+.proc li { animation: liDone .3s ease forwards; animation-delay: calc(.6s + var(--i) * .8s); }
+.proc li:nth-child(1) { --i: 0; } .proc li:nth-child(2) { --i: 1; } .proc li:nth-child(3) { --i: 2; } .proc li:nth-child(4) { --i: 3; } .proc li:nth-child(5) { --i: 4; }
+@keyframes stDone { to { background: var(--sage); border-color: var(--sage); color: var(--accent-ink); } }
+@keyframes liDone { to { color: var(--fg); } }
+.proc ~ .cta-row .next { opacity: 0; animation: reveal .3s ease 4.5s forwards; }
+@keyframes reveal { to { opacity: 1; } }
+.proc li b { font-weight: 600; display: block; }
+.proc li span { font-size: 13px; display: block; margin-top: 2px; }
+.proc li span .q { font-family: Georgia, "Times New Roman", serif; color: var(--accent); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sk { display: grid; gap: 12px; }
+.sk i { display: block; height: 14px; border-radius: 7px; background: linear-gradient(90deg, var(--surface-2) 0%, #262c27 50%, var(--surface-2) 100%); background-size: 200% 100%; animation: shimmer 1.4s linear 3; }
+.sk .blk { height: 74px; border-radius: 12px; }
+.sk .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.radios { display: grid; gap: 10px; }
+.radio { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; background: var(--surface); color: var(--fg); font-size: 14.5px; font-weight: 500; }
+.radio input { accent-color: #7e997e; margin-top: 3px; width: 16px; height: 16px; flex: none; }
+.radio small { display: block; color: var(--muted); font-weight: 400; font-size: 13px; margin-top: 2px; }
+.radio.on { border-color: var(--accent); background: var(--surface-2); }
+.brings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.brings div { background: var(--surface-2); border-radius: 12px; padding: 12px; }
+.brings b { font-family: var(--display); font-size: 24px; color: var(--accent); display: block; line-height: 1.1; }
+.brings span { font-size: 12.5px; color: var(--muted); }
+.success { display: flex; gap: 16px; align-items: flex-start; padding: 20px; border-radius: var(--r); background: var(--ok-bg); border: 1px solid rgba(134,201,156,.35); margin-bottom: 16px; flex-wrap: wrap; }
+.success .s-ico { width: 46px; height: 46px; border-radius: 50%; background: var(--ok); color: var(--accent-ink); display: grid; place-items: center; font-size: 22px; font-weight: 700; flex: none; }
+.success h2 { color: var(--ok); font-size: 20px; }
+.success .txt { flex: 1; min-width: 220px; }
+.track-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 960px) { .track-grid { grid-template-columns: 1fr; } }
+.countdown b { font-family: var(--display); font-size: 46px; line-height: 1; color: var(--accent); }
+.toggle { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--fg); font-weight: 400; }
+.toggle:last-child { border: 0; }
+.toggle input { appearance: none; width: 38px; height: 22px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); position: relative; cursor: pointer; flex: none; transition: .2s; }
+.toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: .2s; }
+.toggle input:checked { background: var(--sage); border-color: var(--sage); }
+.toggle input:checked::after { left: 18px; background: var(--paper); }
+.btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+.btn[disabled] { opacity: .45; cursor: wait; }
+
+/* ---------- Toast ---------- */
+.toast { position: fixed; left: 16px; right: 16px; margin: 0 auto; width: max-content; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); display: none; background: var(--fg); color: var(--bg); padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; z-index: 50; max-width: calc(100% - 32px); text-align: center; }
+.toast.show { display: block; }
+footer { border-top: 1px solid var(--line); }
+footer .wrap { padding-block: 22px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a4 4 0 0 0 6 0zM19 7l-3 7a4 4 0 0 0 6 0z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a1 1 0 0 1 1-1h12l-2 4 2 4H5"/></symbol>
+  </defs>
+</svg>
+
+<input class="pg-radio" type="radio" name="pg" id="pg-home" aria-label="home page" checked>
+<input class="pg-radio" type="radio" name="pg" id="pg-policy" aria-label="policy page">
+<input class="pg-radio" type="radio" name="pg" id="pg-rejection" aria-label="rejection page">
+<input class="pg-radio" type="radio" name="pg" id="pg-complaint" aria-label="complaint page">
+<header class="appbar">
+  <div class="wrap">
+    <label class="brand" for="pg-home" aria-label="ClaimSaathi home">
+      <span class="brand-mark"><svg style="color:var(--accent-ink)"><use href="#i-shield"/></svg></span>
+      <b>ClaimSaathi</b>
+    </label>
+    <nav class="nav" aria-label="Main">
+      <label for="pg-home" data-i18n="nav_home">Home</label>
+      <label for="pg-policy" data-i18n="nav_policy">Policy Insights</label>
+      <label for="pg-rejection" data-i18n="nav_rej">Rejection Check</label>
+      <label for="pg-complaint" data-i18n="nav_comp">File a Complaint</label>
+    </nav>
+    <div class="bar-right">
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="hi" aria-pressed="false">हिं</button>
+        <button type="button" data-lang="hn" aria-pressed="false">Hinglish</button>
+      </div>
+      <span class="proto-pill">UI preview · v9</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= HOME ================= -->
+<section class="page" id="home" aria-labelledby="h-home">
+  <div class="hero">
+    <div>
+      <span class="eyebrow" data-i18n="hero_eyebrow">Your insurance rights companion</span>
+      <h1 id="h-home" style="margin-top:10px" data-i18n-html="hero_title">Understand your coverage.<br><span>Defend your rights.</span></h1>
+      <p data-i18n="hero_sub">Upload your policy and ClaimSaathi explains it in plain language, compares it with other plans, checks rejected claims against your own clauses and helps you file a complaint that holds up.</p>
+      <div class="actions">
+        <label for="pg-policy" class="btn primary"  data-goto="policy:upload"><svg><use href="#i-upload"/></svg><span data-i18n="cta_upload">Upload a policy</span></label>
+        <label for="pg-rejection" class="btn"  data-goto="rejection:upload"><svg><use href="#i-search"/></svg><span data-i18n="cta_check">Check a rejected claim</span></label>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="alert-row">
+        <div class="alert-ico"><svg><use href="#i-alert"/></svg></div>
+        <div style="min-width:0">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Claim rejected</b><span class="chip bad"><span class="dot"></span>Needs review</span></div>
+          <p class="muted" style="font-size:13.5px;margin-top:2px">Knee replacement · Suraksha Health Plus</p>
+        </div>
+      </div>
+      <div class="mini-timeline num">
+        <div><span class="muted">Claim amount</span><b>₹1,80,000</b></div>
+        <div><span class="muted">Insurer's reason</span><span>24-month waiting period</span></div>
+        <div><span class="muted">Your continuous cover</span><span style="color:var(--ok)">3 years 6 months</span></div>
+        <div><span class="muted">ClaimSaathi finding</span><span style="color:var(--warn)">Possible inconsistency</span></div>
+      </div>
+      <label for="pg-rejection" class="btn primary"  style="margin-top:14px;width:100%;justify-content:center">Review this rejection <svg><use href="#i-arrow"/></svg></label>
+    </div>
+  </div>
+
+  <div class="features">
+    <label for="pg-policy" class="feature">
+      <div class="f-ico"><svg><use href="#i-doc"/></svg></div>
+      <div><span class="eyebrow">Decode · Compare · Ask</span><h2 style="margin-top:6px" data-i18n="nav_policy">Policy Insights</h2></div>
+      <ul><li>Policy details and key limits</li><li>Every clause in plain language</li><li>Compare two policies by scenario</li><li>Ask ClaimSaathi questions with citations</li></ul>
+      <span class="go">Open Policy Insights →</span>
+    </label>
+    <label for="pg-rejection" class="feature">
+      <div class="f-ico"><svg><use href="#i-search"/></svg></div>
+      <div><span class="eyebrow">Verify</span><h2 style="margin-top:6px" data-i18n="nav_rej">Rejection Check</h2></div>
+      <ul><li>Upload the rejection letter</li><li>Reason matched to the exact clause</li><li>Policy timeline reconstruction</li><li>Evidence report you can download</li></ul>
+      <span class="go">Open Rejection Check →</span>
+    </label>
+    <label for="pg-complaint" class="feature">
+      <div class="f-ico"><svg><use href="#i-flag"/></svg></div>
+      <div><span class="eyebrow">Act</span><h2 style="margin-top:6px" data-i18n="nav_comp">File a Complaint</h2></div>
+      <ul><li>Auto-drafted, editable complaint</li><li>Document checklist</li><li>Insurer → Bima Bharosa → Ombudsman</li><li>Track deadlines and status</li></ul>
+      <span class="go">Open Complaint →</span>
+    </label>
+  </div>
+
+  <div class="section-label"><h2>Your policies</h2><span class="muted" style="font-size:13px">Sample policies for this preview</span></div>
+  <div class="policies">
+    <div class="panel policy-card">
+      <div class="top">
+        <div><span class="eyebrow">Health</span><h3 style="font-size:18px;margin-top:4px">Suraksha Health Plus</h3><p class="muted" style="font-size:13px">Navjeevan General Insurance · <span class="mono">NGI/HL/2025/448812</span></p></div>
+        <span class="chip ok"><span class="dot"></span>Active</span>
+      </div>
+      <dl class="stats num" style="margin:0"><div><dt>Sum insured</dt><dd>₹5,00,000</dd></div><div><dt>Renews</dt><dd>11 Mar 2026</dd></div><div><dt>Cover since</dt><dd>Mar 2022</dd></div></dl>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><label for="pg-policy" class="btn">View insights</label><label for="pg-rejection" class="btn">1 rejected claim</label></div>
+    </div>
+    <div class="panel policy-card">
+      <div class="top">
+        <div><span class="eyebrow">Motor</span><h3 style="font-size:18px;margin-top:4px">DriveSure Comprehensive</h3><p class="muted" style="font-size:13px">Kavach Motor Insurance · <span class="mono">KMI/PC/2025/091174</span></p></div>
+        <span class="chip ok"><span class="dot"></span>Active</span>
+      </div>
+      <dl class="stats num" style="margin:0"><div><dt>IDV</dt><dd>₹6,40,000</dd></div><div><dt>Renews</dt><dd>04 Aug 2026</dd></div><div><dt>Add-ons</dt><dd>Zero dep</dd></div></dl>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><label for="pg-policy" class="btn">View insights</label><span class="chip warn"><span class="dot"></span>No engine protect cover</span></div>
+    </div>
+  </div>
+  <p class="disclaimer">All policies, insurers, people and claims in this preview are fictional. ClaimSaathi gives guidance based on your documents; it does not decide legal entitlement.</p>
+</section>
+
+<!-- ================= POLICY INSIGHTS ================= -->
+<section class="page" id="policy" aria-labelledby="h-policy">
+  <input class="vh" type="radio" name="ps" id="ps-upload"><input class="vh" type="radio" name="ps" id="ps-processing"><input class="vh" type="radio" name="ps" id="ps-results" checked>
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Decode · Compare · Ask</span>
+      <h1 id="h-policy" style="margin-top:6px" data-i18n="nav_policy">Policy Insights</h1>
+      <p class="lede" data-i18n="policy_sub">See what your policy covers, read every clause in plain language, compare it with another plan and ask questions about your own situation.</p>
+    </div>
+    <div class="policy-switch">
+      <label for="pol-select" class="muted" style="font-size:13px">Policy</label>
+      <select id="pol-select"><option>Suraksha Health Plus</option><option>DriveSure Comprehensive</option></select>
+    </div>
+  </div>
+
+  <div class="flow" data-flow="policy">
+    <div class="steps">
+      <label class="fs" for="ps-upload"><i>1</i>Upload policy</label><span class="sep">›</span>
+      <label class="fs" for="ps-processing"><i>2</i>Reading policy</label><span class="sep">›</span>
+      <label class="fs" for="ps-results"><i>3</i>Your insights</label>
+    </div>
+    <button type="button" class="btn play" data-play="policy"><svg><use href="#i-arrow"/></svg>Play walkthrough</button>
+  </div>
+
+  <!-- Step 1: upload -->
+  <div class="step" data-page="policy" data-step="upload">
+    <div class="up-grid">
+      <div class="bigdrop">
+        <div class="up-ico"><svg><use href="#i-upload"/></svg></div>
+        <h2>Drop your policy document here</h2>
+        <p class="muted">PDF, JPG or PNG · up to 25 MB · scanned copies and phone photos work too</p>
+        <div class="row">
+          <button class="btn" type="button" data-toast><svg><use href="#i-doc"/></svg>Browse files</button>
+          <label class="btn primary" for="ps-processing"><svg><use href="#i-arrow"/></svg>Use sample policy</label>
+        </div>
+      </div>
+      <div class="panel grid">
+        <h3>What to upload</h3>
+        <ul class="req">
+          <li><div>Policy wording<small>The full terms and conditions booklet</small></div><span class="chip sage">Required</span></li>
+          <li><div>Policy schedule<small>Sum insured, members, dates</small></div><span class="chip">Recommended</span></li>
+          <li><div>Endorsements and add-ons<small>Any changes made after purchase</small></div><span class="chip">Optional</span></li>
+          <li><div>Previous years' policies<small>Proves continuous cover for waiting periods</small></div><span class="chip">Optional</span></li>
+        </ul>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="muted" style="font-size:13px">Policy type</span>
+          <div class="seg" role="group" aria-label="Policy type"><button type="button" aria-pressed="true">Health</button><button type="button" aria-pressed="false">Motor</button><button type="button" aria-pressed="false">Life</button></div>
+        </div>
+        <div class="note"><svg><use href="#i-shield"/></svg><span>Your documents stay private. They are encrypted, never shared with your insurer, and you can delete them at any time.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: processing -->
+  <div class="step" data-page="policy" data-step="processing">
+    <div class="proc-grid">
+      <div class="panel">
+        <div class="panel-title" style="margin-bottom:4px"><h3>Reading Suraksha_Health_Plus_Policy_Wording.pdf</h3><span class="muted" style="font-size:13px">About 10 seconds</span></div>
+        <div class="pbar"><b></b></div>
+        <ol class="proc">
+          <li><span class="st">✓</span><div><b>Extracting text from 42 pages</b><span>3 scanned pages sent to OCR</span></div></li>
+          <li><span class="st">✓</span><div><b>Finding and labelling clauses</b><span>38 clauses: 14 coverage, 11 exclusions, 6 limits, 7 waiting periods</span></div></li>
+          <li><span class="st">✓</span><div><b>Reading schedule and endorsements</b><span>Sum insured ₹5,00,000 · 2 endorsements · 1 member</span></div></li>
+          <li><span class="st">✓</span><div><b>Working out your waiting periods</b><span>Counted from first inception, 12 Mar 2022</span></div></li>
+          <li><span class="st">✓</span><div><b>Writing your plain-language summary</b><span>English · हिंदी · Hinglish</span></div></li>
+        </ol>
+        <div class="cta-row"><label class="btn primary next" for="ps-results">View insights <svg><use href="#i-arrow"/></svg></label></div>
+      </div>
+      <div class="panel">
+        <span class="eyebrow">Preparing your summary</span>
+        <div class="sk" style="margin-top:14px">
+          <div class="row"><i class="blk"></i><i class="blk"></i></div>
+          <div class="row"><i class="blk"></i><i class="blk"></i></div>
+          <i style="width:70%"></i><i></i><i style="width:85%"></i><i style="width:55%"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: results -->
+  <div class="step" data-page="policy" data-step="results">
+  <input class="vh" type="radio" name="ptab" id="pt-details" checked><input class="vh" type="radio" name="ptab" id="pt-clauses"><input class="vh" type="radio" name="ptab" id="pt-compare"><input class="vh" type="radio" name="ptab" id="pt-ask">
+  <div class="drop">
+    <div class="file"><div class="file-ico">PDF</div><div><b>Suraksha_Health_Plus_Policy_Wording.pdf</b><span>42 pages · schedule + 2 endorsements · read 14 Nov 2025</span></div></div>
+    <span class="chip ok"><span class="dot"></span>38 clauses found</span>
+    <button class="btn" type="button" data-toast><svg><use href="#i-upload"/></svg>Upload another</button>
+  </div>
+
+  <div class="tabs" role="radiogroup" aria-label="Policy views">
+    <label for="pt-details" id="t-details"><svg><use href="#i-info"/></svg>Details</label>
+    <label for="pt-clauses" id="t-clauses"><svg><use href="#i-list"/></svg>Clauses</label>
+    <label for="pt-compare" id="t-compare"><svg><use href="#i-scale"/></svg>Compare</label>
+    <label for="pt-ask" id="t-ask"><svg><use href="#i-chat"/></svg>Ask ClaimSaathi</label>
+  </div>
+
+  <!-- Details -->
+  <div class="tabpanel" id="tab-details" role="region" aria-labelledby="t-details">
+    <dl class="kv num" style="margin:0">
+      <div><dt>Sum insured</dt><dd>₹5,00,000<small>+ 20% no-claim bonus earned</small></dd></div>
+      <div><dt>Policy period</dt><dd>12 Mar 2025 – 11 Mar 2026<small>Renewal 4 of 4</small></dd></div>
+      <div><dt>First inception</dt><dd>12 Mar 2022<small>Continuous, no break</small></dd></div>
+      <div><dt>Room rent</dt><dd>1% of SI per day<small>ICU: 2% of SI per day</small></dd></div>
+      <div><dt>Co-payment</dt><dd>None<small>10% if insured is 61+</small></dd></div>
+      <div><dt>Premium</dt><dd>₹14,860 / year<small>Incl. GST</small></dd></div>
+    </dl>
+    <div class="cover-cols">
+      <div class="panel cover-col">
+        <h3><span class="chip ok" style="padding:3px 7px">✓</span>Covered</h3>
+        <ul><li>In-patient hospitalisation <span class="cite">§3.1</span></li><li>Pre & post hospitalisation 60/90 days <span class="cite">§3.2</span></li><li>Day-care procedures (540+) <span class="cite">§3.4</span></li><li>Ambulance up to ₹2,000 <span class="cite">§3.6</span></li></ul>
+      </div>
+      <div class="panel cover-col">
+        <h3><span class="chip bad" style="padding:3px 7px">✕</span>Not covered</h3>
+        <ul><li>Cosmetic surgery <span class="cite">§5.4</span></li><li>Maternity & newborn <span class="cite">§5.9</span></li><li>Self-inflicted injury <span class="cite">§5.12</span></li><li>Treatment outside India <span class="cite">§5.15</span></li></ul>
+      </div>
+      <div class="panel cover-col">
+        <h3><span class="chip warn" style="padding:3px 7px">!</span>Limits</h3>
+        <ul><li>Cataract ₹40,000 per eye <span class="cite">§4.6</span></li><li>Room rent 1% SI/day <span class="cite">§4.1</span></li><li>AYUSH up to ₹25,000 <span class="cite">§3.8</span></li><li>Modern treatments 50% SI <span class="cite">§4.7</span></li></ul>
+      </div>
+      <div class="panel cover-col">
+        <h3><span class="chip sage" style="padding:3px 7px">⏱</span>Waiting periods</h3>
+        <ul class="num"><li>Initial: 30 days <span class="chip ok">Done</span></li><li>Listed illnesses: 24 months <span class="chip ok">Ended Mar 2024</span></li><li>Pre-existing: 36 months <span class="chip ok">Ended Mar 2025</span></li></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clauses -->
+  <div class="tabpanel" id="tab-clauses" role="region" aria-labelledby="t-clauses">
+    <div class="toolbar">
+      <div class="search"><svg><use href="#i-search"/></svg><input id="clause-search" type="text" placeholder="Search clauses, e.g. knee, room rent, maternity" aria-label="Search clauses"></div>
+      <div class="filters" role="group" aria-label="Clause type">
+        <button type="button" aria-pressed="true" data-f="all">All 38</button>
+        <button type="button" aria-pressed="false" data-f="cov">Coverage</button>
+        <button type="button" aria-pressed="false" data-f="exc">Exclusions</button>
+        <button type="button" aria-pressed="false" data-f="wait">Waiting periods</button>
+        <button type="button" aria-pressed="false" data-f="lim">Limits</button>
+      </div>
+    </div>
+    <div class="clauses">
+      <article class="clause" data-k="wait">
+        <div class="orig"><span class="ref">Section 4.3 · Specific waiting period · p. 17</span><h3>Listed illnesses and procedures</h3><p>“Expenses related to the treatment of the listed conditions, surgeries or treatments shall be excluded until the expiry of 24 months of continuous coverage after the date of inception of the first policy with the Company… (iv) Joint replacement surgery…”</p></div>
+        <div class="plain"><span class="lbl">What it means</span><p>Knee or hip replacement is only covered after you have held this policy for <b>2 years without a break</b>, counted from your <b>first</b> policy, not the latest renewal.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip sage">Waiting period</span><span class="chip ok"><span class="dot"></span>Ended 12 Mar 2024 for you</span></div></div>
+      </article>
+      <article class="clause" data-k="lim">
+        <div class="orig"><span class="ref">Section 4.1 · Room rent · p. 15</span><h3>Room, boarding and nursing</h3><p>“Room rent, boarding and nursing expenses are payable up to 1% of the Sum Insured per day. Where the insured opts for a room category above the eligible limit, associated medical expenses shall be payable in proportion…”</p></div>
+        <div class="plain"><span class="lbl">What it means</span><p>You can claim up to <b>₹5,000 a day</b> for the room. Pick a costlier room and the insurer may cut <b>other bills too</b>, in the same ratio.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip sage">Limit</span><span class="chip warn"><span class="dot"></span>Proportionate deduction risk</span></div></div>
+      </article>
+      <article class="clause" data-k="exc">
+        <div class="orig"><span class="ref">Section 5.9 · Permanent exclusions · p. 21</span><h3>Maternity expenses</h3><p>“Medical treatment expenses traceable to childbirth (including complicated deliveries and caesarean sections incurred during hospitalisation) except ectopic pregnancy…”</p></div>
+        <div class="plain"><span class="lbl">What it means</span><p>Delivery and pregnancy costs are <b>not covered at all</b> on this plan. Only an ectopic pregnancy is an exception.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip sage">Exclusion</span><span class="chip bad"><span class="dot"></span>Not covered</span></div></div>
+      </article>
+      <article class="clause" data-k="cov">
+        <div class="orig"><span class="ref">Section 3.2 · Pre and post hospitalisation · p. 9</span><h3>Medical expenses before and after admission</h3><p>“Relevant medical expenses incurred during 60 days immediately before the date of admission and 90 days immediately after discharge, provided a claim for in-patient hospitalisation is admissible…”</p></div>
+        <div class="plain"><span class="lbl">What it means</span><p>Tests, medicines and follow-ups from <b>60 days before</b> and <b>90 days after</b> a hospital stay are paid, if the main claim is accepted.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip sage">Coverage</span><span class="chip ok"><span class="dot"></span>Covered</span></div></div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Compare -->
+  <div class="tabpanel" id="tab-compare" role="region" aria-labelledby="t-compare">
+    <div class="panel-title"><div><h2>Suraksha Health Plus <span class="muted" style="font-weight:500">vs</span> Arogya Secure Gold</h2><p class="muted" style="font-size:13.5px;margin-top:4px">Pick a real-life situation and ClaimSaathi tests it against both policy wordings.</p></div><button class="btn" type="button" data-toast><svg><use href="#i-upload"/></svg>Change second policy</button></div>
+    <div class="scen" role="group" aria-label="Scenario">
+      <button type="button" aria-pressed="true">Knee replacement in year 3</button>
+      <button type="button" aria-pressed="false">Maternity in year 2</button>
+      <button type="button" aria-pressed="false">Cataract surgery</button>
+      <button type="button" aria-pressed="false">Private room, 5 days</button>
+    </div>
+    <div class="verdict">
+      <div class="panel">
+        <div class="who"><b>Suraksha Health Plus</b><span class="chip ok"><span class="dot"></span>Covered</span></div>
+        <span class="big num">Up to ₹5,00,000</span>
+        <p class="muted" style="font-size:14px">24-month waiting period for joint replacement ends before year 3.</p>
+        <div><span class="cite">§4.3(iv)</span> <span class="cite">§3.1</span></div>
+      </div>
+      <div class="panel">
+        <div class="who"><b>Arogya Secure Gold</b><span class="chip bad"><span class="dot"></span>Not yet covered</span></div>
+        <span class="big num">₹0 until year 4</span>
+        <p class="muted" style="font-size:14px">Joint replacement has a 48-month waiting period on this plan.</p>
+        <div><span class="cite">§6.2(b)</span></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Feature</th><th>Suraksha Health Plus</th><th>Arogya Secure Gold</th></tr></thead>
+        <tbody class="num">
+          <tr><td>Sum insured</td><td>₹5,00,000</td><td class="better">₹7,00,000</td></tr>
+          <tr><td>Premium (age 34)</td><td class="better">₹14,860</td><td>₹18,200</td></tr>
+          <tr><td>Joint replacement waiting</td><td class="better">24 months</td><td class="worse">48 months</td></tr>
+          <tr><td>Pre-existing disease waiting</td><td>36 months</td><td class="better">24 months</td></tr>
+          <tr><td>Room rent</td><td class="worse">1% of SI / day</td><td class="better">Any single private room</td></tr>
+          <tr><td>Maternity</td><td>Excluded</td><td class="better">₹50,000 after 24 months</td></tr>
+          <tr><td>Co-payment</td><td class="better">None below 61</td><td>20% for all ages</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Ask -->
+  <div class="tabpanel" id="tab-ask" role="region" aria-labelledby="t-ask">
+    <div class="chat-layout">
+      <div class="chat">
+        <div class="msg user">Is my knee replacement covered? I've had this policy since 2022.</div>
+        <div class="msg bot">
+          <div class="answer-tag"><span class="chip ok"><span class="dot"></span>Likely covered</span><span class="muted" style="font-size:12.5px">Based on 2 clauses in your policy</span></div>
+          <p>Yes. Joint replacement has a 24-month waiting period, counted from your first policy on <b>12 Mar 2022</b>. That ended on <b>12 Mar 2024</b>, so surgery after that date falls inside your cover, subject to your room-rent limit.</p>
+          <blockquote><span class="mono">Section 4.3(iv) · p. 17</span>“…excluded until the expiry of 24 months of continuous coverage after the date of inception of the first policy…”</blockquote>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="cite">§4.3(iv)</span><span class="cite">§4.1</span></div>
+        </div>
+        <div class="msg user">Agar main private room lun to kitna milega?</div>
+        <div class="msg bot">
+          <div class="answer-tag"><span class="chip warn"><span class="dot"></span>Limit applies</span><span class="muted" style="font-size:12.5px">Hinglish mein jawab</span></div>
+          <p>Aapki policy mein room ka limit <b>₹5,000 per day</b> hai (Sum Insured ka 1%). Agar room ₹8,000 ka hai, to baaki bills bhi usi ratio mein kat sakte hain. Isliye ₹5,000 tak ka room lena safe rahega.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="cite">§4.1</span></div>
+        </div>
+        <div class="composer">
+          <input id="ask-input" type="text" placeholder="Ask about your policy in English, हिंदी or Hinglish" aria-label="Ask a question">
+          <button class="icon-btn" type="button" aria-label="Speak your question" data-toast><svg><use href="#i-mic"/></svg></button>
+          <button class="icon-btn primary" type="button" aria-label="Send" data-toast><svg><use href="#i-send"/></svg></button>
+        </div>
+      </div>
+      <aside class="panel">
+        <h3 style="margin-bottom:12px">Try asking</h3>
+        <div class="suggest">
+          <button type="button" data-toast>Does my plan cover dengue hospitalisation?</button>
+          <button type="button" data-toast>What happens if I miss my renewal by 10 days?</button>
+          <button type="button" data-toast>Kya cataract surgery ka poora paisa milega?</button>
+          <button type="button" data-toast>Which documents do I need for a cashless claim?</button>
+        </div>
+        <p class="muted" style="font-size:12.5px;margin-top:14px">Every answer quotes the clause it relies on, so you can check it yourself.</p>
+      </aside>
+    </div>
+  </div>
+  </div>
+  <p class="disclaimer">Sample policy wording written for this preview. Answers are explanations of your documents, not a decision on any claim.</p>
+</section>
+
+<!-- ================= REJECTION CHECK ================= -->
+<section class="page" id="rejection" aria-labelledby="h-rej">
+  <input class="vh" type="radio" name="rs" id="rs-upload"><input class="vh" type="radio" name="rs" id="rs-processing"><input class="vh" type="radio" name="rs" id="rs-results" checked>
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Verify</span>
+      <h1 id="h-rej" style="margin-top:6px" data-i18n="nav_rej">Rejection Check</h1>
+      <p class="lede" data-i18n="rej_sub">Upload the insurer's rejection letter. ClaimSaathi matches each reason to your policy clauses, rebuilds your coverage timeline and shows what supports your case.</p>
+    </div>
+    <span class="mono muted">Claim CLM-24-08817</span>
+  </div>
+
+  <div class="flow" data-flow="rejection">
+    <div class="steps">
+      <label class="fs" for="rs-upload"><i>1</i>Upload documents</label><span class="sep">›</span>
+      <label class="fs" for="rs-processing"><i>2</i>Checking rejection</label><span class="sep">›</span>
+      <label class="fs" for="rs-results"><i>3</i>Findings</label>
+    </div>
+    <button type="button" class="btn play" data-play="rejection"><svg><use href="#i-arrow"/></svg>Play walkthrough</button>
+  </div>
+
+  <!-- Step 1: upload -->
+  <div class="step" data-page="rejection" data-step="upload">
+    <div class="up-grid">
+      <div class="grid">
+        <div class="bigdrop">
+          <div class="up-ico"><svg><use href="#i-doc"/></svg></div>
+          <h2>Upload the rejection letter</h2>
+          <p class="muted">The letter or email where the insurer refused or cut your claim. PDF, photo or screenshot.</p>
+          <div class="row">
+            <button class="btn" type="button" data-toast><svg><use href="#i-upload"/></svg>Browse files</button>
+            <label class="btn primary" for="rs-processing"><svg><use href="#i-arrow"/></svg>Use sample letter</label>
+          </div>
+        </div>
+        <div class="panel">
+          <h3 style="margin-bottom:12px">Claim details</h3>
+          <div class="fields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+            <label for="r-policy">Policy<select id="r-policy" class="field"><option>Suraksha Health Plus (already read)</option><option>DriveSure Comprehensive</option></select></label>
+            <label for="r-claim">Claim number<input id="r-claim" type="text" placeholder="e.g. CLM-24-08817"></label>
+            <label for="r-date">Date of rejection<input id="r-date" type="text" placeholder="DD / MM / YYYY"></label>
+            <label for="r-amt">Claim amount<input id="r-amt" type="text" placeholder="₹"></label>
+          </div>
+        </div>
+      </div>
+      <div class="panel grid">
+        <h3>Supporting documents</h3>
+        <p class="muted" style="font-size:13.5px">The more you add, the more ClaimSaathi can check. Your policy is already linked from Policy Insights.</p>
+        <ul class="req">
+          <li><div>Policy wording and schedule<small>Linked from Policy Insights</small></div><span class="chip ok">Linked</span></li>
+          <li><div>Renewal receipts or old policies<small>Proves continuous cover</small></div><button class="btn" type="button" data-toast style="padding:5px 10px;font-size:12.5px">Add</button></li>
+          <li><div>Discharge summary<small>Diagnosis and treatment dates</small></div><button class="btn" type="button" data-toast style="padding:5px 10px;font-size:12.5px">Add</button></li>
+          <li><div>Hospital bills<small>Itemised bill and payment receipts</small></div><button class="btn" type="button" data-toast style="padding:5px 10px;font-size:12.5px">Add</button></li>
+          <li><div>Doctor's notes or prescriptions<small>When symptoms started</small></div><button class="btn" type="button" data-toast style="padding:5px 10px;font-size:12.5px">Add</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: processing -->
+  <div class="step" data-page="rejection" data-step="processing">
+    <div class="proc-grid">
+      <div class="panel">
+        <div class="panel-title" style="margin-bottom:4px"><h3>Checking claim CLM-24-08817</h3><span class="muted" style="font-size:13px">About 10 seconds</span></div>
+        <div class="pbar"><b></b></div>
+        <ol class="proc">
+          <li><span class="st">✓</span><div><b>Reading the rejection letter</b><span>Reason found: <span class="q">“…within the 24-month waiting period… under Clause 4.3”</span></span></div></li>
+          <li><span class="st">✓</span><div><b>Finding Clause 4.3 in your policy</b><span>Section 4.3(iv), page 17 · Joint replacement surgery</span></div></li>
+          <li><span class="st">✓</span><div><b>Rebuilding your coverage timeline</b><span>4 renewal receipts · first policy 12 Mar 2022 · no gaps</span></div></li>
+          <li><span class="st">✓</span><div><b>Comparing the dates</b><span>Waiting ended 12 Mar 2024 · surgery 18 Sep 2025</span></div></li>
+          <li><span class="st">✓</span><div><b>Checking your evidence</b><span>3 documents support you · 1 more recommended</span></div></li>
+        </ol>
+        <div class="cta-row"><label class="btn primary next" for="rs-results">See findings <svg><use href="#i-arrow"/></svg></label></div>
+      </div>
+      <div class="panel">
+        <span class="eyebrow">Building your evidence report</span>
+        <div class="sk" style="margin-top:14px">
+          <i class="blk"></i>
+          <i style="width:40%"></i>
+          <div class="row"><i></i><i></i></div><div class="row"><i></i><i></i></div><div class="row"><i></i><i></i></div>
+          <i style="width:75%"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: results -->
+  <div class="step" data-page="rejection" data-step="results">
+  <div class="rj-grid">
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-title"><h3>Documents</h3><button class="btn" type="button" data-toast style="padding:6px 10px;font-size:13px"><svg><use href="#i-upload"/></svg>Add</button></div>
+        <div class="doclist">
+          <div class="file"><div class="file-ico">PDF</div><div style="min-width:0"><b>Rejection_Letter_CLM-24-08817.pdf</b><span>Received 02 Oct 2025</span></div></div>
+          <div class="file"><div class="file-ico">PDF</div><div style="min-width:0"><b>Policy_Schedule_2025-26.pdf</b><span>Current policy</span></div></div>
+          <div class="file"><div class="file-ico">PDF</div><div style="min-width:0"><b>Renewal_Receipts_2022-2025.pdf</b><span>4 receipts, no gaps</span></div></div>
+          <div class="file"><div class="file-ico">PDF</div><div style="min-width:0"><b>Discharge_Summary.pdf</b><span>City Care Hospital, Pune</span></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3 style="margin-bottom:10px">Insurer's letter</h3>
+        <div class="letter">
+          <span class="mono">Navjeevan General Insurance · Ref NGI/CL/2025/7731</span>
+          <p style="margin-top:8px">Dear Policyholder, your claim for ₹1,80,000 towards right total knee replacement has been <b>repudiated</b>. <mark>The treatment falls within the 24-month waiting period applicable to joint replacement under Clause 4.3 of the policy.</mark> The policy is considered effective from 12 Mar 2025.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="assess">
+        <div class="a-ico"><svg><use href="#i-alert"/></svg></div>
+        <div class="txt">
+          <h2>Possible inconsistency found</h2>
+          <p>The letter counts your waiting period from the <b>latest renewal (2025)</b>. Clause 4.3 counts it from your <b>first policy (2022)</b>. On your records, the waiting period ended 18 months before surgery.</p>
+        </div>
+        <div class="score num"><b>3 / 3</b><span class="muted" style="font-size:12px">documents support you</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><h3>Coverage timeline</h3><span class="muted" style="font-size:12.5px">Rebuilt from your renewal receipts</span></div>
+        <div class="tl">
+          <div class="tl-track num">
+            <div class="tl-axis"></div>
+            <div class="tl-wait" style="left:4%;width:30%"><span>24-month waiting period</span></div>
+            <div class="tl-ev" style="left:4%"><div class="pin"></div><div class="lab"><b>12 Mar 2022</b><span>First policy</span></div></div>
+            <div class="tl-ev" style="left:19%"><div class="pin"></div><div class="lab"><b>Mar 2023</b><span>Renewed</span></div></div>
+            <div class="tl-ev" style="left:34%"><div class="pin" style="border-color:var(--ok);background:var(--ok)"></div><div class="lab"><b>12 Mar 2024</b><span style="color:var(--ok)">Waiting ends</span></div></div>
+            <div class="tl-ev" style="left:56%"><div class="pin"></div><div class="lab"><b>12 Mar 2025</b><span>Renewed · insurer's start date</span></div></div>
+            <div class="tl-ev warnp" style="left:79%"><div class="pin"></div><div class="lab"><b>18 Sep 2025</b><span>Surgery</span></div></div>
+            <div class="tl-ev alert" style="left:94%"><div class="pin"></div><div class="lab"><b>02 Oct 2025</b><span style="color:var(--bad)">Rejected</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><h3>Evidence map</h3><span class="muted" style="font-size:12.5px">Each rejection ground, checked</span></div>
+        <div class="table-wrap">
+          <table class="evmap">
+            <thead><tr><th>Insurer's claim</th><th>What your policy says</th><th>Your evidence</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Policy effective from 12 Mar 2025</td><td>Waiting counted from first inception <span class="cite">§4.3</span></td><td>Renewal receipts 2022–2025</td><td><span class="chip ok"><span class="dot"></span>Contradicted</span></td></tr>
+              <tr><td>Within 24-month waiting period</td><td>24 months of continuous cover <span class="cite">§4.3(iv)</span></td><td>42 months on surgery date</td><td><span class="chip ok"><span class="dot"></span>Contradicted</span></td></tr>
+              <tr><td>Portability or break in cover</td><td>Grace period 30 days <span class="cite">§8.2</span></td><td>All renewals paid before due date</td><td><span class="chip ok"><span class="dot"></span>No break</span></td></tr>
+              <tr><td>Knee condition pre-existing</td><td>36-month PED waiting <span class="cite">§4.2</span></td><td>Not stated by insurer</td><td><span class="chip warn"><span class="dot"></span>Ask insurer</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="panel">
+          <h3 style="margin-bottom:12px">Evidence checklist</h3>
+          <ul class="check">
+            <li><span class="box on">✓</span>Rejection letter</li>
+            <li><span class="box on">✓</span>All renewal receipts since 2022</li>
+            <li><span class="box on">✓</span>Discharge summary</li>
+            <li><span class="box"></span><span>Doctor's note on when knee pain began <span class="chip warn">Recommended</span></span></li>
+            <li><span class="box"></span>Itemised hospital bill</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3 style="margin-bottom:12px">Questions to raise</h3>
+          <ul class="check">
+            <li><span class="box">?</span>Why was the policy treated as starting in 2025 when receipts show continuous cover since 2022?</li>
+            <li><span class="box">?</span>Is the insurer relying on any reason other than Clause 4.3?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cta-row">
+        <label for="pg-complaint" class="btn primary"><svg><use href="#i-flag"/></svg>Draft a complaint</label>
+        <button class="btn" type="button" data-toast><svg><use href="#i-download"/></svg>Download evidence report</button>
+      </div>
+    </div>
+  </div>
+  </div>
+  <p class="disclaimer">Fictional case. ClaimSaathi points out where a rejection may not match your policy and what evidence you have. It does not establish that a claim must be paid.</p>
+</section>
+
+<!-- ================= COMPLAINT ================= -->
+<section class="page" id="complaint" aria-labelledby="h-comp">
+  <input class="vh" type="radio" name="cs" id="cs-route"><input class="vh" type="radio" name="cs" id="cs-draft" checked><input class="vh" type="radio" name="cs" id="cs-track">
+  <div class="page-head">
+    <div>
+      <span class="eyebrow">Act</span>
+      <h1 id="h-comp" style="margin-top:6px" data-i18n="nav_comp">File a Complaint</h1>
+      <p class="lede" data-i18n="comp_sub">ClaimSaathi drafts the complaint from your Rejection Check, lists the documents to attach and shows where to file it next.</p>
+    </div>
+    <span class="chip sage"><span class="dot"></span>Draft from Rejection Check · CLM-24-08817</span>
+  </div>
+
+  <div class="flow" data-flow="complaint">
+    <div class="steps">
+      <label class="fs" for="cs-route"><i>1</i>Choose where to file</label><span class="sep">›</span>
+      <label class="fs" for="cs-draft"><i>2</i>Review draft</label><span class="sep">›</span>
+      <label class="fs" for="cs-track"><i>3</i>Track complaint</label>
+    </div>
+    <button type="button" class="btn play" data-play="complaint"><svg><use href="#i-arrow"/></svg>Play walkthrough</button>
+  </div>
+
+  <!-- Step 1: route -->
+  <div class="step" data-page="complaint" data-step="route">
+  <div class="up-grid" style="margin-bottom:22px">
+    <div class="panel grid">
+      <h3>Where are you right now?</h3>
+      <div class="radios" role="radiogroup" aria-label="Your situation">
+        <label class="radio on"><input type="radio" name="sit" id="sit-1" checked><span>I haven't complained to the insurer yet<small>ClaimSaathi recommends writing to the insurer's grievance officer first.</small></span></label>
+        <label class="radio"><input type="radio" name="sit" id="sit-2"><span>The insurer replied, but I'm not satisfied<small>Escalate on Bima Bharosa, IRDAI's grievance portal.</small></span></label>
+        <label class="radio"><input type="radio" name="sit" id="sit-3"><span>No reply after 14 days<small>You can escalate on Bima Bharosa now.</small></span></label>
+        <label class="radio"><input type="radio" name="sit" id="sit-4"><span>Bima Bharosa didn't resolve it<small>Approach the Insurance Ombudsman, within one year of the insurer's final reply.</small></span></label>
+      </div>
+    </div>
+    <div class="panel grid">
+      <h3>Brought in from your Rejection Check</h3>
+      <div class="brings num">
+        <div><b>3</b><span>grounds for review</span></div>
+        <div><b>4</b><span>documents attached</span></div>
+        <div><b>3</b><span>clause references</span></div>
+      </div>
+      <div class="note"><svg><use href="#i-info"/></svg><span>Claim CLM-24-08817 · ₹1,80,000 · rejected 02 Oct 2025 under Clause 4.3</span></div>
+      <label class="btn primary" for="cs-draft" style="justify-self:start">Continue to draft <svg><use href="#i-arrow"/></svg></label>
+    </div>
+  </div>
+  <div class="route">
+    <div class="stage now">
+      <span class="chip sage tag">Step 1 · Start here</span>
+      <h3>Insurer's grievance officer</h3>
+      <p>Write to the insurer first. They should reply within 14 days.</p>
+    </div>
+    <div class="stage">
+      <span class="chip tag">Step 2 · If unresolved</span>
+      <h3>Bima Bharosa (IRDAI)</h3>
+      <p>Escalate on IRDAI's grievance portal if the reply is late or unsatisfactory. <a href="https://bimabharosa.irdai.gov.in/" target="_blank" rel="noopener">bimabharosa.irdai.gov.in</a></p>
+    </div>
+    <div class="stage">
+      <span class="chip tag">Step 3 · Final</span>
+      <h3>Insurance Ombudsman</h3>
+      <p>Free dispute resolution, within one year of the insurer's final reply. <a href="https://www.cioins.co.in/" target="_blank" rel="noopener">cioins.co.in</a></p>
+    </div>
+  </div>
+  </div>
+
+  <!-- Step 2: draft -->
+  <div class="step" data-page="complaint" data-step="draft">
+  <div class="cp-grid">
+    <div class="grid">
+      <form class="panel" id="complaint-form" novalidate>
+        <div class="panel-title"><h3>Complaint details</h3><span class="muted" style="font-size:12.5px">Pre-filled · edit anything</span></div>
+        <div class="fields">
+          <label for="f-name">Policyholder name<input id="f-name" type="text" value="Rohit Verma"></label>
+          <label for="f-phone">Mobile<input id="f-phone" type="text" value="98XXX XX214"></label>
+          <label for="f-insurer">Insurer<input id="f-insurer" type="text" value="Navjeevan General Insurance"></label>
+          <label for="f-policy">Policy number<input id="f-policy" type="text" value="NGI/HL/2025/448812"></label>
+          <label for="f-claim">Claim number<input id="f-claim" type="text" value="CLM-24-08817"></label>
+          <label for="f-amt">Amount disputed<input id="f-amt" type="text" value="₹1,80,000"></label>
+          <label for="f-type" class="full">Type of grievance
+            <select id="f-type" class="field"><option>Claim rejected / repudiated</option><option>Claim partly paid</option><option>Delay in claim settlement</option><option>Policy servicing</option></select>
+          </label>
+          <label for="f-ask" class="full">What you are asking for
+            <textarea id="f-ask">Review the rejection and settle the claim of ₹1,80,000, since my waiting period under Clause 4.3 ended on 12 Mar 2024, based on continuous cover since 12 Mar 2022.</textarea>
+          </label>
+        </div>
+        <h3 style="margin:18px 0 10px">Attachments</h3>
+        <div class="attach">
+          <div><span>Rejection_Letter_CLM-24-08817.pdf</span><span class="chip ok">Attached</span></div>
+          <div><span>Renewal_Receipts_2022-2025.pdf</span><span class="chip ok">Attached</span></div>
+          <div><span>Discharge_Summary.pdf</span><span class="chip ok">Attached</span></div>
+          <div><span>ClaimSaathi_Evidence_Report.pdf</span><span class="chip ok">Attached</span></div>
+          <div><span>Doctor's note on onset of knee pain</span><button class="btn" type="button" data-toast style="padding:5px 10px;font-size:12.5px"><svg><use href="#i-upload"/></svg>Add</button></div>
+        </div>
+        <div class="cta-row">
+          <label class="btn primary" for="cs-track"><svg><use href="#i-send"/></svg>Send to grievance officer</label>
+          <button class="btn" type="button" data-toast><svg><use href="#i-download"/></svg>Download PDF</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="grid">
+      <div class="panel-title" style="margin:0"><h3>Letter preview</h3><button class="btn" type="button" data-copy style="padding:6px 10px;font-size:13px"><svg><use href="#i-copy"/></svg>Copy text</button></div>
+      <article class="paper" id="letter">
+        <div class="meta"><span>To: Grievance Redressal Officer, Navjeevan General Insurance</span><span>14 Nov 2025</span></div>
+        <p><b>Subject:</b> Request to review repudiation of claim CLM-24-08817 under policy NGI/HL/2025/448812</p>
+        <p>Dear Sir/Madam,</p>
+        <p>My claim of ₹1,80,000 for right total knee replacement at City Care Hospital, Pune (18 Sep 2025) was rejected on 02 Oct 2025, citing the 24-month waiting period under Clause 4.3.</p>
+        <h3>Grounds for review</h3>
+        <ol>
+          <li>Clause 4.3 <span class="ref">§4.3(iv)</span> counts the waiting period from the inception of the <i>first</i> policy. My first policy began on 12 Mar 2022.</li>
+          <li>The enclosed receipts show continuous renewal with no break in cover <span class="ref">§8.2</span>. On the date of surgery I had 42 months of continuous cover.</li>
+          <li>The rejection letter treats the policy as effective from 12 Mar 2025, which is the latest renewal date, not the inception date.</li>
+        </ol>
+        <p>I request that you review the decision and settle the claim. If you rely on any other ground, please state it in writing with the clause reference.</p>
+        <p>Yours faithfully,<br>Rohit Verma</p>
+      </article>
+    </div>
+  </div>
+  </div>
+
+  <!-- Step 3: track -->
+  <div class="step" data-page="complaint" data-step="track">
+    <div class="success">
+      <div class="s-ico">✓</div>
+      <div class="txt">
+        <h2>Complaint sent to Navjeevan General Insurance</h2>
+        <p style="margin-top:6px">Sent to the Grievance Redressal Officer on 14 Nov 2025 with 4 attachments. Keep this reference for any follow-up.</p>
+      </div>
+      <div><span class="muted" style="font-size:12px">Reference</span><div class="mono" style="font-size:15px;color:var(--fg)">GRV-NGI-2025-55120</div></div>
+    </div>
+    <div class="track-grid">
+      <div class="panel">
+        <h3 style="margin-bottom:14px">Complaint tracker</h3>
+        <div class="track">
+          <div class="done"><b>Draft ready</b><span>14 Nov</span></div>
+          <div class="done"><b>Sent to insurer</b><span>14 Nov</span></div>
+          <div class="now"><b>Waiting for insurer's reply</b><span>due 28 Nov</span></div>
+          <div><b>Escalate on Bima Bharosa if needed</b><span>after 28 Nov</span></div>
+          <div><b>Approach Ombudsman</b><span>within 1 year</span></div>
+        </div>
+      </div>
+      <div class="panel grid">
+        <h3>Reply due</h3>
+        <div class="countdown num"><b>14</b> <span class="muted">days left</span></div>
+        <p class="muted" style="font-size:13.5px">The insurer should respond by <b style="color:var(--fg)">28 Nov 2025</b>. Upload their reply here and ClaimSaathi will check it against your grounds.</p>
+        <button class="btn" type="button" data-toast style="justify-self:start"><svg><use href="#i-upload"/></svg>Upload insurer's reply</button>
+      </div>
+      <div class="panel grid">
+        <h3>Reminders</h3>
+        <div>
+          <label class="toggle" for="rm-sms">SMS reminder on 25 Nov<input id="rm-sms" type="checkbox" checked></label>
+          <label class="toggle" for="rm-wa">WhatsApp updates<input id="rm-wa" type="checkbox" checked></label>
+          <label class="toggle" for="rm-mail">Email copy of complaint<input id="rm-mail" type="checkbox"></label>
+        </div>
+        <button class="btn" type="button" aria-disabled="true" data-toast style="justify-self:start"><svg><use href="#i-flag"/></svg>Escalate to Bima Bharosa</button>
+        <p class="muted" style="font-size:12.5px">Unlocks after 28 Nov, or sooner if the insurer's reply doesn't resolve your complaint.</p>
+      </div>
+    </div>
+  </div>
+  <p class="disclaimer">ClaimSaathi prepares a draft for you to review. You decide what to send. Timelines shown are general guidance; check the current IRDAI rules for your case.</p>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap"><span><b style="color:var(--fg)">ClaimSaathi</b> · Understand your coverage. Defend your rights.</span><span>UI preview for The Builder's Theory 1.0 · all data is sample data</span></div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* Optional extras. Navigation, tabs and steps work without this script. */
+(function () {
+  function $(s) { return document.querySelector(s); }
+  function $$(s) { return document.querySelectorAll(s); }
+
+  // pressed-state groups
+  function group(sel) {
+    $$(sel).forEach(function (g) {
+      g.addEventListener("click", function (e) {
+        var b = e.target.closest("button"); if (!b) return;
+        g.querySelectorAll("button").forEach(function (o) { o.setAttribute("aria-pressed", o === b); });
+      });
+    });
+  }
+  group(".scen"); group(".filters"); group(".up-grid .seg");
+
+  // clause filter + search
+  var filt = "all", q = "";
+  function applyClauses() {
+    $$(".clause").forEach(function (c) {
+      var okF = filt === "all" || c.dataset.k === filt;
+      var okQ = !q || c.textContent.toLowerCase().indexOf(q) >= 0;
+      c.hidden = !(okF && okQ);
+    });
+  }
+  var fl = $(".filters");
+  if (fl) fl.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; filt = b.dataset.f; applyClauses(); });
+  var cs = $("#clause-search");
+  if (cs) cs.addEventListener("input", function (e) { q = e.target.value.trim().toLowerCase(); applyClauses(); });
+
+  // toast
+  var toastEl = $("#toast"), tt;
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.classList.add("show");
+    clearTimeout(tt); tt = setTimeout(function () { toastEl.classList.remove("show"); }, 2400);
+  }
+  document.addEventListener("click", function (e) {
+    if (e.target.closest("[data-toast]")) toast("UI preview: this action isn't connected yet.");
+  });
+  $("#complaint-form").addEventListener("submit", function (e) { e.preventDefault(); });
+  var ai = $("#ask-input");
+  if (ai) ai.addEventListener("keydown", function (e) { if (e.key === "Enter") toast("UI preview: answers aren't live yet."); });
+  var cp = $("[data-copy]");
+  if (cp) cp.addEventListener("click", function () {
+    var txt = $("#letter").innerText;
+    try { navigator.clipboard.writeText(txt).then(function () { toast("Letter copied"); }, selectLetter); }
+    catch (err) { selectLetter(); }
+  });
+  function selectLetter() {
+    var r = document.createRange(); r.selectNodeContents($("#letter"));
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Text selected. Press Ctrl+C to copy.");
+  }
+
+  // walkthrough: ticks the step radios on a timer
+  var timers = [];
+  function pick(id) { var r = document.getElementById(id); if (r) r.checked = true; }
+  document.addEventListener("click", function (e) {
+    var p = e.target.closest("[data-play]"); if (!p) return;
+    timers.forEach(clearTimeout); timers = [];
+    var pg = p.dataset.play;
+    if (pg === "complaint") {
+      pick("cs-route");
+      timers.push(setTimeout(function () { pick("cs-draft"); }, 2600));
+      timers.push(setTimeout(function () { pick("cs-track"); }, 6200));
+    } else {
+      var x = pg === "policy" ? "ps" : "rs";
+      pick(x + "-upload");
+      timers.push(setTimeout(function () { pick(x + "-processing"); }, 1800));
+      timers.push(setTimeout(function () { pick(x + "-results"); }, 7200));
+    }
+  });
+  // home buttons that open a page on its upload step
+  $$("[data-goto]").forEach(function (a) {
+    a.addEventListener("click", function () { var t = a.dataset.goto.split(":"); pick((t[0] === "policy" ? "ps" : "rs") + "-" + t[1]); });
+  });
+
+  // language toggle (key labels only)
+  var dict = {
+    en: { nav_home: "Home", nav_policy: "Policy Insights", nav_rej: "Rejection Check", nav_comp: "File a Complaint",
+      hero_eyebrow: "Your insurance rights companion",
+      hero_title: "Understand your coverage.<br><span>Defend your rights.</span>",
+      hero_sub: "Upload your policy and ClaimSaathi explains it in plain language, compares it with other plans, checks rejected claims against your own clauses and helps you file a complaint that holds up.",
+      cta_upload: "Upload a policy", cta_check: "Check a rejected claim",
+      policy_sub: "See what your policy covers, read every clause in plain language, compare it with another plan and ask questions about your own situation.",
+      rej_sub: "Upload the insurer's rejection letter. ClaimSaathi matches each reason to your policy clauses, rebuilds your coverage timeline and shows what supports your case.",
+      comp_sub: "ClaimSaathi drafts the complaint from your Rejection Check, lists the documents to attach and shows where to file it next." },
+    hi: { nav_home: "होम", nav_policy: "पॉलिसी जानकारी", nav_rej: "रिजेक्शन जाँच", nav_comp: "शिकायत दर्ज करें",
+      hero_eyebrow: "आपके बीमा अधिकारों का साथी",
+      hero_title: "अपना कवरेज समझें।<br><span>अपने अधिकारों की रक्षा करें।</span>",
+      hero_sub: "अपनी पॉलिसी अपलोड करें। ClaimSaathi उसे आसान भाषा में समझाता है, दूसरी पॉलिसी से तुलना करता है, रिजेक्ट हुए क्लेम को आपकी शर्तों से मिलाता है और मज़बूत शिकायत दर्ज करने में मदद करता है।",
+      cta_upload: "पॉलिसी अपलोड करें", cta_check: "रिजेक्ट क्लेम जाँचें",
+      policy_sub: "देखें आपकी पॉलिसी क्या कवर करती है, हर शर्त आसान भाषा में पढ़ें, दूसरी पॉलिसी से तुलना करें और अपने सवाल पूछें।",
+      rej_sub: "बीमा कंपनी का रिजेक्शन पत्र अपलोड करें। ClaimSaathi हर कारण को आपकी पॉलिसी की शर्तों से मिलाता है और दिखाता है कि कौन से सबूत आपके पक्ष में हैं।",
+      comp_sub: "ClaimSaathi आपकी रिजेक्शन जाँच से शिकायत का ड्राफ्ट बनाता है, ज़रूरी दस्तावेज़ बताता है और आगे कहाँ शिकायत करनी है, यह दिखाता है।" },
+    hn: { nav_home: "Home", nav_policy: "Policy Samjho", nav_rej: "Rejection Check", nav_comp: "Complaint Karo",
+      hero_eyebrow: "Aapka insurance rights saathi",
+      hero_title: "Apna coverage samjho.<br><span>Apne rights ke liye lado.</span>",
+      hero_sub: "Policy upload karo aur ClaimSaathi use simple bhasha mein samjhayega, doosre plans se compare karega, rejected claim ko aapke clauses se check karega aur strong complaint file karne mein help karega.",
+      cta_upload: "Policy upload karo", cta_check: "Rejected claim check karo",
+      policy_sub: "Dekho aapki policy kya cover karti hai, har clause simple bhasha mein padho, doosre plan se compare karo aur apne sawaal poocho.",
+      rej_sub: "Insurer ka rejection letter upload karo. ClaimSaathi har reason ko aapke policy clause se match karta hai aur dikhata hai ki kaunse documents aapke favour mein hain.",
+      comp_sub: "ClaimSaathi aapke Rejection Check se complaint draft karta hai, attach karne wale documents batata hai aur aage kahan file karna hai, yeh dikhata hai." }
+  };
+  $$("[data-lang]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var d = dict[b.dataset.lang];
+      $$("[data-lang]").forEach(function (o) { o.setAttribute("aria-pressed", o === b); });
+      $$("[data-i18n]").forEach(function (el) { el.textContent = d[el.dataset.i18n]; });
+      $$("[data-i18n-html]").forEach(function (el) { el.innerHTML = d[el.dataset.i18nHtml]; });
+      document.documentElement.lang = b.dataset.lang === "hi" ? "hi" : "en";
+    });
+  });
+})();
+</script>
