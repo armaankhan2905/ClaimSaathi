@@ -73,6 +73,8 @@ label.brand { cursor: pointer; }
 .seg { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
 .seg button { border: 0; background: transparent; padding: 5px 10px; border-radius: 7px; font-size: 12.5px; cursor: pointer; color: var(--muted); }
 .seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); box-shadow: inset 0 0 0 1px var(--line); }
+.demo-strip { background: var(--warn-bg); border-bottom: 1px solid rgba(183,121,31,.25); color: var(--fg); font-size: 13px; text-align: center; padding: 7px 16px; line-height: 1.45; }
+.demo-strip b { color: var(--warn); font-weight: 600; margin-right: 6px; }
 .proto-pill { font-size: 11.5px; color: var(--warn); border: 1px solid rgba(183,121,31,.35); background: var(--warn-bg); padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
 @media (max-width: 760px) {
   .appbar .wrap { gap: 10px; }
@@ -469,6 +471,7 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
 <input class="pg-radio" type="radio" name="pg" id="pg-rejection" aria-label="rejection page">
 <input class="pg-radio" type="radio" name="pg" id="pg-complaint" aria-label="complaint page">
 <header class="appbar">
+  <div class="demo-strip" role="note"><b data-i18n="demo_tag">Demo preview</b><span data-i18n="demo_text">This is a demo of the features ClaimSaathi will offer. All policies, claims and results shown are sample data.</span></div>
   <div class="wrap">
     <label class="brand" for="pg-home" aria-label="ClaimSaathi home">
       <span class="brand-mark"><svg style="color:var(--accent-ink)"><use href="#i-shield"/></svg></span>
@@ -1343,7 +1346,8 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
 
   // language toggle (key labels only)
   var dict = {
-    en: { nav_home: "Home", nav_policy: "Policy Insights", nav_rej: "Rejection Check", nav_comp: "File a Complaint",
+    en: { demo_tag: "Demo preview", demo_text: "This is a demo of the features ClaimSaathi will offer. All policies, claims and results shown are sample data.",
+      nav_home: "Home", nav_policy: "Policy Insights", nav_rej: "Rejection Check", nav_comp: "File a Complaint",
       hero_eyebrow: "Your insurance rights companion",
       hero_title: "Understand your coverage.<br><span>Defend your rights.</span>",
       hero_sub: "Upload your policy and ClaimSaathi explains it in plain language, compares it with other plans, flags hidden clauses and loopholes before they catch you out, checks rejected claims against your own clauses and helps you file a complaint that holds up.",
@@ -1351,7 +1355,8 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
       policy_sub: "See what your policy covers, read every clause in plain language, compare it with another plan and ask questions about your own situation.",
       rej_sub: "Upload the insurer's rejection letter. ClaimSaathi matches each reason to your policy clauses, rebuilds your coverage timeline and shows what supports your case.",
       comp_sub: "ClaimSaathi drafts the complaint from your Rejection Check, lists the documents to attach and shows where to file it next." },
-    hi: { nav_home: "होम", nav_policy: "पॉलिसी जानकारी", nav_rej: "रिजेक्शन जाँच", nav_comp: "शिकायत दर्ज करें",
+    hi: { demo_tag: "डेमो प्रीव्यू", demo_text: "यह ClaimSaathi में आने वाले फीचर्स का डेमो है। यहाँ दिखाई गई सभी पॉलिसी, क्लेम और नतीजे सैंपल डेटा हैं।",
+      nav_home: "होम", nav_policy: "पॉलिसी जानकारी", nav_rej: "रिजेक्शन जाँच", nav_comp: "शिकायत दर्ज करें",
       hero_eyebrow: "आपके बीमा अधिकारों का साथी",
       hero_title: "अपना कवरेज समझें।<br><span>अपने अधिकारों की रक्षा करें।</span>",
       hero_sub: "अपनी पॉलिसी अपलोड करें। ClaimSaathi उसे आसान भाषा में समझाता है, दूसरी पॉलिसी से तुलना करता है, छिपी शर्तों और लूपहोल्स को पहले ही पकड़ लेता है, रिजेक्ट हुए क्लेम को आपकी शर्तों से मिलाता है और मज़बूत शिकायत दर्ज करने में मदद करता है।",
@@ -1359,7 +1364,8 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
       policy_sub: "देखें आपकी पॉलिसी क्या कवर करती है, हर शर्त आसान भाषा में पढ़ें, दूसरी पॉलिसी से तुलना करें और अपने सवाल पूछें।",
       rej_sub: "बीमा कंपनी का रिजेक्शन पत्र अपलोड करें। ClaimSaathi हर कारण को आपकी पॉलिसी की शर्तों से मिलाता है और दिखाता है कि कौन से सबूत आपके पक्ष में हैं।",
       comp_sub: "ClaimSaathi आपकी रिजेक्शन जाँच से शिकायत का ड्राफ्ट बनाता है, ज़रूरी दस्तावेज़ बताता है और आगे कहाँ शिकायत करनी है, यह दिखाता है।" },
-    hn: { nav_home: "Home", nav_policy: "Policy Samjho", nav_rej: "Rejection Check", nav_comp: "Complaint Karo",
+    hn: { demo_tag: "Demo preview", demo_text: "Yeh ClaimSaathi ke aane wale features ka demo hai. Yahan dikhaye gaye saare policies, claims aur results sample data hain.",
+      nav_home: "Home", nav_policy: "Policy Samjho", nav_rej: "Rejection Check", nav_comp: "Complaint Karo",
       hero_eyebrow: "Aapka insurance rights saathi",
       hero_title: "Apna coverage samjho.<br><span>Apne rights ke liye lado.</span>",
       hero_sub: "Policy upload karo aur ClaimSaathi use simple bhasha mein samjhayega, doosre plans se compare karega, hidden clauses aur loopholes pehle hi pakad lega, rejected claim ko aapke clauses se check karega aur strong complaint file karne mein help karega.",
