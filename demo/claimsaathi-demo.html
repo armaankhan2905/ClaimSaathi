@@ -1162,6 +1162,395 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
 (function () {
   function $(s) { return document.querySelector(s); }
   function $$(s) { return document.querySelectorAll(s); }
+  var lang = "en";
+  var TR = {
+    "Dark": ["डार्क", "Dark"],
+    "Light": ["लाइट", "Light"],
+    "Switch to dark mode": ["डार्क मोड पर जाएँ", "Dark mode on karo"],
+    "Switch to light mode": ["लाइट मोड पर जाएँ", "Light mode on karo"],
+    "UI preview · v9": ["UI प्रीव्यू · v9", "UI preview · v9"],
+    "✓ Covered": ["✓ कवर है", "✓ Covered hai"],
+    "Cataract surgery · Clause 4.2": ["मोतियाबिंद सर्जरी · शर्त 4.2", "Cataract surgery · Clause 4.2"],
+    "Claim strength: 82%": ["क्लेम की मज़बूती: 82%", "Claim strength: 82%"],
+    "3 clauses support your case": ["3 शर्तें आपके पक्ष में हैं", "3 clauses aapke case ko support karte hain"],
+    "Claim rejected": ["क्लेम रिजेक्ट हुआ", "Claim reject hua"],
+    "Needs review": ["जाँच ज़रूरी", "Review zaroori"],
+    "Knee replacement · Suraksha Health Plus": ["घुटना प्रत्यारोपण · Suraksha Health Plus", "Knee replacement · Suraksha Health Plus"],
+    "Claim amount": ["क्लेम राशि", "Claim amount"],
+    "Insurer's reason": ["बीमा कंपनी का कारण", "Insurer ka reason"],
+    "24-month waiting period": ["24 महीने की वेटिंग अवधि", "24 mahine ka waiting period"],
+    "Your continuous cover": ["आपका लगातार कवर", "Aapka continuous cover"],
+    "3 years 6 months": ["3 साल 6 महीने", "3 saal 6 mahine"],
+    "ClaimSaathi finding": ["ClaimSaathi का निष्कर्ष", "ClaimSaathi ki finding"],
+    "Possible inconsistency": ["संभावित गड़बड़ी", "Ho sakti hai gadbad"],
+    "Review this rejection": ["यह रिजेक्शन जाँचें", "Yeh rejection check karo"],
+    "Decode · Compare · Ask": ["समझें · तुलना करें · पूछें", "Samjho · Compare karo · Poocho"],
+    "Policy details and key limits": ["पॉलिसी की जानकारी और मुख्य सीमाएँ", "Policy details aur main limits"],
+    "Every clause in plain language": ["हर शर्त आसान भाषा में", "Har clause simple bhasha mein"],
+    "Compare two policies by scenario": ["हालात के हिसाब से दो पॉलिसी की तुलना", "Situation ke hisaab se do policies compare karo"],
+    "Ask ClaimSaathi questions with citations": ["ClaimSaathi से सवाल पूछें, शर्तों के हवाले के साथ", "ClaimSaathi se sawaal poocho, clause reference ke saath"],
+    "Open Policy Insights →": ["पॉलिसी जानकारी खोलें →", "Policy Samjho kholo →"],
+    "Verify": ["जाँचें", "Check karo"],
+    "Upload the rejection letter": ["रिजेक्शन पत्र अपलोड करें", "Rejection letter upload karo"],
+    "Reason matched to the exact clause": ["हर कारण सही शर्त से मिलाया गया", "Har reason exact clause se match"],
+    "Policy timeline reconstruction": ["पॉलिसी की टाइमलाइन दोबारा तैयार", "Policy timeline dobara banayi jaati hai"],
+    "Evidence report you can download": ["डाउनलोड करने लायक सबूत रिपोर्ट", "Download karne layak evidence report"],
+    "Open Rejection Check →": ["रिजेक्शन जाँच खोलें →", "Rejection Check kholo →"],
+    "Act": ["कार्रवाई करें", "Action lo"],
+    "Auto-drafted, editable complaint": ["अपने-आप तैयार, बदलने लायक शिकायत", "Auto-draft complaint, jo aap edit kar sakte ho"],
+    "Document checklist": ["दस्तावेज़ों की चेकलिस्ट", "Documents ki checklist"],
+    "Insurer → Bima Bharosa → Ombudsman": ["बीमा कंपनी → बीमा भरोसा → लोकपाल", "Insurer → Bima Bharosa → Ombudsman"],
+    "Track deadlines and status": ["समय-सीमा और स्थिति पर नज़र", "Deadlines aur status track karo"],
+    "Open Complaint →": ["शिकायत खोलें →", "Complaint kholo →"],
+    "Your policies": ["आपकी पॉलिसियाँ", "Aapki policies"],
+    "Sample policies for this preview": ["इस प्रीव्यू के लिए सैंपल पॉलिसियाँ", "Is preview ke liye sample policies"],
+    "Health": ["स्वास्थ्य", "Health"],
+    "Navjeevan General Insurance ·": ["Navjeevan General Insurance ·", "Navjeevan General Insurance ·"],
+    "Active": ["चालू", "Active"],
+    "Sum insured": ["बीमा राशि", "Sum insured"],
+    "Renews": ["नवीनीकरण", "Renewal"],
+    "Cover since": ["कवर कब से", "Cover kab se"],
+    "View insights": ["जानकारी देखें", "Insights dekho"],
+    "1 rejected claim": ["1 रिजेक्ट क्लेम", "1 rejected claim"],
+    "Motor": ["मोटर", "Motor"],
+    "Add-ons": ["ऐड-ऑन", "Add-ons"],
+    "Zero dep": ["ज़ीरो डेप", "Zero dep"],
+    "No engine protect cover": ["इंजन प्रोटेक्ट कवर नहीं", "Engine protect cover nahi hai"],
+    "All policies, insurers, people and claims in this preview are fictional. ClaimSaathi gives guidance based on your documents; it does not decide legal entitlement.": ["इस प्रीव्यू की सभी पॉलिसी, बीमा कंपनियाँ, लोग और क्लेम काल्पनिक हैं। ClaimSaathi आपके दस्तावेज़ों के आधार पर मार्गदर्शन देता है; कानूनी हक़ का फ़ैसला नहीं करता।", "Is preview ki saari policies, insurers, log aur claims fictional hain. ClaimSaathi aapke documents ke basis par guidance deta hai; legal haq ka faisla nahi karta."],
+    "Policy": ["पॉलिसी", "Policy"],
+    "<i>1</i>Upload policy": ["<i>1</i>पॉलिसी अपलोड", "<i>1</i>Policy upload"],
+    "<i>2</i>Reading policy": ["<i>2</i>पॉलिसी पढ़ी जा रही है", "<i>2</i>Policy padh rahe hain"],
+    "<i>3</i>Your insights": ["<i>3</i>आपकी जानकारी", "<i>3</i>Aapki insights"],
+    "Play walkthrough": ["डेमो चलाएँ", "Walkthrough chalao"],
+    "Drop your policy document here": ["अपना पॉलिसी दस्तावेज़ यहाँ डालें", "Apna policy document yahan daalo"],
+    "PDF, JPG or PNG · up to 25 MB · scanned copies and phone photos work too": ["PDF, JPG या PNG · 25 MB तक · स्कैन कॉपी और फ़ोन की फ़ोटो भी चलेगी", "PDF, JPG ya PNG · 25 MB tak · scanned copy aur phone photo bhi chalegi"],
+    "Browse files": ["फ़ाइल चुनें", "File chuno"],
+    "Use sample policy": ["सैंपल पॉलिसी इस्तेमाल करें", "Sample policy use karo"],
+    "What to upload": ["क्या अपलोड करें", "Kya upload karein"],
+    "Policy wording": ["पॉलिसी की शर्तें", "Policy wording"],
+    "The full terms and conditions booklet": ["पूरी नियम और शर्तों की पुस्तिका", "Poori terms and conditions booklet"],
+    "Required": ["ज़रूरी", "Zaroori"],
+    "Policy schedule": ["पॉलिसी शेड्यूल", "Policy schedule"],
+    "Sum insured, members, dates": ["बीमा राशि, सदस्य, तारीख़ें", "Sum insured, members, dates"],
+    "Recommended": ["सुझाया गया", "Recommended"],
+    "Endorsements and add-ons": ["एंडोर्समेंट और ऐड-ऑन", "Endorsements aur add-ons"],
+    "Any changes made after purchase": ["ख़रीद के बाद किए गए बदलाव", "Kharidne ke baad kiye gaye changes"],
+    "Optional": ["वैकल्पिक", "Optional"],
+    "Previous years' policies": ["पिछले सालों की पॉलिसियाँ", "Pichhle saal ki policies"],
+    "Proves continuous cover for waiting periods": ["वेटिंग अवधि के लिए लगातार कवर साबित करती हैं", "Waiting period ke liye continuous cover prove karti hain"],
+    "Policy type": ["पॉलिसी का प्रकार", "Policy type"],
+    "Life": ["जीवन", "Life"],
+    "Your documents stay private. They are encrypted, never shared with your insurer, and you can delete them at any time.": ["आपके दस्तावेज़ निजी रहते हैं। वे एन्क्रिप्ट रहते हैं, बीमा कंपनी से कभी साझा नहीं होते, और आप उन्हें कभी भी हटा सकते हैं।", "Aapke documents private rehte hain. Woh encrypted hain, insurer ke saath kabhi share nahi hote, aur aap unhe kabhi bhi delete kar sakte ho."],
+    "Reading Suraksha_Health_Plus_Policy_Wording.pdf": ["Suraksha_Health_Plus_Policy_Wording.pdf पढ़ी जा रही है", "Suraksha_Health_Plus_Policy_Wording.pdf padh rahe hain"],
+    "About 10 seconds": ["लगभग 10 सेकंड", "Lagbhag 10 second"],
+    "Extracting text from 42 pages": ["42 पन्नों से टेक्स्ट निकाला जा रहा है", "42 pages se text nikaal rahe hain"],
+    "3 scanned pages sent to OCR": ["3 स्कैन पन्ने OCR को भेजे गए", "3 scanned pages OCR ko bheje"],
+    "Finding and labelling clauses": ["शर्तें ढूँढी और पहचानी जा रही हैं", "Clauses dhoondh kar label kar rahe hain"],
+    "38 clauses: 14 coverage, 11 exclusions, 6 limits, 7 waiting periods": ["38 शर्तें: 14 कवरेज, 11 बहिष्करण, 6 सीमाएँ, 7 वेटिंग अवधि", "38 clauses: 14 coverage, 11 exclusions, 6 limits, 7 waiting periods"],
+    "Reading schedule and endorsements": ["शेड्यूल और एंडोर्समेंट पढ़े जा रहे हैं", "Schedule aur endorsements padh rahe hain"],
+    "Sum insured ₹5,00,000 · 2 endorsements · 1 member": ["बीमा राशि ₹5,00,000 · 2 एंडोर्समेंट · 1 सदस्य", "Sum insured ₹5,00,000 · 2 endorsements · 1 member"],
+    "Working out your waiting periods": ["आपकी वेटिंग अवधि की गणना", "Aapke waiting periods calculate kar rahe hain"],
+    "Counted from first inception, 12 Mar 2022": ["पहली पॉलिसी की शुरुआत, 12 Mar 2022 से गिनी गई", "Pehli policy ki shuruaat, 12 Mar 2022 se gina"],
+    "Writing your plain-language summary": ["आसान भाषा में सारांश लिखा जा रहा है", "Simple bhasha mein summary likh rahe hain"],
+    "Preparing your summary": ["आपका सारांश तैयार हो रहा है", "Aapki summary taiyaar ho rahi hai"],
+    "42 pages · schedule + 2 endorsements · read 14 Nov 2025": ["42 पन्ने · शेड्यूल + 2 एंडोर्समेंट · 14 Nov 2025 को पढ़ी गई", "42 pages · schedule + 2 endorsements · 14 Nov 2025 ko padhi"],
+    "38 clauses found": ["38 शर्तें मिलीं", "38 clauses mile"],
+    "Upload another": ["दूसरी अपलोड करें", "Doosri upload karo"],
+    "Details": ["जानकारी", "Details"],
+    "Clauses": ["शर्तें", "Clauses"],
+    "Compare": ["तुलना", "Compare"],
+    "Ask ClaimSaathi": ["ClaimSaathi से पूछें", "ClaimSaathi se poocho"],
+    "+ 20% no-claim bonus earned": ["+ 20% नो-क्लेम बोनस मिला", "+ 20% no-claim bonus mila"],
+    "Policy period": ["पॉलिसी अवधि", "Policy period"],
+    "Renewal 4 of 4": ["4 में से 4वाँ नवीनीकरण", "Renewal 4 of 4"],
+    "First inception": ["पहली शुरुआत", "Pehli shuruaat"],
+    "Continuous, no break": ["लगातार, कोई ब्रेक नहीं", "Continuous, koi break nahi"],
+    "Room rent": ["कमरे का किराया", "Room rent"],
+    "1% of SI per day": ["बीमा राशि का 1% प्रतिदिन", "SI ka 1% per day"],
+    "ICU: 2% of SI per day": ["ICU: बीमा राशि का 2% प्रतिदिन", "ICU: SI ka 2% per day"],
+    "Co-payment": ["को-पेमेंट", "Co-payment"],
+    "None": ["कोई नहीं", "Nahi"],
+    "10% if insured is 61+": ["61+ उम्र पर 10%", "61+ age par 10%"],
+    "Premium": ["प्रीमियम", "Premium"],
+    "₹14,860 / year": ["₹14,860 / साल", "₹14,860 / saal"],
+    "Incl. GST": ["GST सहित", "GST ke saath"],
+    "Covered": ["कवर है", "Covered"],
+    "In-patient hospitalisation <span class=\"cite\">§3.1</span>": ["अस्पताल में भर्ती <span class=\"cite\">§3.1</span>", "Hospital mein admit hona <span class=\"cite\">§3.1</span>"],
+    "Pre &amp; post hospitalisation 60/90 days <span class=\"cite\">§3.2</span>": ["भर्ती से पहले और बाद 60/90 दिन <span class=\"cite\">§3.2</span>", "Admit se pehle aur baad 60/90 din <span class=\"cite\">§3.2</span>"],
+    "Day-care procedures (540+) <span class=\"cite\">§3.4</span>": ["डे-केयर प्रक्रियाएँ (540+) <span class=\"cite\">§3.4</span>", "Day-care procedures (540+) <span class=\"cite\">§3.4</span>"],
+    "Ambulance up to ₹2,000 <span class=\"cite\">§3.6</span>": ["एम्बुलेंस ₹2,000 तक <span class=\"cite\">§3.6</span>", "Ambulance ₹2,000 tak <span class=\"cite\">§3.6</span>"],
+    "Not covered": ["कवर नहीं", "Covered nahi"],
+    "Cosmetic surgery <span class=\"cite\">§5.4</span>": ["कॉस्मेटिक सर्जरी <span class=\"cite\">§5.4</span>", "Cosmetic surgery <span class=\"cite\">§5.4</span>"],
+    "Maternity &amp; newborn <span class=\"cite\">§5.9</span>": ["मातृत्व और नवजात <span class=\"cite\">§5.9</span>", "Maternity aur newborn <span class=\"cite\">§5.9</span>"],
+    "Self-inflicted injury <span class=\"cite\">§5.12</span>": ["ख़ुद को पहुँचाई गई चोट <span class=\"cite\">§5.12</span>", "Khud ko lagayi chot <span class=\"cite\">§5.12</span>"],
+    "Treatment outside India <span class=\"cite\">§5.15</span>": ["भारत के बाहर इलाज <span class=\"cite\">§5.15</span>", "India ke bahar ilaaj <span class=\"cite\">§5.15</span>"],
+    "Limits": ["सीमाएँ", "Limits"],
+    "Cataract ₹40,000 per eye <span class=\"cite\">§4.6</span>": ["मोतियाबिंद ₹40,000 प्रति आँख <span class=\"cite\">§4.6</span>", "Cataract ₹40,000 per aankh <span class=\"cite\">§4.6</span>"],
+    "Room rent 1% SI/day <span class=\"cite\">§4.1</span>": ["कमरे का किराया बीमा राशि का 1%/दिन <span class=\"cite\">§4.1</span>", "Room rent SI ka 1%/din <span class=\"cite\">§4.1</span>"],
+    "AYUSH up to ₹25,000 <span class=\"cite\">§3.8</span>": ["आयुष ₹25,000 तक <span class=\"cite\">§3.8</span>", "AYUSH ₹25,000 tak <span class=\"cite\">§3.8</span>"],
+    "Modern treatments 50% SI <span class=\"cite\">§4.7</span>": ["आधुनिक इलाज बीमा राशि का 50% <span class=\"cite\">§4.7</span>", "Modern treatments SI ka 50% <span class=\"cite\">§4.7</span>"],
+    "Waiting periods": ["वेटिंग अवधि", "Waiting periods"],
+    "Initial: 30 days": ["शुरुआती: 30 दिन", "Shuruaati: 30 din"],
+    "Done": ["पूरी", "Ho gaya"],
+    "Listed illnesses: 24 months": ["सूचीबद्ध बीमारियाँ: 24 महीने", "Listed bimariyan: 24 mahine"],
+    "Ended Mar 2024": ["Mar 2024 में ख़त्म", "Mar 2024 mein khatam"],
+    "Pre-existing: 36 months": ["पहले से मौजूद बीमारी: 36 महीने", "Pre-existing: 36 mahine"],
+    "Ended Mar 2025": ["Mar 2025 में ख़त्म", "Mar 2025 mein khatam"],
+    "All 38": ["सभी 38", "Saare 38"],
+    "Coverage": ["कवरेज", "Coverage"],
+    "Exclusions": ["बहिष्करण", "Exclusions"],
+    "What it means": ["इसका मतलब", "Iska matlab"],
+    "Knee or hip replacement is only covered after you have held this policy for <b>2 years without a break</b>, counted from your <b>first</b> policy, not the latest renewal.": ["घुटने या कूल्हे का प्रत्यारोपण तभी कवर होता है जब आपके पास यह पॉलिसी <b>बिना ब्रेक के 2 साल</b> से हो। यह आपकी <b>पहली</b> पॉलिसी से गिना जाता है, नवीनतम नवीनीकरण से नहीं।", "Knee ya hip replacement tabhi cover hota hai jab aapke paas yeh policy <b>bina break ke 2 saal</b> se ho. Yeh aapki <b>pehli</b> policy se gina jaata hai, latest renewal se nahi."],
+    "Waiting period": ["वेटिंग अवधि", "Waiting period"],
+    "Ended 12 Mar 2024 for you": ["आपके लिए 12 Mar 2024 को ख़त्म", "Aapke liye 12 Mar 2024 ko khatam"],
+    "You can claim up to <b>₹5,000 a day</b> for the room. Pick a costlier room and the insurer may cut <b>other bills too</b>, in the same ratio.": ["आप कमरे के लिए <b>₹5,000 प्रतिदिन</b> तक क्लेम कर सकते हैं। महँगा कमरा लेने पर बीमा कंपनी <b>बाक़ी बिल भी</b> उसी अनुपात में काट सकती है।", "Aap room ke liye <b>₹5,000 per day</b> tak claim kar sakte ho. Mehenga room liya to insurer <b>baaki bills bhi</b> usi ratio mein kaat sakta hai."],
+    "Limit": ["सीमा", "Limit"],
+    "Proportionate deduction risk": ["अनुपात में कटौती का जोखिम", "Proportionate deduction ka risk"],
+    "Delivery and pregnancy costs are <b>not covered at all</b> on this plan. Only an ectopic pregnancy is an exception.": ["इस प्लान में डिलीवरी और गर्भावस्था का ख़र्च <b>बिल्कुल कवर नहीं</b> है। सिर्फ़ एक्टोपिक प्रेगनेंसी इसका अपवाद है।", "Is plan mein delivery aur pregnancy ka kharcha <b>bilkul cover nahi</b> hai. Sirf ectopic pregnancy iska exception hai."],
+    "Exclusion": ["बहिष्करण", "Exclusion"],
+    "Tests, medicines and follow-ups from <b>60 days before</b> and <b>90 days after</b> a hospital stay are paid, if the main claim is accepted.": ["अस्पताल में भर्ती से <b>60 दिन पहले</b> और <b>90 दिन बाद</b> तक के टेस्ट, दवाइयाँ और फ़ॉलो-अप का भुगतान होता है, अगर मुख्य क्लेम मंज़ूर हो।", "Hospital stay se <b>60 din pehle</b> aur <b>90 din baad</b> tak ke tests, dawaiyan aur follow-ups pay hote hain, agar main claim accept ho."],
+    "vs": ["बनाम", "vs"],
+    "Pick a real-life situation and ClaimSaathi tests it against both policy wordings.": ["कोई असली हालात चुनें और ClaimSaathi उसे दोनों पॉलिसी की शर्तों पर परखेगा।", "Koi real-life situation chuno aur ClaimSaathi use dono policies ki wording par test karega."],
+    "Change second policy": ["दूसरी पॉलिसी बदलें", "Doosri policy badlo"],
+    "Knee replacement in year 3": ["तीसरे साल में घुटना प्रत्यारोपण", "Teesre saal mein knee replacement"],
+    "Maternity in year 2": ["दूसरे साल में मातृत्व", "Doosre saal mein maternity"],
+    "Cataract surgery": ["मोतियाबिंद सर्जरी", "Cataract surgery"],
+    "Private room, 5 days": ["प्राइवेट कमरा, 5 दिन", "Private room, 5 din"],
+    "Up to ₹5,00,000": ["₹5,00,000 तक", "₹5,00,000 tak"],
+    "24-month waiting period for joint replacement ends before year 3.": ["जोड़ प्रत्यारोपण की 24 महीने की वेटिंग अवधि तीसरे साल से पहले ख़त्म हो जाती है।", "Joint replacement ka 24 mahine ka waiting period teesre saal se pehle khatam ho jaata hai."],
+    "Not yet covered": ["अभी कवर नहीं", "Abhi covered nahi"],
+    "₹0 until year 4": ["चौथे साल तक ₹0", "Chauthe saal tak ₹0"],
+    "Joint replacement has a 48-month waiting period on this plan.": ["इस प्लान में जोड़ प्रत्यारोपण की वेटिंग अवधि 48 महीने है।", "Is plan mein joint replacement ka waiting period 48 mahine hai."],
+    "Feature": ["फ़ीचर", "Feature"],
+    "Premium (age 34)": ["प्रीमियम (उम्र 34)", "Premium (age 34)"],
+    "Joint replacement waiting": ["जोड़ प्रत्यारोपण वेटिंग", "Joint replacement waiting"],
+    "24 months": ["24 महीने", "24 mahine"],
+    "48 months": ["48 महीने", "48 mahine"],
+    "Pre-existing disease waiting": ["पहले से मौजूद बीमारी की वेटिंग", "Pre-existing disease waiting"],
+    "36 months": ["36 महीने", "36 mahine"],
+    "1% of SI / day": ["बीमा राशि का 1% / दिन", "SI ka 1% / din"],
+    "Any single private room": ["कोई भी सिंगल प्राइवेट कमरा", "Koi bhi single private room"],
+    "Maternity": ["मातृत्व", "Maternity"],
+    "Excluded": ["शामिल नहीं", "Excluded"],
+    "₹50,000 after 24 months": ["24 महीने बाद ₹50,000", "24 mahine baad ₹50,000"],
+    "None below 61": ["61 से कम उम्र पर नहीं", "61 se kam age par nahi"],
+    "20% for all ages": ["हर उम्र पर 20%", "Har age par 20%"],
+    "Is my knee replacement covered? I've had this policy since 2022.": ["क्या मेरा घुटना प्रत्यारोपण कवर है? मेरे पास यह पॉलिसी 2022 से है।", "Kya mera knee replacement covered hai? Yeh policy mere paas 2022 se hai."],
+    "Likely covered": ["शायद कवर है", "Shayad covered hai"],
+    "Based on 2 clauses in your policy": ["आपकी पॉलिसी की 2 शर्तों के आधार पर", "Aapki policy ke 2 clauses ke basis par"],
+    "Yes. Joint replacement has a 24-month waiting period, counted from your first policy on <b>12 Mar 2022</b>. That ended on <b>12 Mar 2024</b>, so surgery after that date falls inside your cover, subject to your room-rent limit.": ["हाँ। जोड़ प्रत्यारोपण की वेटिंग अवधि 24 महीने है, जो आपकी पहली पॉलिसी <b>12 Mar 2022</b> से गिनी जाती है। यह <b>12 Mar 2024</b> को ख़त्म हो गई, इसलिए उसके बाद की सर्जरी आपके कवर में आती है, कमरे के किराए की सीमा के साथ।", "Haan. Joint replacement ka waiting period 24 mahine ka hai, jo aapki pehli policy <b>12 Mar 2022</b> se gina jaata hai. Yeh <b>12 Mar 2024</b> ko khatam ho gaya, isliye uske baad ki surgery aapke cover mein aati hai, room-rent limit ke saath."],
+    "Agar main private room lun to kitna milega?": ["अगर मैं प्राइवेट कमरा लूँ तो कितना मिलेगा?", "Agar main private room lun to kitna milega?"],
+    "Limit applies": ["सीमा लागू", "Limit lagta hai"],
+    "Hinglish mein jawab": ["हिंदी में जवाब", "Hinglish mein jawab"],
+    "Aapki policy mein room ka limit <b>₹5,000 per day</b> hai (Sum Insured ka 1%). Agar room ₹8,000 ka hai, to baaki bills bhi usi ratio mein kat sakte hain. Isliye ₹5,000 tak ka room lena safe rahega.": ["आपकी पॉलिसी में कमरे की सीमा <b>₹5,000 प्रतिदिन</b> है (बीमा राशि का 1%)। अगर कमरा ₹8,000 का है, तो बाक़ी बिल भी उसी अनुपात में कट सकते हैं। इसलिए ₹5,000 तक का कमरा लेना सुरक्षित रहेगा।", "Aapki policy mein room ka limit <b>₹5,000 per day</b> hai (Sum Insured ka 1%). Agar room ₹8,000 ka hai, to baaki bills bhi usi ratio mein kat sakte hain. Isliye ₹5,000 tak ka room lena safe rahega."],
+    "Try asking": ["ये पूछकर देखें", "Yeh poochh kar dekho"],
+    "Does my plan cover dengue hospitalisation?": ["क्या मेरा प्लान डेंगू में अस्पताल भर्ती कवर करता है?", "Kya mera plan dengue hospitalisation cover karta hai?"],
+    "What happens if I miss my renewal by 10 days?": ["अगर मैं नवीनीकरण में 10 दिन की देरी करूँ तो क्या होगा?", "Agar renewal 10 din late ho jaaye to kya hoga?"],
+    "Kya cataract surgery ka poora paisa milega?": ["क्या मोतियाबिंद सर्जरी का पूरा पैसा मिलेगा?", "Kya cataract surgery ka poora paisa milega?"],
+    "Which documents do I need for a cashless claim?": ["कैशलेस क्लेम के लिए कौन से दस्तावेज़ चाहिए?", "Cashless claim ke liye kaunse documents chahiye?"],
+    "Every answer quotes the clause it relies on, so you can check it yourself.": ["हर जवाब में वह शर्त दी जाती है जिस पर वह आधारित है, ताकि आप ख़ुद जाँच सकें।", "Har jawab mein woh clause quote hota hai jis par woh based hai, taaki aap khud check kar sako."],
+    "Sample policy wording written for this preview. Answers are explanations of your documents, not a decision on any claim.": ["पॉलिसी की ये शर्तें इस प्रीव्यू के लिए लिखी गई सैंपल हैं। जवाब आपके दस्तावेज़ों की व्याख्या हैं, किसी क्लेम पर फ़ैसला नहीं।", "Yeh policy wording is preview ke liye likha gaya sample hai. Jawab aapke documents ki explanation hain, kisi claim par faisla nahi."],
+    "Claim CLM-24-08817": ["क्लेम CLM-24-08817", "Claim CLM-24-08817"],
+    "<i>1</i>Upload documents": ["<i>1</i>दस्तावेज़ अपलोड", "<i>1</i>Documents upload"],
+    "<i>2</i>Checking rejection": ["<i>2</i>रिजेक्शन की जाँच", "<i>2</i>Rejection check ho raha hai"],
+    "<i>3</i>Findings": ["<i>3</i>निष्कर्ष", "<i>3</i>Findings"],
+    "The letter or email where the insurer refused or cut your claim. PDF, photo or screenshot.": ["वह पत्र या ईमेल जिसमें बीमा कंपनी ने आपका क्लेम ठुकराया या घटाया। PDF, फ़ोटो या स्क्रीनशॉट।", "Woh letter ya email jisme insurer ne aapka claim reject ya kam kiya. PDF, photo ya screenshot."],
+    "Use sample letter": ["सैंपल पत्र इस्तेमाल करें", "Sample letter use karo"],
+    "Claim details": ["क्लेम की जानकारी", "Claim details"],
+    "Suraksha Health Plus (already read)": ["Suraksha Health Plus (पहले से पढ़ी गई)", "Suraksha Health Plus (pehle se padhi hui)"],
+    "Claim number": ["क्लेम नंबर", "Claim number"],
+    "Date of rejection": ["रिजेक्शन की तारीख़", "Rejection ki date"],
+    "Supporting documents": ["सहायक दस्तावेज़", "Supporting documents"],
+    "The more you add, the more ClaimSaathi can check. Your policy is already linked from Policy Insights.": ["आप जितना ज़्यादा जोड़ेंगे, ClaimSaathi उतना ज़्यादा जाँच पाएगा। आपकी पॉलिसी पॉलिसी जानकारी से पहले ही जुड़ी है।", "Jitna zyada add karoge, ClaimSaathi utna zyada check kar payega. Aapki policy Policy Samjho se pehle hi linked hai."],
+    "Policy wording and schedule": ["पॉलिसी की शर्तें और शेड्यूल", "Policy wording aur schedule"],
+    "Linked from Policy Insights": ["पॉलिसी जानकारी से जुड़ा", "Policy Samjho se linked"],
+    "Linked": ["जुड़ा है", "Linked"],
+    "Renewal receipts or old policies": ["नवीनीकरण रसीदें या पुरानी पॉलिसियाँ", "Renewal receipts ya purani policies"],
+    "Proves continuous cover": ["लगातार कवर साबित करती हैं", "Continuous cover prove karti hain"],
+    "Add": ["जोड़ें", "Add karo"],
+    "Discharge summary": ["डिस्चार्ज सारांश", "Discharge summary"],
+    "Diagnosis and treatment dates": ["बीमारी की पहचान और इलाज की तारीख़ें", "Diagnosis aur treatment ki dates"],
+    "Hospital bills": ["अस्पताल के बिल", "Hospital bills"],
+    "Itemised bill and payment receipts": ["मदवार बिल और भुगतान रसीदें", "Itemised bill aur payment receipts"],
+    "Doctor's notes or prescriptions": ["डॉक्टर के नोट या पर्चे", "Doctor ke notes ya prescriptions"],
+    "When symptoms started": ["लक्षण कब शुरू हुए", "Symptoms kab shuru hue"],
+    "Checking claim CLM-24-08817": ["क्लेम CLM-24-08817 की जाँच", "Claim CLM-24-08817 check ho raha hai"],
+    "Reading the rejection letter": ["रिजेक्शन पत्र पढ़ा जा रहा है", "Rejection letter padh rahe hain"],
+    "Reason found:": ["कारण मिला:", "Reason mila:"],
+    "Finding Clause 4.3 in your policy": ["आपकी पॉलिसी में शर्त 4.3 ढूँढी जा रही है", "Aapki policy mein Clause 4.3 dhoondh rahe hain"],
+    "Section 4.3(iv), page 17 · Joint replacement surgery": ["धारा 4.3(iv), पन्ना 17 · जोड़ प्रत्यारोपण सर्जरी", "Section 4.3(iv), page 17 · Joint replacement surgery"],
+    "Rebuilding your coverage timeline": ["आपके कवरेज की टाइमलाइन बनाई जा रही है", "Aapki coverage timeline dobara bana rahe hain"],
+    "4 renewal receipts · first policy 12 Mar 2022 · no gaps": ["4 नवीनीकरण रसीदें · पहली पॉलिसी 12 Mar 2022 · कोई गैप नहीं", "4 renewal receipts · pehli policy 12 Mar 2022 · koi gap nahi"],
+    "Comparing the dates": ["तारीख़ों की तुलना", "Dates compare kar rahe hain"],
+    "Waiting ended 12 Mar 2024 · surgery 18 Sep 2025": ["वेटिंग 12 Mar 2024 को ख़त्म · सर्जरी 18 Sep 2025", "Waiting 12 Mar 2024 ko khatam · surgery 18 Sep 2025"],
+    "Checking your evidence": ["आपके सबूतों की जाँच", "Aapke evidence check kar rahe hain"],
+    "3 documents support you · 1 more recommended": ["3 दस्तावेज़ आपके पक्ष में · 1 और सुझाया गया", "3 documents aapke favour mein · 1 aur recommended"],
+    "See findings": ["निष्कर्ष देखें", "Findings dekho"],
+    "Building your evidence report": ["आपकी सबूत रिपोर्ट बन रही है", "Aapki evidence report ban rahi hai"],
+    "Documents": ["दस्तावेज़", "Documents"],
+    "Received 02 Oct 2025": ["02 Oct 2025 को मिला", "02 Oct 2025 ko mila"],
+    "Current policy": ["मौजूदा पॉलिसी", "Current policy"],
+    "4 receipts, no gaps": ["4 रसीदें, कोई गैप नहीं", "4 receipts, koi gap nahi"],
+    "Insurer's letter": ["बीमा कंपनी का पत्र", "Insurer ka letter"],
+    "Possible inconsistency found": ["संभावित गड़बड़ी मिली", "Possible gadbad mili"],
+    "The letter counts your waiting period from the <b>latest renewal (2025)</b>. Clause 4.3 counts it from your <b>first policy (2022)</b>. On your records, the waiting period ended 18 months before surgery.": ["पत्र आपकी वेटिंग अवधि <b>नवीनतम नवीनीकरण (2025)</b> से गिनता है। शर्त 4.3 इसे आपकी <b>पहली पॉलिसी (2022)</b> से गिनती है। आपके रिकॉर्ड के अनुसार वेटिंग अवधि सर्जरी से 18 महीने पहले ख़त्म हो चुकी थी।", "Letter aapka waiting period <b>latest renewal (2025)</b> se ginta hai. Clause 4.3 ise aapki <b>pehli policy (2022)</b> se ginta hai. Aapke records ke hisaab se waiting period surgery se 18 mahine pehle khatam ho chuka tha."],
+    "documents support you": ["दस्तावेज़ आपके पक्ष में", "documents aapke favour mein"],
+    "Coverage timeline": ["कवरेज टाइमलाइन", "Coverage timeline"],
+    "Rebuilt from your renewal receipts": ["आपकी नवीनीकरण रसीदों से बनाई गई", "Aapki renewal receipts se banayi gayi"],
+    "First policy": ["पहली पॉलिसी", "Pehli policy"],
+    "Renewed": ["नवीनीकरण हुआ", "Renew hui"],
+    "Waiting ends": ["वेटिंग ख़त्म", "Waiting khatam"],
+    "Renewed · insurer's start date": ["नवीनीकरण · बीमा कंपनी की शुरुआती तारीख़", "Renew hui · insurer ki start date"],
+    "Surgery": ["सर्जरी", "Surgery"],
+    "Rejected": ["रिजेक्ट", "Reject hua"],
+    "Evidence map": ["सबूतों का नक्शा", "Evidence map"],
+    "Each rejection ground, checked": ["रिजेक्शन का हर आधार जाँचा गया", "Rejection ka har ground check kiya"],
+    "Insurer's claim": ["बीमा कंपनी का दावा", "Insurer ka daava"],
+    "What your policy says": ["आपकी पॉलिसी क्या कहती है", "Aapki policy kya kehti hai"],
+    "Your evidence": ["आपके सबूत", "Aapke evidence"],
+    "Status": ["स्थिति", "Status"],
+    "Policy effective from 12 Mar 2025": ["पॉलिसी 12 Mar 2025 से लागू", "Policy 12 Mar 2025 se laagu"],
+    "Waiting counted from first inception <span class=\"cite\">§4.3</span>": ["वेटिंग पहली शुरुआत से गिनी जाती है <span class=\"cite\">§4.3</span>", "Waiting pehli shuruaat se gina jaata hai <span class=\"cite\">§4.3</span>"],
+    "Renewal receipts 2022–2025": ["नवीनीकरण रसीदें 2022–2025", "Renewal receipts 2022–2025"],
+    "Contradicted": ["ग़लत साबित", "Galat saabit"],
+    "Within 24-month waiting period": ["24 महीने की वेटिंग अवधि के अंदर", "24 mahine ke waiting period ke andar"],
+    "24 months of continuous cover <span class=\"cite\">§4.3(iv)</span>": ["24 महीने का लगातार कवर <span class=\"cite\">§4.3(iv)</span>", "24 mahine ka continuous cover <span class=\"cite\">§4.3(iv)</span>"],
+    "42 months on surgery date": ["सर्जरी की तारीख़ पर 42 महीने", "Surgery ki date par 42 mahine"],
+    "Portability or break in cover": ["पोर्टेबिलिटी या कवर में ब्रेक", "Portability ya cover mein break"],
+    "Grace period 30 days <span class=\"cite\">§8.2</span>": ["ग्रेस अवधि 30 दिन <span class=\"cite\">§8.2</span>", "Grace period 30 din <span class=\"cite\">§8.2</span>"],
+    "All renewals paid before due date": ["सभी नवीनीकरण तय तारीख़ से पहले भरे गए", "Saare renewals due date se pehle pay kiye"],
+    "No break": ["कोई ब्रेक नहीं", "Koi break nahi"],
+    "Knee condition pre-existing": ["घुटने की बीमारी पहले से थी", "Knee ki problem pehle se thi"],
+    "36-month PED waiting <span class=\"cite\">§4.2</span>": ["पहले से मौजूद बीमारी की 36 महीने की वेटिंग <span class=\"cite\">§4.2</span>", "36 mahine ka PED waiting <span class=\"cite\">§4.2</span>"],
+    "Not stated by insurer": ["बीमा कंपनी ने नहीं बताया", "Insurer ne nahi bataya"],
+    "Ask insurer": ["बीमा कंपनी से पूछें", "Insurer se poocho"],
+    "Evidence checklist": ["सबूतों की चेकलिस्ट", "Evidence checklist"],
+    "Rejection letter": ["रिजेक्शन पत्र", "Rejection letter"],
+    "All renewal receipts since 2022": ["2022 से सभी नवीनीकरण रसीदें", "2022 se saari renewal receipts"],
+    "Doctor's note on when knee pain began": ["घुटने का दर्द कब शुरू हुआ, इस पर डॉक्टर का नोट", "Knee pain kab shuru hua, is par doctor ka note"],
+    "Itemised hospital bill": ["अस्पताल का मदवार बिल", "Itemised hospital bill"],
+    "Questions to raise": ["उठाने लायक सवाल", "Poochne layak sawaal"],
+    "Why was the policy treated as starting in 2025 when receipts show continuous cover since 2022?": ["जब रसीदें 2022 से लगातार कवर दिखाती हैं, तो पॉलिसी को 2025 से शुरू क्यों माना गया?", "Jab receipts 2022 se continuous cover dikhati hain, to policy ko 2025 se shuru kyon maana gaya?"],
+    "Is the insurer relying on any reason other than Clause 4.3?": ["क्या बीमा कंपनी शर्त 4.3 के अलावा किसी और कारण पर निर्भर है?", "Kya insurer Clause 4.3 ke alawa kisi aur reason par depend kar raha hai?"],
+    "Draft a complaint": ["शिकायत का ड्राफ्ट बनाएँ", "Complaint draft karo"],
+    "Download evidence report": ["सबूत रिपोर्ट डाउनलोड करें", "Evidence report download karo"],
+    "Fictional case. ClaimSaathi points out where a rejection may not match your policy and what evidence you have. It does not establish that a claim must be paid.": ["काल्पनिक मामला। ClaimSaathi बताता है कि रिजेक्शन कहाँ आपकी पॉलिसी से मेल नहीं खाता और आपके पास क्या सबूत हैं। इससे यह तय नहीं होता कि क्लेम का भुगतान होना ही चाहिए।", "Fictional case. ClaimSaathi batata hai ki rejection kahan aapki policy se match nahi karta aur aapke paas kya evidence hai. Isse yeh tay nahi hota ki claim pay hona hi chahiye."],
+    "Draft from Rejection Check · CLM-24-08817": ["रिजेक्शन जाँच से ड्राफ्ट · CLM-24-08817", "Rejection Check se draft · CLM-24-08817"],
+    "<i>1</i>Choose where to file": ["<i>1</i>कहाँ शिकायत करें, चुनें", "<i>1</i>Kahan file karna hai, chuno"],
+    "<i>2</i>Review draft": ["<i>2</i>ड्राफ्ट देखें", "<i>2</i>Draft review karo"],
+    "<i>3</i>Track complaint": ["<i>3</i>शिकायत ट्रैक करें", "<i>3</i>Complaint track karo"],
+    "Where are you right now?": ["आप अभी किस स्थिति में हैं?", "Aap abhi kis stage par ho?"],
+    "I haven't complained to the insurer yet": ["मैंने अभी तक बीमा कंपनी से शिकायत नहीं की", "Maine abhi tak insurer se complaint nahi ki"],
+    "ClaimSaathi recommends writing to the insurer's grievance officer first.": ["ClaimSaathi पहले बीमा कंपनी के शिकायत अधिकारी को लिखने की सलाह देता है।", "ClaimSaathi pehle insurer ke grievance officer ko likhne ki salah deta hai."],
+    "The insurer replied, but I'm not satisfied": ["बीमा कंपनी ने जवाब दिया, पर मैं संतुष्ट नहीं हूँ", "Insurer ne reply kiya, par main satisfied nahi hoon"],
+    "Escalate on Bima Bharosa, IRDAI's grievance portal.": ["IRDAI के शिकायत पोर्टल, बीमा भरोसा पर आगे बढ़ाएँ।", "IRDAI ke grievance portal, Bima Bharosa par escalate karo."],
+    "No reply after 14 days": ["14 दिन बाद भी कोई जवाब नहीं", "14 din baad bhi koi reply nahi"],
+    "You can escalate on Bima Bharosa now.": ["आप अब बीमा भरोसा पर शिकायत आगे बढ़ा सकते हैं।", "Aap ab Bima Bharosa par escalate kar sakte ho."],
+    "Bima Bharosa didn't resolve it": ["बीमा भरोसा से हल नहीं हुआ", "Bima Bharosa se solve nahi hua"],
+    "Approach the Insurance Ombudsman, within one year of the insurer's final reply.": ["बीमा कंपनी के अंतिम जवाब के एक साल के अंदर बीमा लोकपाल के पास जाएँ।", "Insurer ke final reply ke ek saal ke andar Insurance Ombudsman ke paas jao."],
+    "Brought in from your Rejection Check": ["आपकी रिजेक्शन जाँच से लाया गया", "Aapke Rejection Check se laaya gaya"],
+    "grounds for review": ["जाँच के आधार", "review ke grounds"],
+    "documents attached": ["दस्तावेज़ जुड़े", "documents attached"],
+    "clause references": ["शर्तों के हवाले", "clause references"],
+    "Claim CLM-24-08817 · ₹1,80,000 · rejected 02 Oct 2025 under Clause 4.3": ["क्लेम CLM-24-08817 · ₹1,80,000 · शर्त 4.3 के तहत 02 Oct 2025 को रिजेक्ट", "Claim CLM-24-08817 · ₹1,80,000 · Clause 4.3 ke under 02 Oct 2025 ko reject"],
+    "Continue to draft": ["ड्राफ्ट पर आगे बढ़ें", "Draft par aage badho"],
+    "Step 1 · Start here": ["चरण 1 · यहाँ से शुरू करें", "Step 1 · Yahan se shuru karo"],
+    "Insurer's grievance officer": ["बीमा कंपनी का शिकायत अधिकारी", "Insurer ka grievance officer"],
+    "Write to the insurer first. They should reply within 14 days.": ["पहले बीमा कंपनी को लिखें। उन्हें 14 दिन के अंदर जवाब देना चाहिए।", "Pehle insurer ko likho. Unhe 14 din ke andar reply karna chahiye."],
+    "Step 2 · If unresolved": ["चरण 2 · अगर हल न हो", "Step 2 · Agar solve na ho"],
+    "Bima Bharosa (IRDAI)": ["बीमा भरोसा (IRDAI)", "Bima Bharosa (IRDAI)"],
+    "Escalate on IRDAI's grievance portal if the reply is late or unsatisfactory. <a href=\"https://bimabharosa.irdai.gov.in/\" target=\"_blank\" rel=\"noopener\">bimabharosa.irdai.gov.in</a>": ["जवाब देर से आए या संतोषजनक न हो तो IRDAI के शिकायत पोर्टल पर आगे बढ़ाएँ। <a href=\"https://bimabharosa.irdai.gov.in/\" target=\"_blank\" rel=\"noopener\">bimabharosa.irdai.gov.in</a>", "Reply late aaye ya theek na ho to IRDAI ke grievance portal par escalate karo. <a href=\"https://bimabharosa.irdai.gov.in/\" target=\"_blank\" rel=\"noopener\">bimabharosa.irdai.gov.in</a>"],
+    "Step 3 · Final": ["चरण 3 · अंतिम", "Step 3 · Final"],
+    "Insurance Ombudsman": ["बीमा लोकपाल", "Insurance Ombudsman"],
+    "Free dispute resolution, within one year of the insurer's final reply. <a href=\"https://www.cioins.co.in/\" target=\"_blank\" rel=\"noopener\">cioins.co.in</a>": ["मुफ़्त विवाद समाधान, बीमा कंपनी के अंतिम जवाब के एक साल के अंदर। <a href=\"https://www.cioins.co.in/\" target=\"_blank\" rel=\"noopener\">cioins.co.in</a>", "Free dispute resolution, insurer ke final reply ke ek saal ke andar. <a href=\"https://www.cioins.co.in/\" target=\"_blank\" rel=\"noopener\">cioins.co.in</a>"],
+    "Complaint details": ["शिकायत की जानकारी", "Complaint details"],
+    "Pre-filled · edit anything": ["पहले से भरा · कुछ भी बदलें", "Pehle se bhara · kuch bhi edit karo"],
+    "Policyholder name": ["पॉलिसीधारक का नाम", "Policyholder ka naam"],
+    "Mobile": ["मोबाइल", "Mobile"],
+    "Insurer": ["बीमा कंपनी", "Insurer"],
+    "Policy number": ["पॉलिसी नंबर", "Policy number"],
+    "Amount disputed": ["विवादित राशि", "Disputed amount"],
+    "Type of grievance": ["शिकायत का प्रकार", "Complaint ka type"],
+    "Claim rejected / repudiated": ["क्लेम रिजेक्ट / अस्वीकार", "Claim reject / repudiate hua"],
+    "Claim partly paid": ["क्लेम का आंशिक भुगतान", "Claim ka thoda hi payment hua"],
+    "Delay in claim settlement": ["क्लेम निपटाने में देरी", "Claim settlement mein deri"],
+    "Policy servicing": ["पॉलिसी सर्विसिंग", "Policy servicing"],
+    "What you are asking for": ["आप क्या माँग रहे हैं", "Aap kya maang rahe ho"],
+    "Attachments": ["अटैचमेंट", "Attachments"],
+    "Attached": ["जुड़ा है", "Attached"],
+    "Doctor's note on onset of knee pain": ["घुटने का दर्द शुरू होने पर डॉक्टर का नोट", "Knee pain shuru hone par doctor ka note"],
+    "Send to grievance officer": ["शिकायत अधिकारी को भेजें", "Grievance officer ko bhejo"],
+    "Download PDF": ["PDF डाउनलोड करें", "PDF download karo"],
+    "Letter preview": ["पत्र का प्रीव्यू", "Letter preview"],
+    "Copy text": ["टेक्स्ट कॉपी करें", "Text copy karo"],
+    "To: Grievance Redressal Officer, Navjeevan General Insurance": ["सेवा में: शिकायत निवारण अधिकारी, Navjeevan General Insurance", "To: Grievance Redressal Officer, Navjeevan General Insurance"],
+    "<b>Subject:</b> Request to review repudiation of claim CLM-24-08817 under policy NGI/HL/2025/448812": ["<b>विषय:</b> पॉलिसी NGI/HL/2025/448812 के तहत क्लेम CLM-24-08817 की अस्वीकृति पर पुनर्विचार का अनुरोध", "<b>Subject:</b> Policy NGI/HL/2025/448812 ke under claim CLM-24-08817 ke rejection par dobara vichar ki request"],
+    "Dear Sir/Madam,": ["आदरणीय महोदय/महोदया,", "Dear Sir/Madam,"],
+    "My claim of ₹1,80,000 for right total knee replacement at City Care Hospital, Pune (18 Sep 2025) was rejected on 02 Oct 2025, citing the 24-month waiting period under Clause 4.3.": ["City Care Hospital, Pune में दाएँ घुटने के पूर्ण प्रत्यारोपण (18 Sep 2025) के लिए मेरा ₹1,80,000 का क्लेम 02 Oct 2025 को शर्त 4.3 के तहत 24 महीने की वेटिंग अवधि बताकर रिजेक्ट कर दिया गया।", "City Care Hospital, Pune mein right total knee replacement (18 Sep 2025) ke liye mera ₹1,80,000 ka claim 02 Oct 2025 ko Clause 4.3 ke 24 mahine ke waiting period ka hawala dekar reject kar diya gaya."],
+    "Grounds for review": ["पुनर्विचार के आधार", "Review ke grounds"],
+    "Clause 4.3 <span class=\"ref\">§4.3(iv)</span> counts the waiting period from the inception of the <i>first</i> policy. My first policy began on 12 Mar 2022.": ["शर्त 4.3 <span class=\"ref\">§4.3(iv)</span> वेटिंग अवधि को <i>पहली</i> पॉलिसी की शुरुआत से गिनती है। मेरी पहली पॉलिसी 12 Mar 2022 को शुरू हुई थी।", "Clause 4.3 <span class=\"ref\">§4.3(iv)</span> waiting period ko <i>pehli</i> policy ki shuruaat se ginta hai. Meri pehli policy 12 Mar 2022 ko shuru hui thi."],
+    "The enclosed receipts show continuous renewal with no break in cover <span class=\"ref\">§8.2</span>. On the date of surgery I had 42 months of continuous cover.": ["संलग्न रसीदें बिना किसी ब्रेक के लगातार नवीनीकरण दिखाती हैं <span class=\"ref\">§8.2</span>। सर्जरी की तारीख़ पर मेरे पास 42 महीने का लगातार कवर था।", "Attached receipts bina kisi break ke continuous renewal dikhati hain <span class=\"ref\">§8.2</span>. Surgery ki date par mere paas 42 mahine ka continuous cover tha."],
+    "The rejection letter treats the policy as effective from 12 Mar 2025, which is the latest renewal date, not the inception date.": ["रिजेक्शन पत्र पॉलिसी को 12 Mar 2025 से लागू मानता है, जो नवीनतम नवीनीकरण की तारीख़ है, शुरुआत की नहीं।", "Rejection letter policy ko 12 Mar 2025 se laagu maanta hai, jo latest renewal date hai, inception date nahi."],
+    "I request that you review the decision and settle the claim. If you rely on any other ground, please state it in writing with the clause reference.": ["मेरा अनुरोध है कि आप इस फ़ैसले पर पुनर्विचार करें और क्लेम का निपटारा करें। अगर आप किसी और आधार पर निर्भर हैं, तो कृपया उसे शर्त के हवाले के साथ लिखित में बताएँ।", "Meri request hai ki aap is decision ko review karein aur claim settle karein. Agar aap kisi aur ground par depend kar rahe hain, to please use clause reference ke saath likh kar batayein."],
+    "Yours faithfully,<br>Rohit Verma": ["भवदीय,<br>Rohit Verma", "Yours faithfully,<br>Rohit Verma"],
+    "Complaint sent to Navjeevan General Insurance": ["शिकायत Navjeevan General Insurance को भेजी गई", "Complaint Navjeevan General Insurance ko bhej di"],
+    "Sent to the Grievance Redressal Officer on 14 Nov 2025 with 4 attachments. Keep this reference for any follow-up.": ["14 Nov 2025 को 4 अटैचमेंट के साथ शिकायत निवारण अधिकारी को भेजी गई। आगे की बातचीत के लिए यह रेफ़रेंस संभालकर रखें।", "14 Nov 2025 ko 4 attachments ke saath Grievance Redressal Officer ko bheji. Follow-up ke liye yeh reference sambhaal kar rakho."],
+    "Reference": ["रेफ़रेंस", "Reference"],
+    "Complaint tracker": ["शिकायत ट्रैकर", "Complaint tracker"],
+    "Draft ready": ["ड्राफ्ट तैयार", "Draft ready"],
+    "Sent to insurer": ["बीमा कंपनी को भेजी गई", "Insurer ko bheji"],
+    "Waiting for insurer's reply": ["बीमा कंपनी के जवाब का इंतज़ार", "Insurer ke reply ka intezaar"],
+    "due 28 Nov": ["28 Nov तक", "28 Nov tak"],
+    "Escalate on Bima Bharosa if needed": ["ज़रूरत हो तो बीमा भरोसा पर आगे बढ़ाएँ", "Zaroorat ho to Bima Bharosa par escalate karo"],
+    "after 28 Nov": ["28 Nov के बाद", "28 Nov ke baad"],
+    "Approach Ombudsman": ["लोकपाल के पास जाएँ", "Ombudsman ke paas jao"],
+    "within 1 year": ["1 साल के अंदर", "1 saal ke andar"],
+    "Reply due": ["जवाब की तारीख़", "Reply due"],
+    "days left": ["दिन बाक़ी", "din baaki"],
+    "The insurer should respond by <b style=\"color:var(--fg)\">28 Nov 2025</b>. Upload their reply here and ClaimSaathi will check it against your grounds.": ["बीमा कंपनी को <b style=\"color:var(--fg)\">28 Nov 2025</b> तक जवाब देना चाहिए। उनका जवाब यहाँ अपलोड करें और ClaimSaathi उसे आपके आधारों से मिलाकर जाँचेगा।", "Insurer ko <b style=\"color:var(--fg)\">28 Nov 2025</b> tak reply karna chahiye. Unka reply yahan upload karo aur ClaimSaathi use aapke grounds se check karega."],
+    "Upload insurer's reply": ["बीमा कंपनी का जवाब अपलोड करें", "Insurer ka reply upload karo"],
+    "Reminders": ["रिमाइंडर", "Reminders"],
+    "SMS reminder on 25 Nov": ["25 Nov को SMS रिमाइंडर", "25 Nov ko SMS reminder"],
+    "WhatsApp updates": ["WhatsApp अपडेट", "WhatsApp updates"],
+    "Email copy of complaint": ["शिकायत की कॉपी ईमेल पर", "Complaint ki copy email par"],
+    "Escalate to Bima Bharosa": ["बीमा भरोसा पर आगे बढ़ाएँ", "Bima Bharosa par escalate karo"],
+    "Unlocks after 28 Nov, or sooner if the insurer's reply doesn't resolve your complaint.": ["28 Nov के बाद खुलेगा, या उससे पहले अगर बीमा कंपनी के जवाब से शिकायत हल न हो।", "28 Nov ke baad khulega, ya pehle agar insurer ke reply se complaint solve na ho."],
+    "ClaimSaathi prepares a draft for you to review. You decide what to send. Timelines shown are general guidance; check the current IRDAI rules for your case.": ["ClaimSaathi आपके देखने के लिए ड्राफ्ट तैयार करता है। क्या भेजना है, यह आप तय करते हैं। दिखाई गई समय-सीमाएँ सामान्य मार्गदर्शन हैं; अपने मामले के लिए IRDAI के मौजूदा नियम देखें।", "ClaimSaathi aapke review ke liye draft taiyaar karta hai. Kya bhejna hai, yeh aap decide karte ho. Dikhayi gayi timelines general guidance hain; apne case ke liye IRDAI ke current rules check karo."],
+    "<b style=\"color:var(--fg)\">ClaimSaathi</b> · Understand your coverage. Defend your rights.": ["<b style=\"color:var(--fg)\">ClaimSaathi</b> · अपना कवरेज समझें। अपने अधिकारों की रक्षा करें।", "<b style=\"color:var(--fg)\">ClaimSaathi</b> · Apna coverage samjho. Apne rights ke liye lado."],
+    "UI preview for The Builder's Theory 1.0 · all data is sample data": ["The Builder's Theory 1.0 के लिए UI प्रीव्यू · सारा डेटा सैंपल है", "The Builder's Theory 1.0 ke liye UI preview · saara data sample hai"],
+    "home page": ["होम पेज", "Home page"],
+    "policy page": ["पॉलिसी पेज", "Policy page"],
+    "rejection page": ["रिजेक्शन पेज", "Rejection page"],
+    "complaint page": ["शिकायत पेज", "Complaint page"],
+    "ClaimSaathi home": ["ClaimSaathi होम", "ClaimSaathi home"],
+    "Main": ["मुख्य", "Main"],
+    "Language": ["भाषा", "Bhasha"],
+    "Policy views": ["पॉलिसी व्यू", "Policy views"],
+    "Search clauses, e.g. knee, room rent, maternity": ["शर्तें खोजें, जैसे घुटना, कमरे का किराया, मातृत्व", "Clauses search karo, jaise knee, room rent, maternity"],
+    "Search clauses": ["शर्तें खोजें", "Clauses search karo"],
+    "Clause type": ["शर्त का प्रकार", "Clause type"],
+    "Scenario": ["हालात", "Situation"],
+    "Conversation": ["बातचीत", "Baatcheet"],
+    "Ask about your policy in English, हिंदी or Hinglish": ["अपनी पॉलिसी के बारे में English, हिंदी या Hinglish में पूछें", "Apni policy ke baare mein English, हिंदी ya Hinglish mein poocho"],
+    "Ask a question": ["सवाल पूछें", "Sawaal poocho"],
+    "Speak your question": ["सवाल बोलकर पूछें", "Sawaal bol kar poocho"],
+    "Send": ["भेजें", "Bhejo"],
+    "e.g. CLM-24-08817": ["जैसे CLM-24-08817", "jaise CLM-24-08817"],
+    "Your situation": ["आपकी स्थिति", "Aapki situation"],
+    "Sample answer": ["सैंपल जवाब", "Sample jawab"],
+    "Demo response": ["डेमो जवाब", "Demo jawab"],
+    "Predefined demo answer": ["पहले से तय डेमो जवाब", "Pehle se tay demo jawab"],
+    "Predefined answers only": ["सिर्फ़ पहले से तय जवाब", "Sirf pehle se tay jawab"],
+    "This preview has predefined answers for the suggested questions. Choose a prompt from Try asking to see a sample response.": ["इस प्रीव्यू में सुझाए गए सवालों के जवाब पहले से तय हैं। सैंपल जवाब देखने के लिए \"ये पूछकर देखें\" में से कोई सवाल चुनें।", "Is preview mein suggested sawaalon ke jawab pehle se tay hain. Sample jawab dekhne ke liye \"Yeh poochh kar dekho\" mein se koi sawaal chuno."],
+    "In this demo policy, inpatient treatment for dengue is covered after any applicable waiting period, subject to room-rent limits and exclusions.": ["इस डेमो पॉलिसी में डेंगू के लिए अस्पताल में भर्ती का इलाज, लागू वेटिंग अवधि के बाद कवर है, कमरे के किराए की सीमा और बहिष्करणों के साथ।", "Is demo policy mein dengue ke liye hospital admit ka ilaaj, applicable waiting period ke baad cover hai, room-rent limit aur exclusions ke saath."],
+    "This demo policy provides a 30-day renewal grace period for waiting-period continuity. Check the actual policy wording for whether treatment during a gap is covered.": ["यह डेमो पॉलिसी वेटिंग अवधि बनाए रखने के लिए नवीनीकरण पर 30 दिन की ग्रेस अवधि देती है। गैप के दौरान इलाज कवर है या नहीं, यह असली पॉलिसी की शर्तों में देखें।", "Yeh demo policy waiting period continuity ke liye renewal par 30 din ka grace period deti hai. Gap ke dauraan ilaaj cover hai ya nahi, yeh asli policy wording mein check karo."],
+    "Haan. Is demo policy mein cataract surgery cover hai, lekin waiting period aur per-eye limit apply ho sakte hain. Schedule mein limit check karein.": ["हाँ। इस डेमो पॉलिसी में मोतियाबिंद सर्जरी कवर है, लेकिन वेटिंग अवधि और प्रति-आँख सीमा लागू हो सकती है। शेड्यूल में सीमा देखें।", "Haan. Is demo policy mein cataract surgery cover hai, lekin waiting period aur per-eye limit apply ho sakte hain. Schedule mein limit check karein."],
+    "Keep your health card or policy details, photo ID, the doctor's admission advice, relevant test reports, and the hospital pre-authorisation form ready.": ["अपना हेल्थ कार्ड या पॉलिसी की जानकारी, फ़ोटो पहचान पत्र, डॉक्टर की भर्ती की सलाह, ज़रूरी टेस्ट रिपोर्ट और अस्पताल का प्री-ऑथराइज़ेशन फ़ॉर्म तैयार रखें।", "Apna health card ya policy details, photo ID, doctor ki admission advice, zaroori test reports aur hospital ka pre-authorisation form ready rakho."],
+    "Type a question or choose one of the suggested questions.": ["सवाल लिखें या सुझाए गए सवालों में से कोई चुनें।", "Sawaal likho ya suggested sawaalon mein se koi chuno."],
+    "UI preview: this action isn't connected yet.": ["UI प्रीव्यू: यह सुविधा अभी जुड़ी नहीं है।", "UI preview: yeh action abhi connected nahi hai."],
+    "Letter copied": ["पत्र कॉपी हो गया", "Letter copy ho gaya"],
+    "Text selected. Press Ctrl+C to copy.": ["टेक्स्ट चुना गया। कॉपी करने के लिए Ctrl+C दबाएँ।", "Text select ho gaya. Copy karne ke liye Ctrl+C dabao."]
+  }; /* TR_DATA */
 
   // 3D tilt on home hero
   var sc = $("#scene"), st = $("#stage");
@@ -1198,7 +1587,7 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
   // toast
   var toastEl = $("#toast"), tt;
   function toast(msg) {
-    toastEl.textContent = msg; toastEl.classList.add("show");
+    toastEl.textContent = t(msg); toastEl.classList.add("show");
     clearTimeout(tt); tt = setTimeout(function () { toastEl.classList.remove("show"); }, 2400);
   }
 
@@ -1208,10 +1597,10 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
     var dark = theme === "dark";
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
     themeToggle.setAttribute("aria-pressed", String(dark));
-    themeToggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
-    themeToggle.title = dark ? "Switch to light mode" : "Switch to dark mode";
+    themeToggle.setAttribute("aria-label", t(dark ? "Switch to light mode" : "Switch to dark mode"));
+    themeToggle.title = t(dark ? "Switch to light mode" : "Switch to dark mode");
     themeIcon.textContent = dark ? "☀" : "☾";
-    themeLabel.textContent = dark ? "Light" : "Dark";
+    themeLabel.textContent = t(dark ? "Light" : "Dark");
     if (persist) {
       try { localStorage.setItem("claimsaathi-theme", dark ? "dark" : "light"); } catch (err) {}
     }
@@ -1258,7 +1647,7 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
     if (!answer) {
       var normalized = prompt.toLowerCase();
       Object.keys(demoAnswers).some(function (key) {
-        if (demoAnswers[key].question.toLowerCase() === normalized) { answer = demoAnswers[key]; return true; }
+        if (demoAnswers[key].question.toLowerCase() === normalized || t(demoAnswers[key].question).toLowerCase() === normalized) { answer = demoAnswers[key]; return true; }
         return false;
       });
     }
@@ -1276,17 +1665,17 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
     answerTag.className = "answer-tag";
     var chip = document.createElement("span");
     chip.className = "chip sage";
-    chip.textContent = answer ? "Sample answer" : "Demo response";
+    chip.textContent = t(answer ? "Sample answer" : "Demo response");
     var sourceLabel = document.createElement("span");
     sourceLabel.className = "muted";
     sourceLabel.style.fontSize = "12.5px";
-    sourceLabel.textContent = answer ? "Predefined demo answer" : "Predefined answers only";
+    sourceLabel.textContent = t(answer ? "Predefined demo answer" : "Predefined answers only");
     answerTag.appendChild(chip);
     answerTag.appendChild(sourceLabel);
     botMessage.appendChild(answerTag);
 
     var answerText = document.createElement("p");
-    answerText.textContent = answer ? answer.answer : "This preview has predefined answers for the suggested questions. Choose a prompt from Try asking to see a sample response.";
+    answerText.textContent = t(answer ? answer.answer : "This preview has predefined answers for the suggested questions. Choose a prompt from Try asking to see a sample response.");
     botMessage.appendChild(answerText);
     if (answer) {
       var quote = document.createElement("blockquote");
@@ -1302,7 +1691,7 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
   }
   document.addEventListener("click", function (e) {
     var suggestion = e.target.closest("[data-question]");
-    if (suggestion) { submitQuestion(demoAnswers[suggestion.dataset.question].question, suggestion.dataset.question); return; }
+    if (suggestion) { submitQuestion(t(demoAnswers[suggestion.dataset.question].question), suggestion.dataset.question); return; }
     if (e.target.closest("#ask-send")) { submitQuestion(ai.value); return; }
     if (e.target.closest("[data-toast]")) toast("UI preview: this action isn't connected yet.");
   });
@@ -1344,7 +1733,8 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
     a.addEventListener("click", function () { var t = a.dataset.goto.split(":"); pick((t[0] === "policy" ? "ps" : "rs") + "-" + t[1]); });
   });
 
-  // language toggle (key labels only)
+  // Hand-written translations for the hero and page intros (data-i18n). Everything
+  // else on the page is translated through TR below.
   var dict = {
     en: { demo_tag: "Demo preview", demo_text: "This is a demo of the features ClaimSaathi will offer. All policies, claims and results shown are sample data.",
       nav_home: "Home", nav_policy: "Policy Insights", nav_rej: "Rejection Check", nav_comp: "File a Complaint",
@@ -1374,14 +1764,64 @@ footer .wrap { padding-block: 22px; display: flex; justify-content: space-betwee
       rej_sub: "Insurer ka rejection letter upload karo. ClaimSaathi har reason ko aapke policy clause se match karta hai aur dikhata hai ki kaunse documents aapke favour mein hain.",
       comp_sub: "ClaimSaathi aapke Rejection Check se complaint draft karta hai, attach karne wale documents batata hai aur aage kahan file karna hai, yeh dikhata hai." }
   };
-  $$("[data-lang]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      var d = dict[b.dataset.lang];
-      $$("[data-lang]").forEach(function (o) { o.setAttribute("aria-pressed", o === b); });
-      $$("[data-i18n]").forEach(function (el) { el.textContent = d[el.dataset.i18n]; });
-      $$("[data-i18n-html]").forEach(function (el) { el.innerHTML = d[el.dataset.i18nHtml]; });
-      document.documentElement.lang = b.dataset.lang === "hi" ? "hi" : "en";
+  // Whole-page translation. Every visible English string is a key in TR, mapped to
+  // [Hindi, Hinglish]. Text that is not in TR (names, dates, amounts, file names)
+  // stays as it is. Original policy wording, the insurer's letter and quotes are
+  // skipped on purpose: they are source documents and stay in their own language.
+  var SKIP = "script,style,svg,textarea,.orig,.letter,blockquote,[data-i18n],[data-i18n-html],[data-no-tr]";
+  var INLINE = { B: 1, I: 1, MARK: 1, BR: 1, A: 1, STRONG: 1, EM: 1 };
+  function isInline(el) { return INLINE[el.tagName] || el.classList.contains("cite") || el.classList.contains("ref"); }
+  function norm(s) { return s.replace(/\s+/g, " ").trim(); }
+  function collectUnits(root) {
+    var units = [];
+    (function walk(el) {
+      if (el.matches(SKIP)) return;
+      var hasText = false, allInline = el.children.length > 0;
+      el.childNodes.forEach(function (n) { if (n.nodeType === 3 && n.nodeValue.trim()) hasText = true; });
+      for (var i = 0; i < el.children.length; i++) if (!isInline(el.children[i])) { allInline = false; break; }
+      if (hasText && allInline) { units.push({ el: el, html: el.innerHTML, key: norm(el.innerHTML) }); return; }
+      el.childNodes.forEach(function (n) {
+        if (n.nodeType === 3 && n.nodeValue.trim()) {
+          var v = n.nodeValue;
+          units.push({ node: n, lead: v.match(/^\s*/)[0], trail: v.match(/\s*$/)[0], text: v, key: norm(v) });
+        } else if (n.nodeType === 1) walk(n);
+      });
+    })(root);
+    return units;
+  }
+  var units = collectUnits(document.body);
+  var attrUnits = [];
+  $$("[placeholder],[aria-label],[title]").forEach(function (el) {
+    if (el.closest("svg")) return;
+    ["placeholder", "aria-label", "title"].forEach(function (a) {
+      var v = el.getAttribute(a);
+      if (v && el.id !== "theme-toggle") attrUnits.push({ el: el, attr: a, text: v, key: norm(v) });
     });
+  });
+
+  function t(s) { var e = lang !== "en" && TR[norm(s)]; return e ? e[lang === "hi" ? 0 : 1] : s; }
+  window.claimsaathiMissing = function () {
+    var seen = {}, out = [];
+    units.concat(attrUnits).forEach(function (u) { if (!TR[u.key] && /[A-Za-z]{2}/.test(u.key) && !seen[u.key]) { seen[u.key] = 1; out.push(u.key); } });
+    return out;
+  };
+
+  function setLang(code) {
+    lang = code;
+    var d = dict[code];
+    $$("[data-lang]").forEach(function (o) { o.setAttribute("aria-pressed", o.dataset.lang === code); });
+    $$("[data-i18n]").forEach(function (el) { el.textContent = d[el.dataset.i18n]; });
+    $$("[data-i18n-html]").forEach(function (el) { el.innerHTML = d[el.dataset.i18nHtml]; });
+    units.forEach(function (u) {
+      if (u.el) { u.el.innerHTML = code === "en" ? u.html : t(u.key) === u.key ? u.html : t(u.key); }
+      else { var tr = t(u.key); u.node.nodeValue = tr === u.key ? u.text : u.lead + tr + u.trail; }
+    });
+    attrUnits.forEach(function (u) { var tr = t(u.key); u.el.setAttribute(u.attr, tr === u.key ? u.text : tr); });
+    setTheme(document.documentElement.getAttribute("data-theme"), false);
+    document.documentElement.lang = code === "hi" ? "hi" : "en";
+  }
+  $$("[data-lang]").forEach(function (b) {
+    b.addEventListener("click", function () { setLang(b.dataset.lang); });
   });
 })();
 </script>
