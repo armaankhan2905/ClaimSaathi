@@ -154,6 +154,16 @@ function DocumentRow({
         </p>
       )}
 
+      {doc.status === "ready" && doc.suggested_kind && doc.suggested_kind !== doc.kind && (
+        <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-[10px] bg-[var(--warn-bg)] px-3 py-2 text-[13px]">
+          <Icon name="info" className="h-4 w-4 flex-none text-warn" />
+          <span className="flex-1">{t("looks_like", { kind: t(`kind_${doc.suggested_kind}` as StringKey) })}</span>
+          <button type="button" className="btn px-3 py-1 text-[12.5px]" onClick={() => onChangeKind(doc.suggested_kind!).catch(() => {})}>
+            {t("use_this")}
+          </button>
+        </div>
+      )}
+
       {confirming && (
         <div role="alertdialog" className="mt-2.5 flex flex-wrap items-center gap-2 rounded-[10px] bg-surface-2 px-3 py-2 text-[13.5px]">
           <span className="flex-1">{t("confirm_delete")}</span>

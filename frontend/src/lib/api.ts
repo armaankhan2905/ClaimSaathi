@@ -15,6 +15,46 @@ export type Policy = {
   cover_since: string | null; // ISO date
   renews_on: string | null; // ISO date
   highlights: { addons?: string[]; warnings?: string[] };
+  auto_created: boolean;
+  analysis_status: "none" | "running" | "ready" | "failed";
+  analysis_mode: "ai" | "basic" | null;
+  analyzed_at: string | null;
+  clause_count: number;
+};
+
+export type WaitingStatus = {
+  name: string;
+  clause_ref: string | null;
+  months: number;
+  counted_from: "first_policy_date" | "policy_start" | "unclear";
+  starts: string | null;
+  ends: string | null;
+  completed: boolean | null;
+  days_left: number | null;
+  note: "break_in_cover" | "basis_unclear" | "missing_dates" | null;
+};
+
+export type PolicyDetail = Policy & {
+  terms: Record<string, unknown> | null;
+  timeline: {
+    continuous_since: string | null;
+    breaks: { previous_end: string; next_start: string; gap_days: number }[];
+    periods_checked: number;
+    waiting_periods: WaitingStatus[];
+  } | null;
+};
+
+export type Clause = {
+  id: number;
+  ref: string;
+  title: string;
+  section_title: string;
+  text: string;
+  category: "coverage" | "exclusion" | "limit" | "waiting_period" | "definition" | "condition" | "claim_process" | "grievance" | "other";
+  plain: { en: string; hi: string; hn: string } | null;
+  page_start: number;
+  page_end: number;
+  document_id: number | null;
 };
 
 export type TokenResponse = { access_token: string; token_type: string; user: User };
@@ -83,6 +123,11 @@ export const api = {
   me: () => request<User>("GET", "/auth/me"),
   updateMe: (b: Partial<Pick<User, "full_name" | "preferred_language">>) => request<User>("PATCH", "/auth/me", b),
   listPolicies: () => request<Policy[]>("GET", "/policies"),
+  getPolicy: (id: number) => request<PolicyDetail>("GET", `/policies/${id}`),
+  analyzePolicy: (id: number) => request<Policy>("POST", `/policies/${id}/analyze`),
+  listClauses: (id: number) => request<Clause[]>("GET", `/policies/${id}/clauses`),
+  searchClauses: (id: number, q: string, k = 5) =>
+    request<{ clause: Clause; score: number }[]>("GET", `/policies/${id}/search?q=${encodeURIComponent(q)}&k=${k}`),
   deletePolicy: (id: number) => request<void>("DELETE", `/policies/${id}`),
 
   uploadDocument: (file: File, kind: DocumentKind, policyId?: number | null) => {
@@ -135,6 +180,7 @@ export type DocumentInfo = {
   error: string | null;
   page_count: number | null;
   ocr_pages: number;
+  suggested_kind: DocumentKind | null;
   created_at: string;
 };
 

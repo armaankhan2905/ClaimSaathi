@@ -70,6 +70,15 @@ function usePolicies() {
     api.listPolicies().then(setPolicies).catch(() => setFailed(true));
   }, []);
   useEffect(load, [load]);
+
+  // Refresh quietly while a policy is still being read, so its card fills in by itself.
+  const reading = policies?.some((p) => p.status === "processing" || p.analysis_status === "running") ?? false;
+  useEffect(() => {
+    if (!reading) return;
+    const id = setInterval(() => api.listPolicies().then(setPolicies).catch(() => {}), 2000);
+    return () => clearInterval(id);
+  }, [reading]);
+
   return { policies, failed, reload: load };
 }
 

@@ -149,6 +149,18 @@ const en = {
   docerr_too_many_pages: "This document has too many pages (the limit is 300).",
   docerr_no_text_found: "No readable text was found. Try a clearer scan or photo.",
   docerr_internal_error: "Something went wrong while reading this file. Please try uploading it again.",
+
+  reading_details: "Reading details…",
+  details_failed: "Couldn't read all details",
+  looks_like: "Looks like: {kind}",
+  use_this: "Use this",
+  understanding_policy: "Reading your policy and finding every clause…",
+  understood_n: "{n} clauses understood",
+  understood_none: "No numbered clauses found yet. Upload the policy wording to see every clause.",
+  basic_mode_note: "Basic mode: clauses and key terms were read without AI, so plain-language explanations aren't available yet.",
+  ai_mode_note: "Every clause has a plain-language explanation in English, Hindi and Hinglish.",
+  read_again: "Read again",
+  understanding_failed: "Something went wrong while reading this policy. Try reading it again.",
 };
 
 export type StringKey = keyof typeof en;
@@ -301,6 +313,18 @@ const hi: Dict = {
   docerr_too_many_pages: "इस दस्तावेज़ में बहुत ज़्यादा पेज हैं (सीमा 300 है)।",
   docerr_no_text_found: "कोई पढ़ने लायक टेक्स्ट नहीं मिला। ज़्यादा साफ़ स्कैन या फ़ोटो आज़माएँ।",
   docerr_internal_error: "यह फ़ाइल पढ़ते समय कुछ गड़बड़ हो गई। कृपया इसे फिर से अपलोड करें।",
+
+  reading_details: "जानकारी पढ़ रहे हैं…",
+  details_failed: "पूरी जानकारी नहीं पढ़ी जा सकी",
+  looks_like: "यह लगता है: {kind}",
+  use_this: "यही चुनें",
+  understanding_policy: "आपकी पॉलिसी पढ़ रहे हैं और हर शर्त ढूँढ रहे हैं…",
+  understood_n: "{n} शर्तें समझी गईं",
+  understood_none: "अभी कोई क्रमांकित शर्त नहीं मिली। हर शर्त देखने के लिए पॉलिसी वर्डिंग अपलोड करें।",
+  basic_mode_note: "बेसिक मोड: शर्तें और मुख्य जानकारी बिना AI के पढ़ी गईं, इसलिए आसान भाषा में समझाना अभी उपलब्ध नहीं है।",
+  ai_mode_note: "हर शर्त अंग्रेज़ी, हिंदी और हिंग्लिश में आसान भाषा में समझाई गई है।",
+  read_again: "फिर से पढ़ें",
+  understanding_failed: "यह पॉलिसी पढ़ते समय कुछ गड़बड़ हो गई। फिर से पढ़कर देखें।",
 };
 
 const hn: Dict = {
@@ -451,6 +475,18 @@ const hn: Dict = {
   docerr_too_many_pages: "Is document mein bahut zyada pages hain (limit 300 hai).",
   docerr_no_text_found: "Koi padhne layak text nahi mila. Thoda saaf scan ya photo try karo.",
   docerr_internal_error: "Is file ko padhte waqt kuch gadbad ho gayi. Ise phir se upload karo.",
+
+  reading_details: "Details padh rahe hain…",
+  details_failed: "Saari details nahi padh paaye",
+  looks_like: "Yeh lagta hai: {kind}",
+  use_this: "Yahi chuno",
+  understanding_policy: "Aapki policy padh rahe hain aur har clause dhoondh rahe hain…",
+  understood_n: "{n} clauses samjhe gaye",
+  understood_none: "Abhi koi numbered clause nahi mila. Har clause dekhne ke liye policy wording upload karo.",
+  basic_mode_note: "Basic mode: clauses aur main details bina AI ke padhi gayi, isliye simple bhasha mein explanation abhi available nahi hai.",
+  ai_mode_note: "Har clause English, Hindi aur Hinglish mein simple bhasha mein samjhaya gaya hai.",
+  read_again: "Phir se padho",
+  understanding_failed: "Is policy ko padhte waqt kuch gadbad ho gayi. Phir se padh ke dekho.",
 };
 
 export type Lang = "en" | "hi" | "hn";

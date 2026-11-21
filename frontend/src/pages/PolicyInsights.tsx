@@ -5,6 +5,7 @@ import { DocumentUploader } from "../components/DocumentUploader";
 import { DocumentViewer } from "../components/DocumentViewer";
 import { Icon } from "../components/Icon";
 import { PageHead } from "../components/PageHead";
+import { PolicyStatusBanner } from "../components/PolicyStatusBanner";
 import { useI18n } from "../i18n/I18nProvider";
 import type { StringKey } from "../i18n/strings";
 import { api, POLICY_DOCUMENT_KINDS, type DocumentInfo, type Policy } from "../lib/api";
@@ -27,9 +28,11 @@ export function PolicyInsights() {
   const { docs, failed, pending, upload, remove, changeKind, dismissPending, reload } = useDocuments(policyId);
   const [viewing, setViewing] = useState<DocumentInfo | null>(null);
 
+  // Reload the policy list when documents finish reading: an upload may have created a policy.
+  const docsSignature = docs?.map((d) => `${d.id}:${d.status}:${d.policy_id}`).join(",") ?? "";
   useEffect(() => {
     api.listPolicies().then(setPolicies).catch(() => {});
-  }, []);
+  }, [docsSignature]);
 
   function choosePolicy(value: string) {
     setParams(value ? { id: value } : {}, { replace: true });
@@ -52,6 +55,7 @@ export function PolicyInsights() {
   return (
     <>
       <PageHead eyebrow={t("policy_eyebrow")} title={t("nav_policy")} lede={t("policy_sub")} />
+      {policyId != null && <PolicyStatusBanner policyId={policyId} refreshKey={docsSignature} />}
 
       <div className="grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]">
         <DocumentUploader kinds={POLICY_DOCUMENT_KINDS} onFiles={upload} extra={policyPicker} />
