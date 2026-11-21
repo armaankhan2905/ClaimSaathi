@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Design tokens carried over from the demo. Light is the default; dark is set via
-   <html data-theme="dark"> (chosen before first paint in index.html). */
+   <html data-theme="dark"> only when the user turns it on (see index.html). */
 :root {
   --bg: #f5f8fc; --surface: #ffffff; --surface-2: #eaf1fb; --line: #dce5f1;
   --fg: #10264a; --muted: #5a6b85;

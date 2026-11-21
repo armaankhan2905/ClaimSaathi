@@ -14,11 +14,11 @@
     <title>ClaimSaathi</title>
     <script>
       // Set the theme before first paint so the page doesn't flash.
+      // Light is the default; dark only if the user picked it with the toggle.
       (function () {
         var t = null;
         try { t = localStorage.getItem("claimsaathi-theme"); } catch (e) {}
-        if (t !== "dark" && t !== "light") t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-        document.documentElement.setAttribute("data-theme", t);
+        document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
       })();
     </script>
   </head>
