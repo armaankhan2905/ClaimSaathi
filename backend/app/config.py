@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60 * 24 * 7
     cors_origins: str = "http://localhost:5173"
 
-    demo_email: str = "rohit.demo@claimsaathi.test"
+    demo_email: str = "rohit.demo@example.com"
     demo_password: str = "demo-pass-2026"
 
     @property
