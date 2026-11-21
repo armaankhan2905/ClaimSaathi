@@ -57,6 +57,18 @@ export type Clause = {
   document_id: number | null;
 };
 
+export type ChatMessage = {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  lang: string;
+  answer_type: "answered" | "not_in_policy" | "needs_more_info" | "search_only" | null;
+  citations: { ref: string; title: string; quote: string; clause_id: number }[];
+  follow_ups: string[];
+  mode: "ai" | "basic" | null;
+  created_at: string;
+};
+
 export type TokenResponse = { access_token: string; token_type: string; user: User };
 
 export class ApiError extends Error {
@@ -129,6 +141,9 @@ export const api = {
   searchClauses: (id: number, q: string, k = 5) =>
     request<{ clause: Clause; score: number }[]>("GET", `/policies/${id}/search?q=${encodeURIComponent(q)}&k=${k}`),
   deletePolicy: (id: number) => request<void>("DELETE", `/policies/${id}`),
+  getChat: (id: number) => request<ChatMessage[]>("GET", `/policies/${id}/chat`),
+  ask: (id: number, question: string, lang: Lang) => request<ChatMessage[]>("POST", `/policies/${id}/chat`, { question, lang }),
+  clearChat: (id: number) => request<void>("DELETE", `/policies/${id}/chat`),
 
   uploadDocument: (file: File, kind: DocumentKind, policyId?: number | null) => {
     const form = new FormData();

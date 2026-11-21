@@ -5,6 +5,7 @@ import { DocumentList } from "../components/DocumentList";
 import { DocumentUploader } from "../components/DocumentUploader";
 import { DocumentViewer } from "../components/DocumentViewer";
 import { Icon, type IconName } from "../components/Icon";
+import { AskTab } from "../components/insights/AskTab";
 import { ClausesTab, type ClauseFilter } from "../components/insights/ClausesTab";
 import { DetailsTab } from "../components/insights/DetailsTab";
 import { PageHead } from "../components/PageHead";
@@ -247,7 +248,7 @@ export function PolicyInsights() {
             ) : tab === "compare" ? (
               <ComingSoon text="coming_compare" />
             ) : (
-              <ComingSoon text="coming_ask" />
+              <AskTab policy={policy} onOpenClause={openClause} />
             )}
           </div>
         </>

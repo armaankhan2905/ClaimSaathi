@@ -56,6 +56,9 @@ class Policy(Base):
     clauses: Mapped[list["Clause"]] = relationship(
         back_populates="policy", cascade="all, delete-orphan", order_by="Clause.order"
     )
+    chat: Mapped[list["ChatMessage"]] = relationship(
+        back_populates="policy", cascade="all, delete-orphan", order_by="ChatMessage.id"
+    )
 
 
 class Clause(Base):
@@ -122,6 +125,25 @@ class DocumentPage(Base):
     ocr_confidence: Mapped[float | None] = mapped_column(Float, default=None)  # average, 0..1
 
     document: Mapped[Document] = relationship(back_populates="pages")
+
+
+class ChatMessage(Base):
+    """One turn of "Ask ClaimSaathi" about a policy (kept so the conversation survives a reload)."""
+
+    __tablename__ = "chat_messages"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    policy_id: Mapped[int] = mapped_column(ForeignKey("policies.id", ondelete="CASCADE"), index=True)
+    role: Mapped[str] = mapped_column(String(10))  # user | assistant
+    content: Mapped[str] = mapped_column(Text)
+    lang: Mapped[str] = mapped_column(String(4), default="en")
+    answer_type: Mapped[str | None] = mapped_column(String(20), default=None)  # assistant only
+    citations: Mapped[list] = mapped_column(JSON, default=list)  # [{"ref", "title", "quote", "clause_id"}]
+    follow_ups: Mapped[list] = mapped_column(JSON, default=list)
+    mode: Mapped[str | None] = mapped_column(String(10), default=None)  # ai | basic
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    policy: Mapped[Policy] = relationship(back_populates="chat")
 
 
 # Number of clauses, loaded with the policy in one query (shown on cards and lists).

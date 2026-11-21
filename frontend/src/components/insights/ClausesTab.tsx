@@ -40,7 +40,18 @@ function ClauseCard({ clause, timeline, best, focused }: { clause: Clause; timel
   const pages = clause.page_start === clause.page_end ? t("page_short", { n: clause.page_start }) : t("pages_short", { a: clause.page_start, b: clause.page_end });
 
   useEffect(() => {
-    if (focused) ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!focused) return;
+    // Cards above this one are still rendering when we arrive from another tab and push it down,
+    // so scroll once smoothly, then correct once the list has settled.
+    const first = setTimeout(() => ref.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+    const settle = setTimeout(() => {
+      const box = ref.current?.getBoundingClientRect();
+      if (box && (box.top < 0 || box.top > window.innerHeight * 0.6)) ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 900);
+    return () => {
+      clearTimeout(first);
+      clearTimeout(settle);
+    };
   }, [focused]);
 
   return (

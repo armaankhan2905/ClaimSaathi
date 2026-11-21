@@ -86,6 +86,25 @@ class ClauseHit(BaseModel):
     score: float
 
 
+class AskIn(BaseModel):
+    question: str = Field(min_length=1, max_length=1000)
+    lang: Language = "en"
+
+
+class ChatMessageOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    role: Literal["user", "assistant"]
+    content: str
+    lang: str
+    answer_type: str | None
+    citations: list[dict]
+    follow_ups: list[str]
+    mode: str | None
+    created_at: datetime
+
+
 DocumentKind = Literal[
     # policy documents
     "policy_wording",
