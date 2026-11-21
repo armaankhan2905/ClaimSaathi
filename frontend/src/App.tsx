@@ -7,6 +7,7 @@ import { ThemeProvider } from "./lib/theme";
 import { LoginPage, SignupPage } from "./pages/AuthPages";
 import { Home } from "./pages/Home";
 import { PolicyInsights } from "./pages/PolicyInsights";
+import { RejectionCheck } from "./pages/RejectionCheck";
 import { SectionPlaceholder } from "./pages/SectionPlaceholder";
 
 export default function App() {
@@ -23,7 +24,7 @@ export default function App() {
                 <Route path="policy" element={<RequireAuth><PolicyInsights /></RequireAuth>} />
                 <Route
                   path="rejection"
-                  element={<RequireAuth><SectionPlaceholder eyebrow="rej_eyebrow" title="nav_rej" lede="rej_sub" /></RequireAuth>}
+                  element={<RequireAuth><RejectionCheck /></RequireAuth>}
                 />
                 <Route
                   path="complaint"

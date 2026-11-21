@@ -33,7 +33,7 @@ export type PendingUpload = { key: string; name: string; size: number; error: st
  * still being read, plus upload, retype and delete actions. `kinds` limits the list to
  * those document types; leave it out to show every type.
  */
-export function useDocuments(policyId: number | null, kinds?: readonly DocumentKind[]) {
+export function useDocuments(policyId: number | null, kinds?: readonly DocumentKind[], claimId?: number | null) {
   const [docs, setDocs] = useState<DocumentInfo[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [pending, setPending] = useState<PendingUpload[]>([]);
@@ -41,13 +41,13 @@ export function useDocuments(policyId: number | null, kinds?: readonly DocumentK
 
   const load = useCallback(async () => {
     try {
-      const all = await api.listDocuments(policyId);
+      const all = await api.listDocuments(policyId, claimId);
       setDocs(kindSet.current ? all.filter((d) => kindSet.current!.has(d.kind)) : all);
       setFailed(false);
     } catch {
       setFailed(true);
     }
-  }, [policyId]);
+  }, [policyId, claimId]);
 
   useEffect(() => {
     setDocs(null);
@@ -69,7 +69,7 @@ export function useDocuments(policyId: number | null, kinds?: readonly DocumentK
           const key = `${file.name}-${file.size}-${Math.random()}`;
           setPending((p) => [...p, { key, name: file.name, size: file.size, error: null }]);
           try {
-            const doc = await api.uploadDocument(file, kind, policyId);
+            const doc = await api.uploadDocument(file, kind, policyId, claimId);
             setPending((p) => p.filter((x) => x.key !== key));
             setDocs((d) => [doc, ...(d ?? [])]);
           } catch (e) {
@@ -79,7 +79,7 @@ export function useDocuments(policyId: number | null, kinds?: readonly DocumentK
         }),
       );
     },
-    [policyId],
+    [policyId, claimId],
   );
 
   const dismissPending = useCallback((key: string) => setPending((p) => p.filter((x) => x.key !== key)), []);

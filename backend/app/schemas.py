@@ -91,6 +91,34 @@ class AskIn(BaseModel):
     lang: Language = "en"
 
 
+class ClaimIn(BaseModel):
+    policy_id: int | None = None
+    lang: Language = "en"
+
+
+class ClaimUpdate(BaseModel):
+    policy_id: int | None = None
+
+
+class CheckIn(BaseModel):
+    lang: Language = "en"
+
+
+class ClaimOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    policy_id: int | None
+    status: Literal["draft", "checking", "ready", "failed"]
+    error: str | None
+    lang: str
+    mode: str | None
+    facts: dict | None
+    findings: dict | None
+    created_at: datetime
+    checked_at: datetime | None
+
+
 class CompareIn(BaseModel):
     a: int
     b: int
@@ -143,11 +171,15 @@ class DocumentOut(BaseModel):
     page_count: int | None
     ocr_pages: int
     suggested_kind: DocumentKind | None = None
+    claim_id: int | None = None
     created_at: datetime
 
 
 class DocumentUpdate(BaseModel):
-    kind: DocumentKind
+    """Only the fields sent are changed; send "claim_id": null to take a document out of a check."""
+
+    kind: DocumentKind | None = None
+    claim_id: int | None = None
 
 
 class DocumentPageOut(BaseModel):

@@ -62,7 +62,8 @@ def after_document_read(document_id: int, session_factory: sessionmaker) -> None
             db.flush()
             doc.policy_id = policy.id
         db.commit()
-        policy_id = doc.policy_id
+        # Only policy documents change what the policy says; a bill or letter must not trigger a re-read.
+        policy_id = doc.policy_id if is_policy_document(doc.kind, doc.suggested_kind) else None
     if policy_id is not None:
         understand_policy(policy_id, session_factory)
 

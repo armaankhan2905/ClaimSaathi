@@ -103,13 +103,36 @@ class Document(Base):
     page_count: Mapped[int | None] = mapped_column(Integer, default=None)
     ocr_pages: Mapped[int] = mapped_column(Integer, default=0)
     suggested_kind: Mapped[str | None] = mapped_column(String(30), default=None)  # what the text looks like
+    claim_id: Mapped[int | None] = mapped_column(ForeignKey("claims.id", ondelete="CASCADE"), index=True, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     owner: Mapped[User] = relationship(back_populates="documents")
     policy: Mapped[Policy | None] = relationship(back_populates="documents")
+    claim: Mapped["Claim | None"] = relationship(back_populates="documents")
     pages: Mapped[list["DocumentPage"]] = relationship(
         back_populates="document", cascade="all, delete-orphan", order_by="DocumentPage.page_number"
     )
+
+
+class Claim(Base):
+    """A rejected (or disputed) claim being checked against its policy."""
+
+    __tablename__ = "claims"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    policy_id: Mapped[int | None] = mapped_column(ForeignKey("policies.id", ondelete="SET NULL"), index=True, default=None)
+    status: Mapped[str] = mapped_column(String(20), default="draft")  # draft | checking | ready | failed
+    error: Mapped[str | None] = mapped_column(String(80), default=None)
+    lang: Mapped[str] = mapped_column(String(4), default="en")  # language the AI explanations were written in
+    mode: Mapped[str | None] = mapped_column(String(10), default=None)  # ai | basic
+    facts: Mapped[dict | None] = mapped_column(JSON, default=None)  # what the rejection letter says (understanding.claims.LetterFacts)
+    findings: Mapped[dict | None] = mapped_column(JSON, default=None)  # assessment, evidence map, timeline, checklist, questions
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+    documents: Mapped[list[Document]] = relationship(back_populates="claim", cascade="all, delete-orphan")
+    policy: Mapped[Policy | None] = relationship()
 
 
 class DocumentPage(Base):

@@ -78,6 +78,58 @@ export type CompareResult = {
 
 export type FeatureRow = { key: string; a: number | string | null; b: number | string | null; better: "a" | "b" | null };
 
+export type FindingRow = {
+  type: string;
+  insurer_reason: string;
+  clause_ref: string | null;
+  policy_quote: { ref: string; title: string; quote: string } | null;
+  status: "contradicted" | "supported" | "unclear";
+  code: string | null;
+  data: {
+    months?: number;
+    policy_start_for_waiting?: string | null;
+    waiting_ends?: string | null;
+    admission_date?: string | null;
+    insurer_counted_from?: string | null;
+    continuous_since?: string | null;
+    periods_checked?: number;
+    breaks?: unknown[];
+  };
+  explanation_en: string;
+  explanation_local: string;
+  question_en: string;
+  question_local: string;
+  evidence: string[];
+};
+
+export type Claim = {
+  id: number;
+  policy_id: number | null;
+  status: "draft" | "checking" | "ready" | "failed";
+  error: string | null;
+  lang: string;
+  mode: "ai" | "basic" | null;
+  facts: {
+    claim_number?: string | null;
+    policy_number?: string | null;
+    patient?: string | null;
+    hospital?: string | null;
+    treatment?: string | null;
+    admission_date?: string | null;
+    letter_date?: string | null;
+    claimed_amount?: number | null;
+  } | null;
+  findings: {
+    assessment: "inconsistency" | "consistent" | "needs_info";
+    rows: FindingRow[];
+    timeline: { date: string; kind: string; months?: number; clause_ref?: string; until?: string; days?: number }[];
+    checklist: { item: string; have: boolean; important: boolean }[];
+    questions: { en: string; local: string }[];
+  } | null;
+  created_at: string;
+  checked_at: string | null;
+};
+
 export type ChatMessage = {
   id: number;
   role: "user" | "assistant";
@@ -168,17 +220,40 @@ export const api = {
   ask: (id: number, question: string, lang: Lang) => request<ChatMessage[]>("POST", `/policies/${id}/chat`, { question, lang }),
   clearChat: (id: number) => request<void>("DELETE", `/policies/${id}/chat`),
 
-  uploadDocument: (file: File, kind: DocumentKind, policyId?: number | null) => {
+  uploadDocument: (file: File, kind: DocumentKind, policyId?: number | null, claimId?: number | null) => {
     const form = new FormData();
     form.append("file", file);
     form.append("kind", kind);
     if (policyId != null) form.append("policy_id", String(policyId));
+    if (claimId != null) form.append("claim_id", String(claimId));
     return request<DocumentInfo>("POST", "/documents", form);
   },
-  listDocuments: (policyId?: number | null) =>
-    request<DocumentInfo[]>("GET", policyId != null ? `/documents?policy_id=${policyId}` : "/documents"),
+  listDocuments: (policyId?: number | null, claimId?: number | null) => {
+    const q = new URLSearchParams();
+    if (policyId != null) q.set("policy_id", String(policyId));
+    if (claimId != null) q.set("claim_id", String(claimId));
+    return request<DocumentInfo[]>("GET", `/documents${q.size ? `?${q}` : ""}`);
+  },
   getDocument: (id: number) => request<DocumentInfo>("GET", `/documents/${id}`),
-  updateDocument: (id: number, b: { kind: DocumentKind }) => request<DocumentInfo>("PATCH", `/documents/${id}`, b),
+  updateDocument: (id: number, b: { kind?: DocumentKind; claim_id?: number | null }) => request<DocumentInfo>("PATCH", `/documents/${id}`, b),
+  listClaims: () => request<Claim[]>("GET", "/claims"),
+  createClaim: (b: { policy_id?: number | null; lang: Lang }) => request<Claim>("POST", "/claims", b),
+  getClaim: (id: number) => request<Claim>("GET", `/claims/${id}`),
+  updateClaim: (id: number, b: { policy_id: number | null }) => request<Claim>("PATCH", `/claims/${id}`, b),
+  checkClaim: (id: number, lang: Lang) => request<Claim>("POST", `/claims/${id}/check`, { lang }),
+  deleteClaim: (id: number) => request<void>("DELETE", `/claims/${id}`),
+  /** Downloads the evidence report PDF (fetched with the login token, then saved by the browser). */
+  downloadReport: async (id: number, fallbackName: string) => {
+    const res = await send("GET", `/claims/${id}/report`);
+    if (!res.ok) throw new ApiError(res.status, "report_failed");
+    const name = /filename="([^"]+)"/.exec(res.headers.get("content-disposition") ?? "")?.[1] ?? fallbackName;
+    const url = URL.createObjectURL(await res.blob());
+    const a = Object.assign(document.createElement("a"), { href: url, download: name });
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30_000);
+  },
   getPages: (id: number) => request<DocumentPage[]>("GET", `/documents/${id}/pages`),
   deleteDocument: (id: number) => request<void>("DELETE", `/documents/${id}`),
   /** Opens the original file in a new tab (fetched with the login token, so it can't be a plain link). */
@@ -219,6 +294,7 @@ export type DocumentInfo = {
   page_count: number | null;
   ocr_pages: number;
   suggested_kind: DocumentKind | null;
+  claim_id: number | null;
   created_at: string;
 };
 

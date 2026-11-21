@@ -40,9 +40,8 @@ function UploadPanel({ policyId, policies, onPolicyChosen, onDocsChanged }: {
 }) {
   const { t } = useI18n();
   const selectId = useId();
-  // Every document type is listed for now, so a file retyped as a claim document doesn't vanish.
-  // Once Rejection Check has its own list (Stage 6), pass POLICY_DOCUMENT_KINDS here.
-  const { docs, failed, pending, upload, remove, changeKind, dismissPending, reload } = useDocuments(policyId);
+  // Policy documents only: claim documents (letters, bills, receipts) live on the Rejection Check page.
+  const { docs, failed, pending, upload, remove, changeKind, dismissPending, reload } = useDocuments(policyId, POLICY_DOCUMENT_KINDS);
   const [viewing, setViewing] = useState<DocumentInfo | null>(null);
 
   const signature = docs?.map((d) => `${d.id}:${d.status}:${d.policy_id}`).join(",") ?? "";

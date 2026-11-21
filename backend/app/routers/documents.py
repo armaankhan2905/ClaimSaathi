@@ -12,8 +12,9 @@ from ..db import get_db, get_session_factory
 from ..deps import current_user
 from ..documents import delete_document_files, process_document
 from ..extraction import sniff_content_type
-from ..models import Document, User
+from ..models import Claim, Document, User
 from ..schemas import DocumentKind, DocumentOut, DocumentPageOut, DocumentUpdate
+from ..understanding.kinds import POLICY_KINDS, is_policy_document
 from ..understanding.pipeline import after_document_read, understand_policy
 from .policies import get_owned_policy
 
@@ -29,6 +30,13 @@ def _get_owned_document(document_id: int, user: User, db: Session) -> Document:
     return doc
 
 
+def _get_owned_claim(claim_id: int, user: User, db: Session) -> Claim:
+    claim = db.get(Claim, claim_id)
+    if claim is None or claim.owner_id != user.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "claim_not_found")
+    return claim
+
+
 def _clean_filename(name: str | None) -> str:
     name = (name or "document").replace("\\", "/").rsplit("/", 1)[-1]
     name = re.sub(r"[\x00-\x1f\x7f]", "", name).strip() or "document"
@@ -41,12 +49,15 @@ async def upload_document(
     file: UploadFile = File(...),
     kind: DocumentKind = Form(...),
     policy_id: int | None = Form(None),
+    claim_id: int | None = Form(None),
     user: User = Depends(current_user),
     db: Session = Depends(get_db),
     session_factory: sessionmaker = Depends(get_session_factory),
 ) -> Document:
     if policy_id is not None:
         get_owned_policy(policy_id, user, db)
+    if claim_id is not None:
+        _get_owned_claim(claim_id, user, db)
 
     limit = get_settings().max_upload_mb * 1024 * 1024
     data = await file.read(limit + 1)
@@ -61,6 +72,7 @@ async def upload_document(
     doc = Document(
         owner_id=user.id,
         policy_id=policy_id,
+        claim_id=claim_id,
         kind=kind,
         filename=_clean_filename(file.filename),
         content_type=content_type,
@@ -77,11 +89,13 @@ async def upload_document(
 
 @router.get("", response_model=list[DocumentOut])
 def list_documents(
-    policy_id: int | None = None, user: User = Depends(current_user), db: Session = Depends(get_db)
+    policy_id: int | None = None, claim_id: int | None = None, user: User = Depends(current_user), db: Session = Depends(get_db)
 ) -> list[Document]:
     q = select(Document).where(Document.owner_id == user.id)
     if policy_id is not None:
         q = q.where(Document.policy_id == policy_id)
+    if claim_id is not None:
+        q = q.where(Document.claim_id == claim_id)
     return list(db.scalars(q.order_by(Document.created_at.desc(), Document.id.desc())))
 
 
@@ -99,13 +113,23 @@ def update_document(
     db: Session = Depends(get_db),
     session_factory: sessionmaker = Depends(get_session_factory),
 ) -> Document:
-    """Fix a wrongly chosen document type without uploading the file again."""
+    """Fix a wrongly chosen document type, or add a document to (or take it out of) a rejection check."""
     doc = _get_owned_document(document_id, user, db)
-    changed = doc.kind != body.kind
-    doc.kind = body.kind
+    if "claim_id" in body.model_fields_set:
+        if body.claim_id is not None:
+            _get_owned_claim(body.claim_id, user, db)
+        doc.claim_id = body.claim_id
+    old_kind, policy_id = doc.kind, doc.policy_id
+    changed = body.kind is not None and body.kind != doc.kind
+    if changed:
+        doc.kind = body.kind
     db.commit()
-    if changed and doc.status == "ready":  # the policy it belongs to may now read differently
+    if changed and doc.status == "ready":
+        # A document became a policy document (may create or update a policy) ...
         background.add_task(after_document_read, doc.id, session_factory)
+        # ... or stopped being one: its policy must be re-read without it.
+        if old_kind in POLICY_KINDS and doc.kind not in POLICY_KINDS and policy_id is not None:
+            background.add_task(understand_policy, policy_id, session_factory)
     return doc
 
 
@@ -137,7 +161,7 @@ def delete_document(
     session_factory: sessionmaker = Depends(get_session_factory),
 ) -> Response:
     doc = _get_owned_document(document_id, user, db)
-    policy_id = doc.policy_id
+    policy_id = doc.policy_id if is_policy_document(doc.kind, doc.suggested_kind) else None
     delete_document_files([doc])
     db.delete(doc)
     db.commit()
