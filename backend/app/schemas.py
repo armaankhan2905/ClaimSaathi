@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -35,3 +36,18 @@ class TokenOut(BaseModel):
 class UserUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=1, max_length=120)
     preferred_language: Language | None = None
+
+
+class PolicyOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    category: str
+    name: str
+    insurer: str
+    policy_number: str | None
+    status: str
+    sum_insured: int | None
+    cover_since: date | None
+    renews_on: date | None
+    highlights: dict
