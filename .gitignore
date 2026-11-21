@@ -16,6 +16,7 @@ dist/
 *.db
 *.db-journal
 backend/storage/
+backend/models/
 
 # Editors and OS
 .vscode/
