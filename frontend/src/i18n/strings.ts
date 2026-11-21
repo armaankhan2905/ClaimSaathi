@@ -90,6 +90,9 @@ const en = {
   working: "Please wait…",
   err_generic: "Something went wrong. Please try again.",
   err_network: "Can't reach the server. Is the backend running?",
+  err_wrong_login: "Wrong email or password.",
+  err_email_taken: "An account with this email already exists. Try signing in.",
+  err_invalid: "Please check the details you entered.",
 
   footer_note: "ClaimSaathi · Built by OverCooked Brains",
   footer_privacy: "Your documents are encrypted and never shared with your insurer.",
@@ -186,6 +189,9 @@ const hi: Dict = {
   working: "कृपया रुकें…",
   err_generic: "कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।",
   err_network: "सर्वर से संपर्क नहीं हो पा रहा। क्या बैकएंड चल रहा है?",
+  err_wrong_login: "ईमेल या पासवर्ड गलत है।",
+  err_email_taken: "इस ईमेल से पहले ही खाता बना हुआ है। साइन इन करके देखें।",
+  err_invalid: "कृपया अपनी भरी गई जानकारी जाँच लें।",
 
   footer_note: "ClaimSaathi · OverCooked Brains द्वारा बनाया गया",
   footer_privacy: "आपके दस्तावेज़ एन्क्रिप्टेड रहते हैं और बीमा कंपनी के साथ कभी साझा नहीं किए जाते।",
@@ -280,6 +286,9 @@ const hn: Dict = {
   working: "Thoda ruko…",
   err_generic: "Kuch gadbad ho gayi. Phir se try karo.",
   err_network: "Server tak nahi pahunch pa rahe. Kya backend chal raha hai?",
+  err_wrong_login: "Email ya password galat hai.",
+  err_email_taken: "Is email se pehle hi account bana hua hai. Sign in karke dekho.",
+  err_invalid: "Jo details bhari hain, unhe ek baar check karo.",
 
   footer_note: "ClaimSaathi · OverCooked Brains ne banaya",
   footer_privacy: "Aapke documents encrypted rehte hain aur insurer ke saath kabhi share nahi hote.",

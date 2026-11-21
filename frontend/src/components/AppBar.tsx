@@ -19,7 +19,7 @@ export function AppBar({ rightSlot }: { rightSlot?: ReactNode }) {
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg">
-      <div className="wrap flex flex-wrap items-center gap-x-[18px] gap-y-2.5 py-3">
+      <div className="wrap flex flex-wrap items-center gap-x-[18px] gap-y-2.5 py-3 md:flex-nowrap">
         <Link to="/" className="flex items-center gap-2.5 text-fg no-underline" aria-label={`${t("brand")} – ${t("nav_home")}`}>
           <span className="grid h-[30px] w-[30px] place-items-center rounded-[9px] bg-accent text-accent-ink">
             <Icon name="shield" className="h-[18px] w-[18px]" />
@@ -59,7 +59,7 @@ export function AppBar({ rightSlot }: { rightSlot?: ReactNode }) {
             <span aria-hidden="true" className="text-base leading-none">
               {dark ? "☀" : "☾"}
             </span>
-            <span className="hidden sm:inline">{dark ? t("theme_light") : t("theme_dark")}</span>
+            <span className="hidden sm:inline md:hidden xl:inline">{dark ? t("theme_light") : t("theme_dark")}</span>
           </button>
           <div className="seg" role="group" aria-label={t("lang_label")}>
             {LANG_OPTIONS.map((o) => (
