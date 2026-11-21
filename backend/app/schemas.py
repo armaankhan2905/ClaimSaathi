@@ -85,6 +85,10 @@ class DocumentOut(BaseModel):
     created_at: datetime
 
 
+class DocumentUpdate(BaseModel):
+    kind: DocumentKind
+
+
 class DocumentPageOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

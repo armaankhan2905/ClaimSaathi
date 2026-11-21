@@ -75,6 +75,18 @@ def test_filename_is_cleaned(client, auth_headers):
     assert _clean_filename(None) == "document"
 
 
+def test_change_document_type(client, db_session, auth_headers):
+    doc = upload(client, auth_headers, photo(), name="letter.jpg").json()
+    assert doc["kind"] == "policy_wording"
+    r = client.patch(f"/api/documents/{doc['id']}", headers=auth_headers, json={"kind": "rejection_letter"})
+    assert r.status_code == 200 and r.json()["kind"] == "rejection_letter"
+    assert client.get(f"/api/documents/{doc['id']}", headers=auth_headers).json()["kind"] == "rejection_letter"
+    assert client.patch(f"/api/documents/{doc['id']}", headers=auth_headers, json={"kind": "selfie"}).status_code == 422
+
+    seed(db_session)
+    assert client.patch(f"/api/documents/{doc['id']}", headers=demo_headers(client), json={"kind": "other"}).status_code == 404
+
+
 def test_download_returns_original_file(client, auth_headers):
     pdf = text_pdf([CLAUSE_LINES])
     doc = upload(client, auth_headers, pdf).json()

@@ -30,18 +30,19 @@ export type PendingUpload = { key: string; name: string; size: number; error: st
 
 /**
  * Documents for one policy (or all, when policyId is null), kept fresh while any are
- * still being read, plus upload and delete actions.
+ * still being read, plus upload, retype and delete actions. `kinds` limits the list to
+ * those document types; leave it out to show every type.
  */
-export function useDocuments(policyId: number | null, kinds: readonly DocumentKind[]) {
+export function useDocuments(policyId: number | null, kinds?: readonly DocumentKind[]) {
   const [docs, setDocs] = useState<DocumentInfo[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [pending, setPending] = useState<PendingUpload[]>([]);
-  const kindSet = useRef(new Set<string>(kinds));
+  const kindSet = useRef(kinds ? new Set<string>(kinds) : null);
 
   const load = useCallback(async () => {
     try {
       const all = await api.listDocuments(policyId);
-      setDocs(all.filter((d) => kindSet.current.has(d.kind)));
+      setDocs(kindSet.current ? all.filter((d) => kindSet.current!.has(d.kind)) : all);
       setFailed(false);
     } catch {
       setFailed(true);
@@ -88,5 +89,17 @@ export function useDocuments(policyId: number | null, kinds: readonly DocumentKi
     setDocs((d) => d?.filter((x) => x.id !== id) ?? null);
   }, []);
 
-  return { docs, failed, pending, upload, remove, dismissPending, reload: load };
+  /** Change a document's type; shown immediately and put back if saving fails. */
+  const changeKind = useCallback(async (id: number, kind: DocumentKind) => {
+    let previous: DocumentKind | undefined;
+    setDocs((d) => d?.map((x) => (x.id === id ? ((previous = x.kind), { ...x, kind }) : x)) ?? null);
+    try {
+      await api.updateDocument(id, { kind });
+    } catch (e) {
+      setDocs((d) => d?.map((x) => (x.id === id && previous ? { ...x, kind: previous } : x)) ?? null);
+      throw e;
+    }
+  }, []);
+
+  return { docs, failed, pending, upload, remove, changeKind, dismissPending, reload: load };
 }

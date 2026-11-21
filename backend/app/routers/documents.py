@@ -13,7 +13,7 @@ from ..deps import current_user
 from ..documents import delete_document_files, process_document
 from ..extraction import sniff_content_type
 from ..models import Document, User
-from ..schemas import DocumentKind, DocumentOut, DocumentPageOut
+from ..schemas import DocumentKind, DocumentOut, DocumentPageOut, DocumentUpdate
 from .policies import get_owned_policy
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
@@ -87,6 +87,17 @@ def list_documents(
 @router.get("/{document_id}", response_model=DocumentOut)
 def get_document(document_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)) -> Document:
     return _get_owned_document(document_id, user, db)
+
+
+@router.patch("/{document_id}", response_model=DocumentOut)
+def update_document(
+    document_id: int, body: DocumentUpdate, user: User = Depends(current_user), db: Session = Depends(get_db)
+) -> Document:
+    """Fix a wrongly chosen document type without uploading the file again."""
+    doc = _get_owned_document(document_id, user, db)
+    doc.kind = body.kind
+    db.commit()
+    return doc
 
 
 @router.get("/{document_id}/pages", response_model=list[DocumentPageOut])

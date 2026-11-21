@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { useI18n } from "../i18n/I18nProvider";
 import type { StringKey } from "../i18n/strings";
-import { api, type DocumentInfo } from "../lib/api";
+import { api, CLAIM_DOCUMENT_KINDS, POLICY_DOCUMENT_KINDS, type DocumentInfo, type DocumentKind } from "../lib/api";
 import { docErrorKey, formatBytes, type PendingUpload } from "../lib/documents";
 import { Icon } from "./Icon";
 
@@ -45,7 +45,56 @@ function StatusChip({ doc }: { doc: DocumentInfo }) {
   );
 }
 
-function DocumentRow({ doc, onView, onDelete }: { doc: DocumentInfo; onView: () => void; onDelete: () => Promise<void> }) {
+/** Compact type picker shown in place of the type label, so a wrong choice can be fixed. */
+function KindSelect({ doc, onChange }: { doc: DocumentInfo; onChange: (kind: DocumentKind) => Promise<void> }) {
+  const { t } = useI18n();
+  const [failed, setFailed] = useState(false);
+  const groups: { label: StringKey; kinds: readonly DocumentKind[] }[] = [
+    { label: "group_policy_docs", kinds: POLICY_DOCUMENT_KINDS },
+    { label: "group_claim_docs", kinds: CLAIM_DOCUMENT_KINDS },
+  ];
+  return (
+    <>
+      <select
+        value={doc.kind}
+        aria-label={`${t("doc_type")}: ${doc.filename}`}
+        title={t("change_type")}
+        onChange={(e) => {
+          setFailed(false);
+          onChange(e.target.value as DocumentKind).catch(() => setFailed(true));
+        }}
+        className="max-w-full cursor-pointer rounded-md border border-transparent bg-transparent py-0.5 pr-1 pl-0 text-[12.5px] text-muted hover:border-line hover:bg-surface-2 focus:border-sage focus:outline-none"
+      >
+        {groups.map((g) => (
+          <optgroup key={g.label} label={t(g.label)}>
+            {g.kinds.map((k) => (
+              <option key={k} value={k}>
+                {t(`kind_${k}` as StringKey)}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      {failed && (
+        <span role="alert" className="ml-1 text-[12px] text-bad">
+          {t("err_generic")}
+        </span>
+      )}
+    </>
+  );
+}
+
+function DocumentRow({
+  doc,
+  onView,
+  onDelete,
+  onChangeKind,
+}: {
+  doc: DocumentInfo;
+  onView: () => void;
+  onDelete: () => Promise<void>;
+  onChangeKind: (kind: DocumentKind) => Promise<void>;
+}) {
   const { t } = useI18n();
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -63,8 +112,10 @@ function DocumentRow({ doc, onView, onDelete }: { doc: DocumentInfo; onView: () 
         <FileBadge contentType={doc.content_type} />
         <div className="min-w-0 flex-1 basis-48">
           <b className="block break-all text-sm font-semibold">{doc.filename}</b>
-          <span className="text-[12.5px] text-muted">
-            {t(`kind_${doc.kind}` as StringKey)} · {formatBytes(doc.size_bytes)}
+          <span className="flex flex-wrap items-center gap-x-1 text-[12.5px] text-muted">
+            <KindSelect doc={doc} onChange={onChangeKind} />
+            <span aria-hidden="true">·</span>
+            {formatBytes(doc.size_bytes)}
           </span>
         </div>
         <StatusChip doc={doc} />
@@ -136,12 +187,14 @@ export function DocumentList({
   pending,
   onView,
   onDelete,
+  onChangeKind,
   onDismissPending,
 }: {
   docs: DocumentInfo[];
   pending: PendingUpload[];
   onView: (doc: DocumentInfo) => void;
   onDelete: (id: number) => Promise<void>;
+  onChangeKind: (id: number, kind: DocumentKind) => Promise<void>;
   onDismissPending: (key: string) => void;
 }) {
   const { t } = useI18n();
@@ -187,7 +240,13 @@ export function DocumentList({
           </motion.li>
         ))}
         {docs.map((d) => (
-          <DocumentRow key={d.id} doc={d} onView={() => onView(d)} onDelete={() => onDelete(d.id)} />
+          <DocumentRow
+            key={d.id}
+            doc={d}
+            onView={() => onView(d)}
+            onDelete={() => onDelete(d.id)}
+            onChangeKind={(kind) => onChangeKind(d.id, kind)}
+          />
         ))}
       </AnimatePresence>
     </ul>

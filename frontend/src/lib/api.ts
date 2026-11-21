@@ -95,6 +95,7 @@ export const api = {
   listDocuments: (policyId?: number | null) =>
     request<DocumentInfo[]>("GET", policyId != null ? `/documents?policy_id=${policyId}` : "/documents"),
   getDocument: (id: number) => request<DocumentInfo>("GET", `/documents/${id}`),
+  updateDocument: (id: number, b: { kind: DocumentKind }) => request<DocumentInfo>("PATCH", `/documents/${id}`, b),
   getPages: (id: number) => request<DocumentPage[]>("GET", `/documents/${id}/pages`),
   deleteDocument: (id: number) => request<void>("DELETE", `/documents/${id}`),
   /** Opens the original file in a new tab (fetched with the login token, so it can't be a plain link). */

@@ -22,7 +22,9 @@ export function PolicyInsights() {
   const policySelectId = useId();
   const [policies, setPolicies] = useState<Policy[]>([]);
   const policyId = params.get("id") ? Number(params.get("id")) : null;
-  const { docs, failed, pending, upload, remove, dismissPending, reload } = useDocuments(policyId, POLICY_DOCUMENT_KINDS);
+  // Every document type is listed for now, so a file retyped as a claim document doesn't vanish.
+  // Once Rejection Check has its own list (Stage 6), pass POLICY_DOCUMENT_KINDS here.
+  const { docs, failed, pending, upload, remove, changeKind, dismissPending, reload } = useDocuments(policyId);
   const [viewing, setViewing] = useState<DocumentInfo | null>(null);
 
   useEffect(() => {
@@ -89,7 +91,14 @@ export function PolicyInsights() {
             <div className="h-[72px] animate-pulse rounded-xl bg-surface-2" />
           </div>
         ) : (
-          <DocumentList docs={docs} pending={pending} onView={setViewing} onDelete={remove} onDismissPending={dismissPending} />
+          <DocumentList
+            docs={docs}
+            pending={pending}
+            onView={setViewing}
+            onDelete={remove}
+            onChangeKind={changeKind}
+            onDismissPending={dismissPending}
+          />
         )}
       </section>
 
