@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -51,3 +51,44 @@ class PolicyOut(BaseModel):
     cover_since: date | None
     renews_on: date | None
     highlights: dict
+
+
+DocumentKind = Literal[
+    # policy documents
+    "policy_wording",
+    "policy_schedule",
+    "endorsement",
+    "previous_policy",
+    # claim documents
+    "rejection_letter",
+    "renewal_receipt",
+    "discharge_summary",
+    "hospital_bill",
+    "doctor_note",
+    "other",
+]
+
+
+class DocumentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    policy_id: int | None
+    kind: DocumentKind
+    filename: str
+    content_type: str
+    size_bytes: int
+    status: Literal["processing", "ready", "failed"]
+    error: str | None
+    page_count: int | None
+    ocr_pages: int
+    created_at: datetime
+
+
+class DocumentPageOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    page_number: int
+    text: str
+    method: Literal["text", "ocr"]
+    ocr_confidence: float | None
