@@ -6,7 +6,11 @@ from pydantic import BaseModel
 
 
 class FakeAI:
+    provider = "fake"
     model = "fake-model"
+    clause_batch_size = 12
+    parallel_requests = 4
+    prompt_budget_chars: int | None = None
 
     def __init__(self, responder: Callable[[type[BaseModel], str], BaseModel]):
         self.responder = responder

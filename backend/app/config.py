@@ -27,11 +27,16 @@ class Settings(BaseSettings):
     max_pages: int = 300
     ocr_dpi: int = 200
 
-    # Claude reads policies, labels clauses and writes plain-language explanations. Without a
-    # key ClaimSaathi falls back to "basic mode" (rule-based extraction, no explanations).
+    # An AI model reads policies, labels clauses and writes plain-language explanations.
+    # ai_provider: "auto" uses Groq if GROQ_API_KEY is set, else Claude if ANTHROPIC_API_KEY is
+    # set. Without any key ClaimSaathi runs in "basic mode" (rule-based, no explanations).
+    ai_enabled: bool = True
+    ai_provider: str = "auto"  # auto | groq | anthropic
     anthropic_api_key: str | None = None
     ai_model: str = "claude-opus-5-5"
-    ai_enabled: bool = True
+    groq_api_key: str | None = None
+    groq_model: str = "openai/gpt-oss-120b"
+    groq_tokens_per_minute: int = 8000  # Groq free plan limit for gpt-oss-120b; raise on a paid plan
 
     # Local embedding model for clause search (downloaded once, runs on this machine)
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"

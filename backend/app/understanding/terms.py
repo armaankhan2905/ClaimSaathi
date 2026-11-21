@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from ..ai import AIClient, AIError
+from ..ai import AIClientProtocol, AIError
 from .clauses import SplitClause
 from .dates import DATE_PATTERN, iso, parse_date
 
@@ -180,13 +180,38 @@ def _merge(primary: PolicyTerms, backup: PolicyTerms) -> PolicyTerms:
     return merged
 
 
+# When a provider limits prompt size, these clauses are sent first: they hold the key terms.
+_TERM_PRIORITY = (r"waiting", r"co-?pay|room|limit|sum insured|deductible|depreciation", r"first policy|continuous|grace",
+                  r"not covered|exclusion", r"add-?on", r"cover")
+
+
+def condensed_wording(clauses: list[SplitClause], budget: int) -> str:
+    """The clauses that matter most for key terms, in document order, within `budget` characters."""
+    def rank(c: SplitClause) -> int:
+        head = f"{c.section_title} {c.title}"
+        return next((i for i, p in enumerate(_TERM_PRIORITY) if re.search(p, head, re.I)), len(_TERM_PRIORITY))
+
+    chosen, used = set(), 0
+    for c in sorted(clauses, key=lambda c: (rank(c), c.order)):
+        block = len(c.ref) + len(c.title) + len(c.text) + 4
+        if used + block > budget:
+            continue
+        chosen.add(c.order)
+        used += block
+    return "\n\n".join(f"{c.ref} {c.title}\n{c.text}" for c in clauses if c.order in chosen)
+
+
 def extract_terms(
-    schedule_text: str, wording_text: str, clauses: list[SplitClause], ai: AIClient | None
+    schedule_text: str, wording_text: str, clauses: list[SplitClause], ai: AIClientProtocol | None
 ) -> tuple[PolicyTerms, str]:
     """Returns (terms, mode) where mode is "ai" or "basic"."""
     basic = basic_terms(schedule_text, wording_text, clauses)
     if ai is None:
         return basic, "basic"
+    budget = ai.prompt_budget_chars
+    if budget and len(schedule_text) + len(wording_text) > budget:
+        schedule_text = schedule_text[: budget // 3]
+        wording_text = condensed_wording(clauses, budget - len(schedule_text)) if clauses else wording_text[: budget - len(schedule_text)]
     prompt = (
         "<policy_schedule>\n" + (schedule_text or "(not provided)") + "\n</policy_schedule>\n\n"
         "<policy_wording>\n" + (wording_text or "(not provided)") + "\n</policy_wording>\n\n"

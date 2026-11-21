@@ -7,13 +7,12 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from ..ai import AIClient, AIError
+from ..ai import AIClientProtocol, AIError
 from .clauses import SplitClause
 
 log = logging.getLogger(__name__)
 
 Category = Literal["coverage", "exclusion", "limit", "waiting_period", "definition", "condition", "claim_process", "grievance", "other"]
-BATCH = 12
 
 
 class ClauseLabel(BaseModel):
@@ -34,9 +33,11 @@ For each clause give:
   deductions), waiting_period, definition, condition (duties, renewal, cancellation), claim_process,
   grievance, or other.
 - A plain explanation in 1-3 short sentences: what it means for the policyholder in practice. Keep every
-  number, amount and time period exactly as in the clause. Do not add rules, advice or opinions that are
-  not in the clause. Write "you" for the policyholder and "the insurer" for the company.
+  number, amount and time period exactly as in the clause, attached to what it measures ("ICU up to 2% of
+  the sum insured per day", never "2% of ICU charges"). Do not add rules, advice or opinions that are not
+  in the clause. Write "you" for the policyholder and "the insurer" for the company.
 - The same explanation in simple Hindi (Devanagari) and in Hinglish (Roman script, the way people text).
+  These must say exactly what the English says, with the same numbers attached to the same things.
 Return one item per clause, using the clause numbers given."""
 
 # Rule-based categories for basic mode, checked against the section title, then the clause title.
@@ -73,21 +74,22 @@ def basic_category(c: SplitClause) -> Category:
     return _match(c.title) or section or "other"
 
 
-def _label_batch(ai: AIClient, batch: list[SplitClause]) -> dict[str, ClauseLabel]:
+def _label_batch(ai: AIClientProtocol, batch: list[SplitClause]) -> dict[str, ClauseLabel]:
     prompt = "\n\n".join(f"<clause ref=\"{c.ref}\" section=\"{c.section_title}\">\n{c.title}\n{c.text}\n</clause>" for c in batch)
     result = ai.extract(ClauseLabels, system=LABEL_SYSTEM, prompt=prompt, effort="low")
     return {item.ref: item for item in result.items}
 
 
-def label_clauses(clauses: list[SplitClause], ai: AIClient | None) -> tuple[list[tuple[str, dict | None]], str]:
+def label_clauses(clauses: list[SplitClause], ai: AIClientProtocol | None) -> tuple[list[tuple[str, dict | None]], str]:
     """Returns ([(category, {"en","hi","hn"} or None) per clause], mode)."""
     basic = [(basic_category(c), None) for c in clauses]
     if ai is None or not clauses:
         return basic, "basic"
 
-    batches = [clauses[i : i + BATCH] for i in range(0, len(clauses), BATCH)]
+    size = ai.clause_batch_size  # sized per provider (Groq's free plan needs small requests)
+    batches = [clauses[i : i + size] for i in range(0, len(clauses), size)]
     try:
-        with ThreadPoolExecutor(max_workers=4) as pool:
+        with ThreadPoolExecutor(max_workers=ai.parallel_requests) as pool:
             labelled: dict[str, ClauseLabel] = {}
             for part in pool.map(lambda b: _label_batch(ai, b), batches):
                 labelled.update(part)

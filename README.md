@@ -121,7 +121,7 @@ uvicorn app.main:app --reload --port 8000
 
 Run the tests with `pytest` from the `backend` folder. To try uploads, use the fictional files in `samples/` (a digital policy, a scanned copy, a schedule and a photo of a rejection letter). Uploaded files are encrypted in `backend/storage/`.
 
-**AI:** add `ANTHROPIC_API_KEY=...` to `backend/.env` and restart the backend to get plain-language explanations of every clause (English, Hindi, Hinglish) and AI-checked key terms. Without a key the app runs in basic mode: clauses, key terms and waiting periods are read with rules. Use **Read again** on Policy Insights to re-read a policy after adding the key. Clause search uses a local model that downloads once (about 220 MB) on first use.
+**AI:** add `GROQ_API_KEY=...` (free plan at console.groq.com) or `ANTHROPIC_API_KEY=...` to `backend/.env` and restart the backend to get plain-language explanations of every clause (English, Hindi, Hinglish) and AI-checked key terms. With Groq's free plan (8K tokens a minute) reading a policy takes a few minutes in the background. Without a key the app runs in basic mode: clauses, key terms and waiting periods are read with rules. Use **Read again** on Policy Insights to re-read a policy after adding the key. Clause search uses a local model that downloads once (about 220 MB) on first use.
 
 **Frontend** (React, runs on port 5173):
 

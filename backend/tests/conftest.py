@@ -21,9 +21,13 @@ def isolated_storage(tmp_path, monkeypatch):
 
 @pytest.fixture(autouse=True)
 def offline_by_default(monkeypatch):
-    """Tests never call the real Claude API and don't load the embedding model unless they opt in."""
+    """Tests never call a real AI API and don't load the embedding model unless they opt in,
+    even when keys are set in backend/.env."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
     monkeypatch.setattr(get_settings(), "anthropic_api_key", None)
+    monkeypatch.setattr(get_settings(), "groq_api_key", None)
+    monkeypatch.setattr(get_settings(), "ai_provider", "auto")
     monkeypatch.setattr(get_settings(), "embeddings_enabled", False)
 
 

@@ -18,6 +18,7 @@ numpy>=2
 
 # policy understanding
 anthropic>=2.11
+groq>=1.7
 fastembed>=0.9
 
 # tests
