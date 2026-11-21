@@ -24,6 +24,20 @@ def test_remove_running_headers_and_page_numbers():
     assert out[3] == "Clause 4 text here\nexplains the claim process"
 
 
+def test_footer_with_changing_page_counter_is_removed():
+    pages = [f"Body of page {i} about clause {i}\nmore {i}\nSAMPLE INSURER LTD   Page {i} of 3" for i in (1, 2, 3)]
+    out = remove_running_headers(pages)
+    assert out == [f"Body of page {i} about clause {i}\nmore {i}" for i in (1, 2, 3)]
+
+
+def test_page_counter_dropped_from_single_page_footer():
+    assert remove_running_headers(["Letter body\nSample Insurer - Claims  Page 1 of 1"]) == ["Letter body\nSample Insurer - Claims"]
+
+
+def test_ocr_bullets_restored():
+    assert clean_text("Covered:\n� cataract;\n· hernia") == "Covered:\n• cataract;\n• hernia"
+
+
 def test_headers_kept_when_document_is_short():
     pages = ["HEADER\nbody one", "HEADER\nbody two"]
     assert remove_running_headers(pages) == pages

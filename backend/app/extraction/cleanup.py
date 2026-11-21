@@ -5,6 +5,11 @@ import unicodedata
 from collections import Counter
 
 _PAGE_NUMBER = re.compile(r"^\s*(page\s*)?\d{1,4}(\s*(of|/)\s*\d{1,4})?\s*$", re.IGNORECASE)
+# "Page 3 of 12" (or "Page 3") inside a longer header/footer line, and at the end of one
+_PAGE_COUNTER = re.compile(r"\bpage\s*\d{1,4}(\s*(of|/)\s*\d{1,4})?\b", re.IGNORECASE)
+_TRAILING_PAGE_COUNTER = re.compile(r"[\s\-|·]*\bpage\s*\d{1,4}\s*(of|/)\s*\d{1,4}\s*$", re.IGNORECASE)
+# OCR reads bullet symbols as U+FFFD or similar look-alikes at the start of a line
+_OCR_BULLET = re.compile(r"^[�·▪●○◦■□►‣⁃]\s*", re.MULTILINE)
 
 
 def clean_text(text: str) -> str:
@@ -15,6 +20,7 @@ def clean_text(text: str) -> str:
     text = text.replace("­", "")  # soft hyphen
     text = re.sub(r"[‘’]", "'", text)
     text = re.sub(r"[“”]", '"', text)
+    text = _OCR_BULLET.sub("• ", text)
     # "cover-\nage" -> "coverage\n" only when both sides are lowercase letters (keeps "Co-\nPayment")
     text = re.sub(r"([a-z])-\n([a-z]+)", lambda m: f"{m.group(1)}{m.group(2)}\n", text)
     lines = [re.sub(r" {2,}", " ", line).strip() for line in text.split("\n")]
@@ -29,9 +35,11 @@ def _edge_lines(text: str, n: int = 2) -> list[str]:
 
 
 def _normalise_edge(line: str) -> str:
-    # Exact text only: numbered lines like "Clause 1" / "Clause 2" are content, not a header.
-    # Page numbers ("Page 3 of 12") are caught separately by _PAGE_NUMBER.
-    return re.sub(r"\s+", " ", line.lower()).strip()
+    # Only page counters are masked, so "... Page 2 of 4" / "... Page 3 of 4" match, while
+    # numbered content like "Clause 1" / "Clause 2" stays distinct.
+    # Letters and digits only, so small OCR differences ("Wording -" vs "Wording-") still match.
+    line = _PAGE_COUNTER.sub("page#", line.lower())
+    return re.sub(r"[^a-z0-9#ऀ-ॿ]", "", line)
 
 
 def remove_running_headers(pages: list[str]) -> list[str]:
@@ -48,10 +56,15 @@ def remove_running_headers(pages: list[str]) -> list[str]:
         lines = page.split("\n")
         non_empty = [i for i, l in enumerate(lines) if l.strip()]
         edge_idx = set(non_empty[:2] + non_empty[-2:])
-        kept = [
-            l
-            for i, l in enumerate(lines)
-            if not (i in edge_idx and (_PAGE_NUMBER.match(l) or _normalise_edge(l) in repeated))
-        ]
+        kept = []
+        for i, l in enumerate(lines):
+            if i in edge_idx:
+                if _PAGE_NUMBER.match(l) or _normalise_edge(l) in repeated:
+                    continue
+                # a footer like "Company name   Page 1 of 1" on a short document: keep the text, drop the counter
+                l = _TRAILING_PAGE_COUNTER.sub("", l)
+                if not l.strip():
+                    continue
+            kept.append(l)
         cleaned.append(re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip())
     return cleaned
