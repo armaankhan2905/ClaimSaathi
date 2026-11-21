@@ -7,6 +7,7 @@ import { DocumentViewer } from "../components/DocumentViewer";
 import { Icon, type IconName } from "../components/Icon";
 import { AskTab } from "../components/insights/AskTab";
 import { ClausesTab, type ClauseFilter } from "../components/insights/ClausesTab";
+import { CompareTab } from "../components/insights/CompareTab";
 import { DetailsTab } from "../components/insights/DetailsTab";
 import { PageHead } from "../components/PageHead";
 import { PolicyStatusBanner } from "../components/PolicyStatusBanner";
@@ -103,18 +104,6 @@ function UploadPanel({ policyId, policies, onPolicyChosen, onDocsChanged }: {
         )}
       </section>
       <DocumentViewer doc={viewing} onClose={() => setViewing(null)} />
-    </div>
-  );
-}
-
-function ComingSoon({ text }: { text: StringKey }) {
-  const { t } = useI18n();
-  return (
-    <div className="panel flex items-start gap-3">
-      <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-surface-2 text-accent">
-        <Icon name="tools" className="h-5 w-5" />
-      </span>
-      <p className="muted mt-2">{t(text)}</p>
     </div>
   );
 }
@@ -246,7 +235,7 @@ export function PolicyInsights() {
             ) : tab === "clauses" ? (
               <ClausesTab policy={policy} clauses={clauses} filter={filter} onFilter={(f) => update({ cat: f, ref: null })} focusRef={focusRef} />
             ) : tab === "compare" ? (
-              <ComingSoon text="coming_compare" />
+              <CompareTab policy={policy} policies={policies ?? []} onOpenClause={openClause} />
             ) : (
               <AskTab policy={policy} onOpenClause={openClause} />
             )}

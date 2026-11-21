@@ -128,3 +128,27 @@ def test_suggest_kind():
     assert suggest_kind("DISCHARGE SUMMARY\nPatient: R") == "discharge_summary"
     assert suggest_kind("Renewal Premium Receipt No 55") == "renewal_receipt"
     assert suggest_kind("Hello world") is None
+    # A wording whose preamble mentions "the Policy Schedule" is still a wording
+    wording = "Suraksha Health Plus - Policy Wording\nNavjeevan General Insurance\n1. Preamble\nThe Policy Schedule, the proposal form and any endorsements form part of this Policy."
+    assert suggest_kind(wording) == "policy_wording"
+    # ...and a schedule that refers to the wording is still a schedule
+    assert suggest_kind("Policy Schedule\nSuraksha Health Plus\nThis schedule must be read with the Policy Wording.") == "policy_schedule"
+
+
+def test_real_sample_documents_are_recognised():
+    from pathlib import Path
+
+    from app.extraction import extract
+
+    samples = Path(__file__).resolve().parents[2] / "samples"
+    expected = {
+        "suraksha-health-plus-policy-wording.pdf": "policy_wording",
+        "suraksha-health-plus-policy-schedule.pdf": "policy_schedule",
+        "drivesure-comprehensive-policy-wording.pdf": "policy_wording",
+        "arogya-secure-gold-policy-wording.pdf": "policy_wording",
+        "arogya-secure-gold-policy-schedule.pdf": "policy_schedule",
+    }
+    for name, kind in expected.items():
+        if (samples / name).exists():
+            text = "\n\n".join(p.text for p in extract((samples / name).read_bytes(), "application/pdf"))
+            assert suggest_kind(text) == kind, name

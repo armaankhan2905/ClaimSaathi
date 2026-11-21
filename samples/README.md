@@ -9,5 +9,6 @@
 | `suraksha-health-plus-policy-schedule.pdf` | Policy schedule: sum insured, limits, First Policy Date, renewal history | Tables |
 | `rejection-letter-CLM-26-08817-photo.jpg` | Phone photo of a claim rejection letter | OCR on photos |
 | `drivesure-comprehensive-policy-wording.pdf` | Motor policy wording with the engine-protect exclusion | Motor policies |
+| `arogya-secure-gold-policy-wording.pdf`, `arogya-secure-gold-policy-schedule.pdf` | A second health policy to compare with Suraksha: knee replacement after 36 months (Suraksha 24), pre-existing diseases after 24 months (Suraksha 36), any private room, no co-pay, no maternity, higher premium | Compare |
 
 **The demo case:** Rohit's knee replacement claim (₹1,80,000, admitted 14 Sep 2026) is rejected under clause 4.2. The insurer counted the 24-month waiting period from the current policy's start (12 Mar 2026), but clause 4.2 counts it from the First Policy Date (12 Mar 2022). The schedule shows continuous renewals since then.

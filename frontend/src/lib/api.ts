@@ -57,6 +57,27 @@ export type Clause = {
   document_id: number | null;
 };
 
+export type Verdict = "covered" | "partly_covered" | "not_covered" | "unclear";
+
+export type PolicyVerdict = {
+  policy_id: number;
+  verdict: Verdict;
+  summary: string;
+  what_you_pay: string;
+  citations: { ref: string; title: string; quote: string }[];
+  mode: "ai" | "basic";
+  reason: { code: "waiting_not_over" | "waiting_over" | "excluded" | "limited" | "mentioned" | "not_mentioned"; months?: number } | null;
+};
+
+export type CompareResult = {
+  scenario: { key: string | null; text: string; month: number | null };
+  a: PolicyVerdict;
+  b: PolicyVerdict;
+  winner: "a" | "b" | "tie";
+};
+
+export type FeatureRow = { key: string; a: number | string | null; b: number | string | null; better: "a" | "b" | null };
+
 export type ChatMessage = {
   id: number;
   role: "user" | "assistant";
@@ -141,6 +162,8 @@ export const api = {
   searchClauses: (id: number, q: string, k = 5) =>
     request<{ clause: Clause; score: number }[]>("GET", `/policies/${id}/search?q=${encodeURIComponent(q)}&k=${k}`),
   deletePolicy: (id: number) => request<void>("DELETE", `/policies/${id}`),
+  compareTable: (a: number, b: number) => request<FeatureRow[]>("GET", `/compare/table?a=${a}&b=${b}`),
+  compareScenario: (b: { a: number; b: number; scenario?: string; custom?: string; lang: Lang }) => request<CompareResult>("POST", "/compare", b),
   getChat: (id: number) => request<ChatMessage[]>("GET", `/policies/${id}/chat`),
   ask: (id: number, question: string, lang: Lang) => request<ChatMessage[]>("POST", `/policies/${id}/chat`, { question, lang }),
   clearChat: (id: number) => request<void>("DELETE", `/policies/${id}/chat`),

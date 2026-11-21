@@ -336,20 +336,115 @@ def _photo(pdf: bytes) -> bytes:
     return out.getvalue()
 
 
-def main() -> None:
+# --------------------------------------------------------------------------- a second health policy, to compare
+
+AROGYA_WORDING = """
+<h1>Arogya Secure Gold</h1>
+<p><b>Sahyog Health Insurance Limited</b><br>
+Individual Health Insurance Policy - Policy Wording<br>
+UIN: SHIHLIP25014V022425</p>
+
+<h2>1. Preamble</h2>
+<p>This Policy covers the Insured Person for medical expenses described below, subject to its terms,
+conditions and exclusions, in return for the premium paid. The Policy Schedule forms part of this Policy.</p>
+
+<h2>2. Definitions</h2>
+<h3>2.1 Continuous Coverage</h3>
+<p>Coverage under this Policy renewed without a break, or within the Grace Period of 30 days.</p>
+<h3>2.2 First Policy Date</h3>
+<p>The start date of the first policy issued by the Company to the Insured Person, as shown in the Policy
+Schedule, from which Continuous Coverage has been maintained.</p>
+<h3>2.3 Pre-existing Disease</h3>
+<p>Any condition diagnosed, or for which medical advice or treatment was received, within 48 months before
+the First Policy Date.</p>
+
+<h2>3. What is covered</h2>
+<h3>3.1 In-patient hospitalisation</h3>
+<p>Medical expenses for hospitalisation of more than 24 hours, up to the Sum Insured.</p>
+<h3>3.2 Room and boarding</h3>
+<p>Room rent for any single private room with air conditioning is payable in full. Intensive care unit
+charges are payable in full. No proportionate deduction applies to other expenses.</p>
+<h3>3.3 Pre- and post-hospitalisation</h3>
+<p>Medical expenses incurred in the 60 days before admission and the 90 days after discharge, for the same
+condition.</p>
+<h3>3.4 Day care treatment</h3>
+<p>Listed day care procedures, up to the Sum Insured.</p>
+<h3>3.5 Cataract</h3>
+<p>Cataract surgery is payable up to Rs. 40,000 per eye per Policy Period, after the waiting period in 4.2.</p>
+<h3>3.6 Road ambulance</h3>
+<p>Ambulance charges up to Rs. 3,000 per hospitalisation.</p>
+
+<h2>4. Waiting periods</h2>
+<h3>4.1 Initial waiting period</h3>
+<p>No expenses are payable for any illness contracted within the first 30 days from the First Policy Date,
+except treatment needed because of an Accident.</p>
+<h3>4.2 Specified illnesses and procedures</h3>
+<p>Expenses for joint replacement surgery (including knee and hip replacement), cataract, hernia, kidney
+stones and hysterectomy are payable only after 36 months of Continuous Coverage from the First Policy Date,
+unless needed because of an Accident.</p>
+<h3>4.3 Pre-existing diseases</h3>
+<p>Expenses related to a Pre-existing Disease, including diabetes and hypertension declared in the proposal,
+are payable after 24 months of Continuous Coverage from the First Policy Date.</p>
+
+<h2>5. What is not covered</h2>
+<ol>
+<li>Maternity expenses, including childbirth and caesarean section, and expenses of the newborn.</li>
+<li>Cosmetic surgery unless needed because of an Accident or burn.</li>
+<li>Intentional self-injury.</li>
+<li>Treatment outside India.</li>
+<li>Dental treatment unless needing hospitalisation because of an Accident.</li>
+<li>Spectacles, contact lenses and hearing aids.</li>
+</ol>
+
+<h2>6. Claims</h2>
+<p>Inform the Company within 24 hours of an emergency admission or 72 hours before a planned admission.
+Submit reimbursement documents within 30 days of discharge.</p>
+
+<h2>7. Grievances</h2>
+<p>Write to the Grievance Officer at care@sahyog-health.example. If you are not satisfied with the reply or
+get none within 30 days, you may use the Bima Bharosa portal or approach the Insurance Ombudsman.</p>
+"""
+
+AROGYA_SCHEDULE = """
+<h1>Policy Schedule</h1>
+<p><b>Arogya Secure Gold</b> - Sahyog Health Insurance Limited</p>
+<table>
+<tr><th>Policy number</th><td>SHI/AS/2026/730155</td></tr>
+<tr><th>Policyholder</th><td>Rohit Sharma</td></tr>
+<tr><th>Policy period</th><td>01 Jan 2026 to 31 Dec 2026</td></tr>
+<tr><th>First Policy Date</th><td>01 Jan 2026</td></tr>
+<tr><th>Sum Insured</th><td>Rs. 5,00,000</td></tr>
+<tr><th>Room rent limit</th><td>Any single private AC room</td></tr>
+<tr><th>Co-payment</th><td>None</td></tr>
+<tr><th>Premium</th><td>Rs. 12,593 + GST Rs. 2,267 = Rs. 14,860</td></tr>
+</table>
+<p class="small">Quotation issued for comparison. This schedule must be read with the Policy Wording.</p>
+"""
+
+
+def main(force: bool = False) -> None:
+    """Writes the sample files; existing files are kept unless force=True (PDFs embed a
+    creation date, so rewriting them would change files that didn't really change)."""
     OUT.mkdir(exist_ok=True)
-    wording = _write_story(HEALTH_WORDING, "Suraksha Health Plus - Policy Wording - UIN NGIHLIP26001V012526")
-    files = {
-        "suraksha-health-plus-policy-wording.pdf": wording,
-        "suraksha-health-plus-policy-schedule.pdf": _write_story(HEALTH_SCHEDULE, "Navjeevan General Insurance - Policy Schedule"),
-        "suraksha-health-plus-policy-wording-scanned.pdf": _scan(wording),
-        "rejection-letter-CLM-26-08817-photo.jpg": _photo(_write_story(REJECTION_LETTER, "Navjeevan General Insurance - Claims")),
-        "drivesure-comprehensive-policy-wording.pdf": _write_story(MOTOR_WORDING, "DriveSure Comprehensive - Policy Wording"),
+    makers = {
+        "suraksha-health-plus-policy-wording.pdf": lambda: _write_story(HEALTH_WORDING, "Suraksha Health Plus - Policy Wording - UIN NGIHLIP26001V012526"),
+        "suraksha-health-plus-policy-schedule.pdf": lambda: _write_story(HEALTH_SCHEDULE, "Navjeevan General Insurance - Policy Schedule"),
+        "suraksha-health-plus-policy-wording-scanned.pdf": lambda: _scan(_write_story(HEALTH_WORDING, "Suraksha Health Plus - Policy Wording - UIN NGIHLIP26001V012526")),
+        "rejection-letter-CLM-26-08817-photo.jpg": lambda: _photo(_write_story(REJECTION_LETTER, "Navjeevan General Insurance - Claims")),
+        "drivesure-comprehensive-policy-wording.pdf": lambda: _write_story(MOTOR_WORDING, "DriveSure Comprehensive - Policy Wording"),
+        "arogya-secure-gold-policy-wording.pdf": lambda: _write_story(AROGYA_WORDING, "Arogya Secure Gold - Policy Wording - UIN SHIHLIP25014V022425"),
+        "arogya-secure-gold-policy-schedule.pdf": lambda: _write_story(AROGYA_SCHEDULE, "Sahyog Health Insurance - Policy Schedule"),
     }
-    for name, data in files.items():
-        (OUT / name).write_bytes(data)
+    for name, make in makers.items():
+        path = OUT / name
+        if path.exists() and not force:
+            continue
+        data = make()
+        path.write_bytes(data)
         print(f"{name:52s} {len(data) / 1024:8.0f} KB")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    main(force="--force" in sys.argv)

@@ -91,6 +91,14 @@ class AskIn(BaseModel):
     lang: Language = "en"
 
 
+class CompareIn(BaseModel):
+    a: int
+    b: int
+    scenario: str | None = Field(default=None, description="key of a preset situation")
+    custom: str | None = Field(default=None, min_length=3, max_length=300, description="a situation in the user's own words")
+    lang: Language = "en"
+
+
 class ChatMessageOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

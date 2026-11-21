@@ -38,9 +38,16 @@ def test_ocr_bullets_restored():
     assert clean_text("Covered:\n� cataract;\n· hernia") == "Covered:\n• cataract;\n• hernia"
 
 
-def test_headers_kept_when_document_is_short():
-    pages = ["HEADER\nbody one", "HEADER\nbody two"]
-    assert remove_running_headers(pages) == pages
+def test_two_page_document_loses_header_and_footer():
+    pages = [
+        "Arogya Secure Gold - Policy Wording\n4.2 Specified illnesses\nSAMPLE DOCUMENT - fictional   Page 1 of 2",
+        "Arogya Secure Gold - Policy Wording\nJoint replacement after 36 months.\nSAMPLE DOCUMENT - fictional   Page 2 of 2",
+    ]
+    assert remove_running_headers(pages) == ["4.2 Specified illnesses", "Joint replacement after 36 months."]
+
+
+def test_single_page_keeps_its_header():
+    assert remove_running_headers(["HEADER\nbody one"]) == ["HEADER\nbody one"]
 
 
 def test_assemble_lines_orders_boxes_and_adds_paragraph_breaks():

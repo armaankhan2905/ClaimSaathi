@@ -47,9 +47,11 @@ def remove_running_headers(pages: list[str]) -> list[str]:
     if not pages:
         return pages
     repeated: set[str] = set()
-    if len(pages) >= 3:
+    if len(pages) >= 2:
         counts = Counter(_normalise_edge(l) for p in pages for l in set(_edge_lines(p)))
-        repeated = {line for line, c in counts.items() if c >= max(3, 0.6 * len(pages))}
+        # On 2 pages a line must repeat on both; on longer documents on most pages.
+        needed = 2 if len(pages) == 2 else max(3, 0.6 * len(pages))
+        repeated = {line for line, c in counts.items() if c >= needed and line}
 
     cleaned = []
     for page in pages:
