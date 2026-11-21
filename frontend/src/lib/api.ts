@@ -130,6 +130,79 @@ export type Claim = {
   checked_at: string | null;
 };
 
+export type Stage = "insurer" | "bima_bharosa" | "ombudsman";
+export type Situation = "not_yet" | "unsatisfied" | "no_reply" | "bb_unresolved";
+export type Ground = { text: string; ref: string | null };
+
+export type ComplaintFields = {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  insurer: string;
+  to_email: string;
+  policy_number: string;
+  claim_number: string;
+  amount: number | null;
+  patient: string;
+  hospital: string;
+  treatment: string;
+  admission_date: string | null;
+  letter_date: string | null;
+  grievance_type: "claim_rejected" | "claim_partly_paid" | "claim_delay" | "policy_service" | "other";
+  ask: string;
+  grounds: Ground[];
+  attachments: number[];
+  include_report: boolean;
+  situation: Situation;
+  earlier_complaint_date: string | null;
+  earlier_reference: string;
+  insurer_reply_date: string | null;
+};
+
+export type ComplaintLetter = {
+  to: string;
+  date: string;
+  subject: string;
+  paragraphs: string[];
+  grounds_intro: string;
+  grounds: Ground[];
+  ask_label: string;
+  ask: string;
+  closing_note: string;
+  sign_off: string;
+  contact: string[];
+  attachments: string[];
+};
+
+export type Complaint = {
+  id: number;
+  claim_id: number | null;
+  stage: Stage;
+  status: "draft" | "sent" | "resolved";
+  fields: ComplaintFields;
+  history: { kind: "created" | "sent" | "reply" | "escalated" | "resolved"; stage: Stage; date: string; reference?: string; outcome?: string; to?: Stage }[];
+  recommended_stage: Stage;
+  tracker: {
+    sent_on: string | null;
+    reference: string;
+    reply_due: string | null;
+    days_left: number | null;
+    replied: "resolved" | "unsatisfied" | null;
+    replied_on: string | null;
+    can_escalate: ("bima_bharosa" | "ombudsman")[];
+    escalate_after: string | null;
+    ombudsman_from: string | null;
+    ombudsman_by: string | null;
+  };
+  letter: ComplaintLetter;
+  letter_text: string;
+  attachment_options: { id: number; filename: string; kind: DocumentKind }[];
+  has_report: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ChatMessage = {
   id: number;
   role: "user" | "assistant";
@@ -201,6 +274,19 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return data as T;
 }
 
+/** Fetches a file with the login token and hands it to the browser to save. */
+async function downloadFile(path: string, fallbackName: string) {
+  const res = await send("GET", path);
+  if (!res.ok) throw new ApiError(res.status, "download_failed");
+  const name = /filename="([^"]+)"/.exec(res.headers.get("content-disposition") ?? "")?.[1] ?? fallbackName;
+  const url = URL.createObjectURL(await res.blob());
+  const a = Object.assign(document.createElement("a"), { href: url, download: name });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
+
 export const api = {
   signup: (b: { full_name: string; email: string; password: string; preferred_language: Lang }) =>
     request<TokenResponse>("POST", "/auth/signup", b),
@@ -243,17 +329,16 @@ export const api = {
   checkClaim: (id: number, lang: Lang) => request<Claim>("POST", `/claims/${id}/check`, { lang }),
   deleteClaim: (id: number) => request<void>("DELETE", `/claims/${id}`),
   /** Downloads the evidence report PDF (fetched with the login token, then saved by the browser). */
-  downloadReport: async (id: number, fallbackName: string) => {
-    const res = await send("GET", `/claims/${id}/report`);
-    if (!res.ok) throw new ApiError(res.status, "report_failed");
-    const name = /filename="([^"]+)"/.exec(res.headers.get("content-disposition") ?? "")?.[1] ?? fallbackName;
-    const url = URL.createObjectURL(await res.blob());
-    const a = Object.assign(document.createElement("a"), { href: url, download: name });
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 30_000);
-  },
+  downloadReport: (id: number, fallbackName: string) => downloadFile(`/claims/${id}/report`, fallbackName),
+  listComplaints: () => request<Complaint[]>("GET", "/complaints"),
+  createComplaint: (b: { claim_id?: number | null; situation: Situation }) => request<Complaint>("POST", "/complaints", b),
+  getComplaint: (id: number) => request<Complaint>("GET", `/complaints/${id}`),
+  updateComplaint: (id: number, b: { fields?: Partial<ComplaintFields>; stage?: Stage }) => request<Complaint>("PATCH", `/complaints/${id}`, b),
+  markSent: (id: number, b: { sent_on?: string; reference?: string }) => request<Complaint>("POST", `/complaints/${id}/sent`, b),
+  recordReply: (id: number, b: { outcome: "resolved" | "unsatisfied"; reply_on?: string }) => request<Complaint>("POST", `/complaints/${id}/reply`, b),
+  escalate: (id: number, to: "bima_bharosa" | "ombudsman") => request<Complaint>("POST", `/complaints/${id}/escalate`, { to }),
+  deleteComplaint: (id: number) => request<void>("DELETE", `/complaints/${id}`),
+  downloadComplaint: (id: number, what: "letter" | "package" | "reminder", fallbackName: string) => downloadFile(`/complaints/${id}/${what}`, fallbackName),
   getPages: (id: number) => request<DocumentPage[]>("GET", `/documents/${id}/pages`),
   deleteDocument: (id: number) => request<void>("DELETE", `/documents/${id}`),
   /** Opens the original file in a new tab (fetched with the login token, so it can't be a plain link). */

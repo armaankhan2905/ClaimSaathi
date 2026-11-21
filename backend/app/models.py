@@ -135,6 +135,24 @@ class Claim(Base):
     policy: Mapped[Policy | None] = relationship()
 
 
+class Complaint(Base):
+    """A complaint about a claim, moving from the insurer to Bima Bharosa to the Ombudsman."""
+
+    __tablename__ = "complaints"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    claim_id: Mapped[int | None] = mapped_column(ForeignKey("claims.id", ondelete="SET NULL"), index=True, default=None)
+    stage: Mapped[str] = mapped_column(String(20), default="insurer")  # insurer | bima_bharosa | ombudsman
+    status: Mapped[str] = mapped_column(String(20), default="draft")  # draft | sent | resolved
+    fields: Mapped[dict] = mapped_column(JSON, default=dict)  # the editable letter details (see complaints.prefill)
+    history: Mapped[list] = mapped_column(JSON, default=list)  # [{"kind": created|sent|reply|escalated|resolved, "stage", "date", ...}]
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+    claim: Mapped[Claim | None] = relationship()
+
+
 class DocumentPage(Base):
     """Clean text of one page, either read directly from the PDF or produced by OCR."""
 

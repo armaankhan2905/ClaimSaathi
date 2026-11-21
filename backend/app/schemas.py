@@ -119,6 +119,50 @@ class ClaimOut(BaseModel):
     checked_at: datetime | None
 
 
+Stage = Literal["insurer", "bima_bharosa", "ombudsman"]
+
+
+class ComplaintIn(BaseModel):
+    claim_id: int | None = None
+    situation: Literal["not_yet", "unsatisfied", "no_reply", "bb_unresolved"] = "not_yet"
+
+
+class ComplaintUpdate(BaseModel):
+    fields: dict | None = None
+    stage: Stage | None = None
+
+
+class SentIn(BaseModel):
+    sent_on: date | None = None
+    reference: str = Field(default="", max_length=80)
+
+
+class ReplyIn(BaseModel):
+    outcome: Literal["resolved", "unsatisfied"]
+    reply_on: date | None = None
+
+
+class EscalateIn(BaseModel):
+    to: Literal["bima_bharosa", "ombudsman"]
+
+
+class ComplaintOut(BaseModel):
+    id: int
+    claim_id: int | None
+    stage: Stage
+    status: Literal["draft", "sent", "resolved"]
+    fields: dict
+    history: list[dict]
+    recommended_stage: Stage
+    tracker: dict
+    letter: dict
+    letter_text: str
+    attachment_options: list[dict]
+    has_report: bool
+    created_at: datetime
+    updated_at: datetime
+
+
 class CompareIn(BaseModel):
     a: int
     b: int

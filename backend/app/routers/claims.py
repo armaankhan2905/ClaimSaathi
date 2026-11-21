@@ -1,12 +1,12 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, sessionmaker
 
 from ..claims_pipeline import effective_kind, run_check
 from ..db import get_db, get_session_factory
 from ..deps import current_user
 from ..documents import delete_document_files
-from ..models import Claim, User
+from ..models import Claim, Complaint, User
 from ..report import build_report
 from ..schemas import CheckIn, ClaimIn, ClaimOut, ClaimUpdate
 from .policies import get_owned_policy
@@ -90,6 +90,7 @@ def report(claim_id: int, user: User = Depends(current_user), db: Session = Depe
 def delete_claim(claim_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)) -> Response:
     claim = get_owned_claim(claim_id, user, db)
     delete_document_files(claim.documents)  # the claim's uploaded files go too
+    db.execute(update(Complaint).where(Complaint.claim_id == claim.id).values(claim_id=None))  # complaints stay, unlinked
     db.delete(claim)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

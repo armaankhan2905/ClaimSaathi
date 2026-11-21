@@ -5,10 +5,10 @@ import { I18nProvider } from "./i18n/I18nProvider";
 import { AuthProvider, RequireAuth } from "./lib/auth";
 import { ThemeProvider } from "./lib/theme";
 import { LoginPage, SignupPage } from "./pages/AuthPages";
+import { ComplaintPage } from "./pages/Complaint";
 import { Home } from "./pages/Home";
 import { PolicyInsights } from "./pages/PolicyInsights";
 import { RejectionCheck } from "./pages/RejectionCheck";
-import { SectionPlaceholder } from "./pages/SectionPlaceholder";
 
 export default function App() {
   return (
@@ -28,7 +28,7 @@ export default function App() {
                 />
                 <Route
                   path="complaint"
-                  element={<RequireAuth><SectionPlaceholder eyebrow="comp_eyebrow" title="nav_comp" lede="comp_sub" /></RequireAuth>}
+                  element={<RequireAuth><ComplaintPage /></RequireAuth>}
                 />
                 <Route path="*" element={<RequireAuth><Home /></RequireAuth>} />
               </Route>
