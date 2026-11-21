@@ -6,7 +6,8 @@ const STORAGE_KEY = "claimsaathi-lang";
 type I18n = {
   lang: Lang;
   setLang: (lang: Lang) => void;
-  t: (key: StringKey) => string;
+  /** t("pages_n", { n: 4 }) fills {n} placeholders. */
+  t: (key: StringKey, vars?: Record<string, string | number>) => string;
 };
 
 const I18nContext = createContext<I18n | null>(null);
@@ -37,7 +38,17 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo<I18n>(() => ({ lang, setLang, t: (key) => STRINGS[lang][key] }), [lang, setLang]);
+  const value = useMemo<I18n>(
+    () => ({
+      lang,
+      setLang,
+      t: (key, vars) => {
+        const s = STRINGS[lang][key];
+        return vars ? s.replace(/\{(\w+)\}/g, (m, name) => (name in vars ? String(vars[name]) : m)) : s;
+      },
+    }),
+    [lang, setLang],
+  );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

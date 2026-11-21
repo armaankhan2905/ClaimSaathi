@@ -46,18 +46,26 @@ export const tokenStore = {
   },
 };
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+async function send(method: string, path: string, body?: unknown): Promise<Response> {
   const headers: Record<string, string> = {};
   const token = tokenStore.get();
   if (token) headers.Authorization = `Bearer ${token}`;
-  if (body !== undefined) headers["Content-Type"] = "application/json";
-
-  let res: Response;
+  let payload: BodyInit | undefined;
+  if (body instanceof FormData) {
+    payload = body; // the browser sets the multipart Content-Type with its boundary
+  } else if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+    payload = JSON.stringify(body);
+  }
   try {
-    res = await fetch(`/api${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+    return await fetch(`/api${path}`, { method, headers, body: payload });
   } catch {
     throw new ApiError(0, "network");
   }
+}
+
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const res = await send(method, path, body);
   if (res.status === 204) return undefined as T;
   const data = await res.json().catch(() => null);
   if (!res.ok) {
@@ -76,4 +84,62 @@ export const api = {
   updateMe: (b: Partial<Pick<User, "full_name" | "preferred_language">>) => request<User>("PATCH", "/auth/me", b),
   listPolicies: () => request<Policy[]>("GET", "/policies"),
   deletePolicy: (id: number) => request<void>("DELETE", `/policies/${id}`),
+
+  uploadDocument: (file: File, kind: DocumentKind, policyId?: number | null) => {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("kind", kind);
+    if (policyId != null) form.append("policy_id", String(policyId));
+    return request<DocumentInfo>("POST", "/documents", form);
+  },
+  listDocuments: (policyId?: number | null) =>
+    request<DocumentInfo[]>("GET", policyId != null ? `/documents?policy_id=${policyId}` : "/documents"),
+  getDocument: (id: number) => request<DocumentInfo>("GET", `/documents/${id}`),
+  getPages: (id: number) => request<DocumentPage[]>("GET", `/documents/${id}/pages`),
+  deleteDocument: (id: number) => request<void>("DELETE", `/documents/${id}`),
+  /** Opens the original file in a new tab (fetched with the login token, so it can't be a plain link). */
+  openDocumentFile: async (id: number) => {
+    const tab = window.open("", "_blank"); // open now, while we still have the click, so pop-up blockers allow it
+    const res = await send("GET", `/documents/${id}/file`);
+    if (!res.ok) {
+      tab?.close();
+      throw new ApiError(res.status, "download_failed");
+    }
+    const url = URL.createObjectURL(await res.blob());
+    if (tab) tab.location.href = url;
+    else window.location.href = url;
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  },
+};
+
+export const POLICY_DOCUMENT_KINDS = ["policy_wording", "policy_schedule", "endorsement", "previous_policy"] as const;
+export const CLAIM_DOCUMENT_KINDS = [
+  "rejection_letter",
+  "renewal_receipt",
+  "discharge_summary",
+  "hospital_bill",
+  "doctor_note",
+  "other",
+] as const;
+export type DocumentKind = (typeof POLICY_DOCUMENT_KINDS)[number] | (typeof CLAIM_DOCUMENT_KINDS)[number];
+
+export type DocumentInfo = {
+  id: number;
+  policy_id: number | null;
+  kind: DocumentKind;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+  status: "processing" | "ready" | "failed";
+  error: string | null;
+  page_count: number | null;
+  ocr_pages: number;
+  created_at: string;
+};
+
+export type DocumentPage = {
+  page_number: number;
+  text: string;
+  method: "text" | "ocr";
+  ocr_confidence: number | null;
 };

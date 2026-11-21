@@ -6,6 +6,7 @@ import { AuthProvider, RequireAuth } from "./lib/auth";
 import { ThemeProvider } from "./lib/theme";
 import { LoginPage, SignupPage } from "./pages/AuthPages";
 import { Home } from "./pages/Home";
+import { PolicyInsights } from "./pages/PolicyInsights";
 import { SectionPlaceholder } from "./pages/SectionPlaceholder";
 
 export default function App() {
@@ -19,10 +20,7 @@ export default function App() {
                 <Route path="login" element={<LoginPage />} />
                 <Route path="signup" element={<SignupPage />} />
                 <Route index element={<RequireAuth><Home /></RequireAuth>} />
-                <Route
-                  path="policy"
-                  element={<RequireAuth><SectionPlaceholder eyebrow="policy_eyebrow" title="nav_policy" lede="policy_sub" /></RequireAuth>}
-                />
+                <Route path="policy" element={<RequireAuth><PolicyInsights /></RequireAuth>} />
                 <Route
                   path="rejection"
                   element={<RequireAuth><SectionPlaceholder eyebrow="rej_eyebrow" title="nav_rej" lede="rej_sub" /></RequireAuth>}
