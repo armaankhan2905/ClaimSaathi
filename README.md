@@ -6,7 +6,7 @@ ClaimSaathi is an AI-powered insurance companion for Indian policyholders. You u
 
 Built by **OverCooked Brains** for The Builder's Theory 1.0 (Finance & FinTech track).
 
-> **Status:** the full app is being built in `frontend/` and `backend/`. Accounts, saved policies, languages, dark mode and document upload (with OCR for scans and photos) work so far; the AI features are in progress. The original clickable demo is in `demo/`. All policies, insurers, people and claims in the sample data are fictional.
+> **Status:** the full app is being built in `frontend/` and `backend/`. Accounts, saved policies, languages, dark mode, document upload (with OCR for scans and photos) and policy understanding (clauses, key terms, waiting-period dates, clause search) work so far; the screens for these insights and the claim features are in progress. The original clickable demo is in `demo/`. All policies, insurers, people and claims in the sample data are fictional.
 
 ---
 
@@ -121,6 +121,8 @@ uvicorn app.main:app --reload --port 8000
 
 Run the tests with `pytest` from the `backend` folder. To try uploads, use the fictional files in `samples/` (a digital policy, a scanned copy, a schedule and a photo of a rejection letter). Uploaded files are encrypted in `backend/storage/`.
 
+**AI:** add `ANTHROPIC_API_KEY=...` to `backend/.env` and restart the backend to get plain-language explanations of every clause (English, Hindi, Hinglish) and AI-checked key terms. Without a key the app runs in basic mode: clauses, key terms and waiting periods are read with rules. Use **Read again** on Policy Insights to re-read a policy after adding the key. Clause search uses a local model that downloads once (about 220 MB) on first use.
+
 **Frontend** (React, runs on port 5173):
 
 ```bash
@@ -137,6 +139,8 @@ Open http://localhost:5173 and sign in with the demo account from `backend/.env.
 | `backend/tests/` | API tests |
 | `frontend/src/` | React app: pages, components, translations (`i18n/strings.ts`) |
 | `backend/app/extraction/` | Reads PDFs, scans and photos into clean page text (PyMuPDF + RapidOCR) |
+| `backend/app/understanding/` | Splits clauses, extracts key terms (Claude or rules), labels clauses, clause search |
+| `backend/app/rules/` | Exact date checks: continuous cover and waiting-period end dates |
 | `samples/` | Fictional policy documents for testing |
 | `demo/` | The original single-file clickable demo |
 
