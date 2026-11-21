@@ -6,7 +6,7 @@ ClaimSaathi is an AI-powered insurance companion for Indian policyholders. You u
 
 Built by **OverCooked Brains** for The Builder's Theory 1.0 (Finance & FinTech track).
 
-> **Status:** this repository contains a clickable demo of the website. All policies, insurers, people and claims in it are fictional sample data, and the AI features are shown with predefined results.
+> **Status:** the full app is being built in `frontend/` and `backend/`. Accounts, saved policies, languages and dark mode work so far; the AI features are in progress. The original clickable demo is in `demo/`. All policies, insurers, people and claims in the sample data are fictional.
 
 ---
 
@@ -102,6 +102,41 @@ The demo in this repository is a front-end preview. The full product is planned 
 | Reports | PDF generator | Evidence reports and complaint letters |
 
 The AI explains complex wording, while a rules engine does the exact date and amount checks. ClaimSaathi gives guidance based on the user's documents; it does not decide legal entitlement or replace professional advice.
+
+## Running the app locally
+
+You need Python 3.12+ and Node.js 20+.
+
+**Backend** (FastAPI, runs on port 8000):
+
+```bash
+cd backend
+python -m venv .venv
+.venv/Scripts/activate        # Windows; on macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env          # then set your own JWT_SECRET
+python -m app.seed            # creates the fictional demo account and sample policies
+uvicorn app.main:app --reload --port 8000
+```
+
+Run the tests with `pytest` from the `backend` folder.
+
+**Frontend** (React, runs on port 5173):
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 and sign in with the demo account from `backend/.env.example`, or create your own. The frontend forwards `/api` requests to the backend.
+
+| Folder | What's in it |
+|---|---|
+| `backend/app/` | API (`main.py`, `routers/`), database models, auth, seed data |
+| `backend/tests/` | API tests |
+| `frontend/src/` | React app: pages, components, translations (`i18n/strings.ts`) |
+| `demo/` | The original single-file clickable demo |
 
 ## Running the demo
 
