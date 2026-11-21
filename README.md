@@ -6,7 +6,7 @@ ClaimSaathi is an AI-powered insurance companion for Indian policyholders. You u
 
 Built by **OverCooked Brains** for The Builder's Theory 1.0 (Finance & FinTech track).
 
-> **Status:** the full app is being built in `frontend/` and `backend/`. Accounts, saved policies, languages and dark mode work so far; the AI features are in progress. The original clickable demo is in `demo/`. All policies, insurers, people and claims in the sample data are fictional.
+> **Status:** the full app is being built in `frontend/` and `backend/`. Accounts, saved policies, languages, dark mode and document upload (with OCR for scans and photos) work so far; the AI features are in progress. The original clickable demo is in `demo/`. All policies, insurers, people and claims in the sample data are fictional.
 
 ---
 
@@ -119,7 +119,7 @@ python -m app.seed            # creates the fictional demo account and sample po
 uvicorn app.main:app --reload --port 8000
 ```
 
-Run the tests with `pytest` from the `backend` folder.
+Run the tests with `pytest` from the `backend` folder. To try uploads, use the fictional files in `samples/` (a digital policy, a scanned copy, a schedule and a photo of a rejection letter). Uploaded files are encrypted in `backend/storage/`.
 
 **Frontend** (React, runs on port 5173):
 
@@ -136,6 +136,8 @@ Open http://localhost:5173 and sign in with the demo account from `backend/.env.
 | `backend/app/` | API (`main.py`, `routers/`), database models, auth, seed data |
 | `backend/tests/` | API tests |
 | `frontend/src/` | React app: pages, components, translations (`i18n/strings.ts`) |
+| `backend/app/extraction/` | Reads PDFs, scans and photos into clean page text (PyMuPDF + RapidOCR) |
+| `samples/` | Fictional policy documents for testing |
 | `demo/` | The original single-file clickable demo |
 
 ## Running the demo
