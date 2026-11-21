@@ -14,6 +14,7 @@ from ..documents import delete_document_files, process_document
 from ..extraction import sniff_content_type
 from ..models import Document, User
 from ..schemas import DocumentKind, DocumentOut, DocumentPageOut, DocumentUpdate
+from ..understanding.pipeline import after_document_read, understand_policy
 from .policies import get_owned_policy
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
@@ -91,12 +92,20 @@ def get_document(document_id: int, user: User = Depends(current_user), db: Sessi
 
 @router.patch("/{document_id}", response_model=DocumentOut)
 def update_document(
-    document_id: int, body: DocumentUpdate, user: User = Depends(current_user), db: Session = Depends(get_db)
+    document_id: int,
+    body: DocumentUpdate,
+    background: BackgroundTasks,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    session_factory: sessionmaker = Depends(get_session_factory),
 ) -> Document:
     """Fix a wrongly chosen document type without uploading the file again."""
     doc = _get_owned_document(document_id, user, db)
+    changed = doc.kind != body.kind
     doc.kind = body.kind
     db.commit()
+    if changed and doc.status == "ready":  # the policy it belongs to may now read differently
+        background.add_task(after_document_read, doc.id, session_factory)
     return doc
 
 
@@ -120,9 +129,18 @@ def download_file(document_id: int, user: User = Depends(current_user), db: Sess
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_document(document_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)) -> Response:
+def delete_document(
+    document_id: int,
+    background: BackgroundTasks,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+    session_factory: sessionmaker = Depends(get_session_factory),
+) -> Response:
     doc = _get_owned_document(document_id, user, db)
+    policy_id = doc.policy_id
     delete_document_files([doc])
     db.delete(doc)
     db.commit()
+    if policy_id is not None:  # re-read the policy from its remaining documents
+        background.add_task(understand_policy, policy_id, session_factory)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -19,6 +19,14 @@ def isolated_storage(tmp_path, monkeypatch):
     return tmp_path / "storage"
 
 
+@pytest.fixture(autouse=True)
+def offline_by_default(monkeypatch):
+    """Tests never call the real Claude API and don't load the embedding model unless they opt in."""
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setattr(get_settings(), "anthropic_api_key", None)
+    monkeypatch.setattr(get_settings(), "embeddings_enabled", False)
+
+
 @pytest.fixture
 def session_factory():
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)

@@ -1,7 +1,8 @@
 from datetime import date, datetime, timezone
 
 from sqlalchemy import JSON, BigInteger, Boolean, Date, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import func, select
+from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
 
 from .db import Base
 
@@ -121,3 +122,9 @@ class DocumentPage(Base):
     ocr_confidence: Mapped[float | None] = mapped_column(Float, default=None)  # average, 0..1
 
     document: Mapped[Document] = relationship(back_populates="pages")
+
+
+# Number of clauses, loaded with the policy in one query (shown on cards and lists).
+Policy.clause_count = column_property(
+    select(func.count(Clause.id)).where(Clause.policy_id == Policy.id).correlate_except(Clause).scalar_subquery()
+)

@@ -89,18 +89,34 @@ def _find_insurer(text: str) -> str | None:
     return max(found, key=len) if found else None
 
 
+_DOC_TITLE = r"(policy\s+)?(wording|schedule|terms\b.*|document|certificate)"
+
+
+def _find_plan_name(text: str) -> str | None:
+    """The plan name from the title block: 'DriveSure Comprehensive - Policy Wording' or, in a
+    schedule, the line after 'Policy Schedule': 'Suraksha Health Plus - Navjeevan ... Limited'."""
+    lines = [l.strip() for l in text.split("\n") if l.strip()][:4]
+    for line in lines:
+        line = re.sub(rf"\s*[-–|:]\s*{_DOC_TITLE}\s*$", "", line, flags=re.I)  # drop "- Policy Wording"
+        parts = re.split(r"\s+[-–|]\s+", line)
+        if len(parts) > 1 and _INSURER.match(parts[-1].strip()):  # drop "- <insurer>"
+            line = " - ".join(parts[:-1])
+        if re.fullmatch(_DOC_TITLE, line, re.I) or _INSURER.match(line) or re.match(r"\d", line):
+            continue
+        if re.match(r"(policy\s*(number|no|period)|sum\s*insured|policyholder|premium|uin)\b", line, re.I):
+            continue  # a "Label value" field line, not a title
+        if 2 < len(line) < 60:
+            return line
+    return None
+
+
 def basic_terms(schedule_text: str, wording_text: str, clauses: list[SplitClause]) -> PolicyTerms:
     """Rule-based reading of the schedule and wording. Precise on well-formatted documents."""
     t = PolicyTerms()
     all_text = f"{schedule_text}\n{wording_text}"
 
-    first_lines = [l.strip() for l in (wording_text or schedule_text).split("\n") if l.strip()]
-    if first_lines:
-        # "DriveSure Comprehensive - Policy Wording" -> "DriveSure Comprehensive"
-        name = re.sub(r"\s*[-–|:]\s*(policy\s+)?(wording|schedule|terms\b.*|document)\s*$", "", first_lines[0], flags=re.I)
-        if 2 < len(name) < 60 and not re.fullmatch(r"(policy\s+)?(wording|schedule)", name, re.I):
-            t.policy_name = name
     t.insurer = _find_insurer(all_text)
+    t.policy_name = _find_plan_name(wording_text) or _find_plan_name(schedule_text)
     if re.search(r"hospitali[sz]ation|sum insured|in-patient", all_text, re.I):
         t.category = "health"
     elif re.search(r"own damage|vehicle|\bIDV\b|private car", all_text, re.I):

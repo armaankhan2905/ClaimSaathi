@@ -57,7 +57,8 @@ MODEL_CACHED = (BASE_DIR / "models").exists() and any((BASE_DIR / "models").iter
         ("delivery of a baby", "3.7"),
     ],
 )
-def test_multilingual_semantic_search(question, expected_ref):
+def test_multilingual_semantic_search(question, expected_ref, monkeypatch):
+    monkeypatch.setattr(get_settings(), "embeddings_enabled", True)
     docs = _docs(with_vectors=True)
     best = search(question, docs, k=1)[0][0]
     assert docs[best].ref == expected_ref

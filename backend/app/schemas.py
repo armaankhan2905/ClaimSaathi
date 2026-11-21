@@ -51,6 +51,39 @@ class PolicyOut(BaseModel):
     cover_since: date | None
     renews_on: date | None
     highlights: dict
+    auto_created: bool = False
+    analysis_status: Literal["none", "running", "ready", "failed"] = "none"
+    analysis_mode: Literal["ai", "basic"] | None = None
+    analyzed_at: datetime | None = None
+    clause_count: int = 0
+
+
+class PolicyDetailOut(PolicyOut):
+    terms: dict | None = None  # understanding.terms.PolicyTerms
+    timeline: dict | None = None  # rules.coverage.policy_timeline
+
+
+ClauseCategory = Literal["coverage", "exclusion", "limit", "waiting_period", "definition", "condition", "claim_process", "grievance", "other"]
+
+
+class ClauseOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    ref: str
+    title: str
+    section_title: str
+    text: str
+    category: ClauseCategory
+    plain: dict | None  # {"en", "hi", "hn"}; None in basic mode
+    page_start: int
+    page_end: int
+    document_id: int | None
+
+
+class ClauseHit(BaseModel):
+    clause: ClauseOut
+    score: float
 
 
 DocumentKind = Literal[
@@ -82,6 +115,7 @@ class DocumentOut(BaseModel):
     error: str | None
     page_count: int | None
     ocr_pages: int
+    suggested_kind: DocumentKind | None = None
     created_at: datetime
 
 
