@@ -27,6 +27,16 @@ class Settings(BaseSettings):
     max_pages: int = 300
     ocr_dpi: int = 200
 
+    # Claude reads policies, labels clauses and writes plain-language explanations. Without a
+    # key ClaimSaathi falls back to "basic mode" (rule-based extraction, no explanations).
+    anthropic_api_key: str | None = None
+    ai_model: str = "claude-opus-5-5"
+    ai_enabled: bool = True
+
+    # Local embedding model for clause search (downloaded once, runs on this machine)
+    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    embeddings_enabled: bool = True
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
