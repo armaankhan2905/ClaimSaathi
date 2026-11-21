@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     demo_email: str = "rohit.demo@example.com"
     demo_password: str = "demo-pass-2026"
 
+    # Uploaded documents are encrypted at rest with this Fernet key. If unset, a key is
+    # generated once into <storage_dir>/.dev-key (fine locally, set it explicitly in production).
+    file_encryption_key: str | None = None
+    storage_dir: Path = BASE_DIR / "storage"
+    max_upload_mb: int = 20
+    max_pages: int = 300
+    ocr_dpi: int = 200
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

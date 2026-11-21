@@ -5,26 +5,41 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app import models  # noqa: F401  (registers tables)
-from app.db import Base, get_db
+from app.config import get_settings
+from app.db import Base, get_db, get_session_factory
 from app.main import app
 
 
+@pytest.fixture(autouse=True)
+def isolated_storage(tmp_path, monkeypatch):
+    """Every test gets its own empty, encrypted storage folder."""
+    s = get_settings()
+    monkeypatch.setattr(s, "storage_dir", tmp_path / "storage")
+    monkeypatch.setattr(s, "file_encryption_key", None)
+    return tmp_path / "storage"
+
+
 @pytest.fixture
-def db_session():
+def session_factory():
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
-    session = Session()
+    yield sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+    engine.dispose()
+
+
+@pytest.fixture
+def db_session(session_factory):
+    session = session_factory()
     try:
         yield session
     finally:
         session.close()
-        engine.dispose()
 
 
 @pytest.fixture
-def client(db_session):
+def client(db_session, session_factory):
     app.dependency_overrides[get_db] = lambda: db_session
+    app.dependency_overrides[get_session_factory] = lambda: session_factory
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()

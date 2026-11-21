@@ -24,6 +24,11 @@ def get_db() -> Iterator[Session]:
         db.close()
 
 
+def get_session_factory() -> sessionmaker:
+    """For background work that outlives the request (overridden in tests)."""
+    return SessionLocal
+
+
 def init_db() -> None:
     from . import models  # noqa: F401  (registers tables)
 
