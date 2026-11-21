@@ -1,6 +1,6 @@
 from datetime import date, datetime, timezone
 
-from sqlalchemy import JSON, BigInteger, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, BigInteger, Boolean, Date, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -25,7 +25,7 @@ class User(Base):
 
 
 class Policy(Base):
-    """A policy saved by a user. Clauses and documents are added in later stages."""
+    """A policy saved by a user, with what ClaimSaathi understood from its documents."""
 
     __tablename__ = "policies"
 
@@ -42,8 +42,42 @@ class Policy(Base):
     highlights: Mapped[dict] = mapped_column(JSON, default=dict)  # e.g. {"addons": [...], "warnings": [...]}
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
+    # Filled by policy understanding (Stage 2)
+    terms: Mapped[dict | None] = mapped_column(JSON, default=None)  # see understanding.terms.PolicyTerms
+    analysis_status: Mapped[str] = mapped_column(String(20), default="none")  # none | running | ready | failed
+    analysis_mode: Mapped[str | None] = mapped_column(String(10), default=None)  # ai | basic
+    analysis_error: Mapped[str | None] = mapped_column(String(200), default=None)
+    analyzed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    auto_created: Mapped[bool] = mapped_column(Boolean, default=False)  # made from an upload, details still being read
+
     owner: Mapped[User] = relationship(back_populates="policies")
     documents: Mapped[list["Document"]] = relationship(back_populates="policy", cascade="all, delete-orphan")
+    clauses: Mapped[list["Clause"]] = relationship(
+        back_populates="policy", cascade="all, delete-orphan", order_by="Clause.order"
+    )
+
+
+class Clause(Base):
+    """One numbered clause of a policy, with its category and plain-language explanation."""
+
+    __tablename__ = "clauses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    policy_id: Mapped[int] = mapped_column(ForeignKey("policies.id", ondelete="CASCADE"), index=True)
+    document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id", ondelete="SET NULL"), default=None)
+    order: Mapped[int] = mapped_column(Integer)
+    ref: Mapped[str] = mapped_column(String(20))  # "4.2"
+    title: Mapped[str] = mapped_column(String(200))
+    section_title: Mapped[str] = mapped_column(String(200))
+    text: Mapped[str] = mapped_column(Text)
+    page_start: Mapped[int] = mapped_column(Integer)
+    page_end: Mapped[int] = mapped_column(Integer)
+    # coverage | exclusion | limit | waiting_period | definition | condition | claim_process | grievance | other
+    category: Mapped[str] = mapped_column(String(20), default="other")
+    plain: Mapped[dict | None] = mapped_column(JSON, default=None)  # {"en": "...", "hi": "...", "hn": "..."}
+    embedding: Mapped[bytes | None] = mapped_column(LargeBinary, default=None)  # float32 vector
+
+    policy: Mapped[Policy] = relationship(back_populates="clauses")
 
 
 class Document(Base):
@@ -64,6 +98,7 @@ class Document(Base):
     error: Mapped[str | None] = mapped_column(String(80), default=None)  # machine-readable reason when failed
     page_count: Mapped[int | None] = mapped_column(Integer, default=None)
     ocr_pages: Mapped[int] = mapped_column(Integer, default=0)
+    suggested_kind: Mapped[str | None] = mapped_column(String(30), default=None)  # what the text looks like
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     owner: Mapped[User] = relationship(back_populates="documents")
