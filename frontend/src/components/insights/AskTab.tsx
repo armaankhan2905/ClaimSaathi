@@ -77,8 +77,82 @@ export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenC
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<StringKey | null>(null);
+  const [listening, setListening] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (_) {}
+      }
+    };
+  }, []);
+
+  function toggleListening() {
+    if (listening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (_) {}
+      }
+      setListening(false);
+      return;
+    }
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
+
+    try {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (_) {}
+      }
+
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = true;
+      rec.lang = lang === "hi" ? "hi-IN" : "en-IN";
+
+      rec.onstart = () => {
+        setListening(true);
+      };
+
+      rec.onresult = (event: any) => {
+        let transcript = "";
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (transcript) {
+          setInput(transcript);
+        }
+      };
+
+      rec.onerror = (event: any) => {
+        console.warn("Speech recognition error:", event.error);
+        setListening(false);
+      };
+
+      rec.onend = () => {
+        setListening(false);
+      };
+
+      rec.start();
+      recognitionRef.current = rec;
+    } catch (err) {
+      console.error("Speech recognition failed:", err);
+      setListening(false);
+    }
+  }
 
   useEffect(() => {
     setMessages(null);
@@ -163,6 +237,19 @@ export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenC
             maxLength={1000}
             className="min-w-0 flex-1 border-0 bg-transparent py-2 text-fg outline-none"
           />
+          <button
+            type="button"
+            onClick={toggleListening}
+            className={`grid h-[38px] w-[38px] flex-none place-items-center rounded-[10px] transition-colors ${
+              listening
+                ? "bg-bad text-white animate-pulse"
+                : "text-muted hover:bg-surface-2 hover:text-fg"
+            }`}
+            aria-label={listening ? "Stop listening" : "Speak your question"}
+            title={listening ? "Stop listening" : "Speak your question (Mic)"}
+          >
+            <Icon name="mic" className="h-[18px] w-[18px]" />
+          </button>
           <button type="submit" disabled={sending || !input.trim()} className="grid h-[38px] w-[38px] flex-none place-items-center rounded-[10px] bg-accent text-accent-ink disabled:opacity-40" aria-label={t("ask_send")} title={t("ask_send")}>
             <Icon name="arrow" className="h-[17px] w-[17px]" />
           </button>

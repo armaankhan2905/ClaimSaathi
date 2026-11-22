@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { useI18n } from "../i18n/I18nProvider";
 import type { StringKey } from "../i18n/strings";
 import { api, type Claim, type Complaint } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { formatDate } from "../lib/format";
 import { Icon } from "./Icon";
 
@@ -11,9 +12,14 @@ type Item = { key: string; to: string; when: string; kind: "check" | "complaint"
 /** Rejection checks and complaints in progress, newest first (hidden when there are none). */
 export function RecentCases() {
   const { t, lang } = useI18n();
+  const { user } = useAuth();
   const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
+    if (!user) {
+      setItems([]);
+      return;
+    }
     let live = true;
     Promise.all([api.listClaims(), api.listComplaints()])
       .then(([claims, complaints]: [Claim[], Complaint[]]) => {
@@ -46,9 +52,9 @@ export function RecentCases() {
     return () => {
       live = false;
     };
-  }, [t, lang]);
+  }, [t, lang, user]);
 
-  if (!items.length) return null;
+  if (!user || !items.length) return null;
   return (
     <section className="mt-[34px]" aria-labelledby="h-cases">
       <h2 id="h-cases" className="mb-3.5">

@@ -295,6 +295,7 @@ export const api = {
   signup: (b: { full_name: string; email: string; password: string; preferred_language: Lang }) =>
     request<TokenResponse>("POST", "/auth/signup", b),
   login: (b: { email: string; password: string }) => request<TokenResponse>("POST", "/auth/login", b),
+  devBypass: () => request<TokenResponse>("POST", "/auth/dev-bypass"),
   me: () => request<User>("GET", "/auth/me"),
   updateMe: (b: Partial<Pick<User, "full_name" | "preferred_language">>) => request<User>("PATCH", "/auth/me", b),
   listPolicies: () => request<Policy[]>("GET", "/policies"),

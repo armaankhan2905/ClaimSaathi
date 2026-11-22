@@ -48,3 +48,12 @@ def test_update_language(client, auth_headers):
     assert r.json()["preferred_language"] == "hi"
     bad = client.patch("/api/auth/me", json={"preferred_language": "fr"}, headers=auth_headers)
     assert bad.status_code == 422
+
+
+def test_dev_bypass(client):
+    r = client.post("/api/auth/dev-bypass")
+    assert r.status_code == 200
+    data = r.json()
+    assert "access_token" in data
+    assert data["user"]["email"] == "rohit.demo@example.com"
+

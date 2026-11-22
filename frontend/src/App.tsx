@@ -31,11 +31,11 @@ export default function App() {
               <Route element={<Layout barRight={<UserMenu />} />}>
                 <Route path="login" element={<LoginPage />} />
                 <Route path="signup" element={<SignupPage />} />
-                <Route index element={<RequireAuth><Home /></RequireAuth>} />
+                <Route index element={<Home />} />
                 <Route path="policy" element={<Page><PolicyInsights /></Page>} />
                 <Route path="rejection" element={<Page><RejectionCheck /></Page>} />
                 <Route path="complaint" element={<Page><ComplaintPage /></Page>} />
-                <Route path="*" element={<RequireAuth><Home /></RequireAuth>} />
+                <Route path="*" element={<Home />} />
               </Route>
             </Routes>
           </BrowserRouter>

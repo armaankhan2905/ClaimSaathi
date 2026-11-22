@@ -1,16 +1,23 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  // The main file is mostly React and the EN/हिं/Hinglish text (about 170 kB gzipped); pages load on demand.
-  build: { chunkSizeWarningLimit: 600 },
-  server: {
-    port: 5173,
-    proxy: {
-      // API_PORT lets a second copy run beside this one (default 8000)
-      "/api": `http://localhost:${process.env.API_PORT ?? "8000"}`,
+declare const process: { env: Record<string, string | undefined> };
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, ".");
+  const backendTarget = env.VITE_BACKEND_URL || `http://localhost:${env.API_PORT || process?.env?.API_PORT || "8000"}`;
+
+  return {
+    plugins: [react(), tailwindcss()],
+    // The main file is mostly React and the EN/हिं/Hinglish text (about 170 kB gzipped); pages load on demand.
+    build: { chunkSizeWarningLimit: 600 },
+    server: {
+      port: 5173,
+      proxy: {
+        // API_PORT lets a second copy run beside this one (default 8000)
+        "/api": backendTarget,
+      },
     },
-  },
+  };
 });

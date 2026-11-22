@@ -61,6 +61,19 @@ def login(body: LoginIn, request: Request, db: Session = Depends(get_db)) -> Tok
     return TokenOut(access_token=create_access_token(user.id), user=UserOut.model_validate(user))
 
 
+@router.post("/dev-bypass", response_model=TokenOut)
+def dev_bypass(db: Session = Depends(get_db)) -> TokenOut:
+    s = get_settings()
+    if s.is_production:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Dev bypass is disabled in production")
+    user = _find_by_email(db, s.demo_email)
+    if user is None:
+        from ..seed import seed
+
+        user = seed(db)
+    return TokenOut(access_token=create_access_token(user.id), user=UserOut.model_validate(user))
+
+
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(current_user)) -> User:
     return user

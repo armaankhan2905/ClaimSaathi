@@ -65,7 +65,7 @@ function useRedirectTarget() {
 
 export function LoginPage() {
   const { t } = useI18n();
-  const { user, login } = useAuth();
+  const { user, login, devBypass, isLocalhost } = useAuth();
   const navigate = useNavigate();
   const target = useRedirectTarget();
   const { busy, error, run } = useSubmit({ 401: "err_wrong_login", 422: "err_invalid", 429: "err_too_many" });
@@ -84,7 +84,47 @@ export function LoginPage() {
 
   return (
     <AuthCard title={t("login_title")} sub={t("login_sub")}>
-      <form onSubmit={onSubmit} className="mt-6 grid gap-4">
+      {isLocalhost && (
+        <div className="mt-4 rounded-xl border border-accent/25 bg-accent/5 p-3.5 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 font-semibold text-accent">
+              <Icon name="shield" className="h-4 w-4" />
+              Localhost Dev Bypass
+            </span>
+            <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[10.5px] font-semibold text-accent">DEV</span>
+          </div>
+          <p className="muted mt-1 text-[12px] leading-relaxed">
+            Running locally on localhost. Bypass login and sign in immediately as demo user.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn primary flex-1 py-1.5 text-xs font-semibold"
+              disabled={busy}
+              onClick={() => {
+                run(async () => {
+                  await devBypass();
+                  navigate(target, { replace: true });
+                });
+              }}
+            >
+              ⚡ Bypass Login (Demo Rohit)
+            </button>
+            <button
+              type="button"
+              className="btn py-1.5 px-2.5 text-xs"
+              disabled={busy}
+              onClick={() => {
+                setEmail("rohit.demo@example.com");
+                setPassword("demo-pass-2026");
+              }}
+            >
+              Fill Credentials
+            </button>
+          </div>
+        </div>
+      )}
+      <form onSubmit={onSubmit} className="mt-5 grid gap-4">
         <label className="field">
           {t("email")}
           <input className="input" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

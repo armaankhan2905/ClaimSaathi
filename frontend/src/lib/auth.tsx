@@ -4,12 +4,23 @@ import { useI18n } from "../i18n/I18nProvider";
 import type { Lang } from "../i18n/strings";
 import { api, ApiError, tokenStore, type TokenResponse, type User } from "./api";
 
+export const isLocalhost =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "::1" ||
+    window.location.hostname.endsWith(".localhost"));
+
+export const DEV_LOGGED_OUT_KEY = "claimsaathi-dev-logged-out";
+
 type AuthState = {
   user: User | null;
   ready: boolean; // finished checking a saved token
   login: (email: string, password: string) => Promise<void>;
   signup: (full_name: string, email: string, password: string, preferred_language: Lang) => Promise<void>;
   logout: () => void;
+  devBypass: () => Promise<void>;
+  isLocalhost: boolean;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -17,16 +28,57 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { lang, setLang } = useI18n();
   const [user, setUser] = useState<User | null>(null);
-  const [ready, setReady] = useState(() => tokenStore.get() === null);
+  const [ready, setReady] = useState(false);
+
+  const applySession = useCallback(
+    (r: TokenResponse) => {
+      tokenStore.set(r.access_token);
+      lastSynced.current = r.user.preferred_language;
+      setLang(r.user.preferred_language);
+      setUser(r.user);
+    },
+    [setLang],
+  );
+
+  const devBypass = useCallback(async () => {
+    try {
+      sessionStorage.removeItem(DEV_LOGGED_OUT_KEY);
+    } catch {}
+    try {
+      const r = await api.devBypass();
+      applySession(r);
+    } catch (e) {
+      console.warn("API dev-bypass failed, falling back to demo login or mock user:", e);
+      try {
+        const r = await api.login({ email: "rohit.demo@example.com", password: "demo-pass-2026" });
+        applySession(r);
+      } catch {
+        const mockUser: User = {
+          id: 1,
+          email: "rohit.demo@example.com",
+          full_name: "Rohit Sharma (Dev Demo)",
+          preferred_language: lang,
+        };
+        tokenStore.set("dev-mock-token-" + Date.now());
+        setUser(mockUser);
+      }
+    }
+  }, [applySession, lang]);
 
   // Restore the session from a saved token.
   useEffect(() => {
-    if (!tokenStore.get()) return;
+    const savedToken = tokenStore.get();
+    if (!savedToken) {
+      setReady(true);
+      return;
+    }
     api
       .me()
       .then(setUser)
       .catch((e) => {
-        if (e instanceof ApiError && e.status === 401) tokenStore.set(null);
+        if (e instanceof ApiError && e.status === 401) {
+          tokenStore.set(null);
+        }
       })
       .finally(() => setReady(true));
   }, []);
@@ -39,30 +91,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     api.updateMe({ preferred_language: lang }).then(setUser).catch(() => {});
   }, [lang, user]);
 
-  const applySession = useCallback(
-    (r: TokenResponse) => {
-      tokenStore.set(r.access_token);
-      lastSynced.current = r.user.preferred_language;
-      setLang(r.user.preferred_language);
-      setUser(r.user);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      try {
+        sessionStorage.removeItem(DEV_LOGGED_OUT_KEY);
+      } catch {}
+      applySession(await api.login({ email, password }));
     },
-    [setLang],
+    [applySession],
   );
 
-  const login = useCallback(async (email: string, password: string) => applySession(await api.login({ email, password })), [applySession]);
-
   const signup = useCallback(
-    async (full_name: string, email: string, password: string, preferred_language: Lang) =>
-      applySession(await api.signup({ full_name, email, password, preferred_language })),
+    async (full_name: string, email: string, password: string, preferred_language: Lang) => {
+      try {
+        sessionStorage.removeItem(DEV_LOGGED_OUT_KEY);
+      } catch {}
+      applySession(await api.signup({ full_name, email, password, preferred_language }));
+    },
     [applySession],
   );
 
   const logout = useCallback(() => {
+    try {
+      sessionStorage.setItem(DEV_LOGGED_OUT_KEY, "true");
+    } catch {}
     tokenStore.set(null);
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ user, ready, login, signup, logout }), [user, ready, login, signup, logout]);
+  const value = useMemo(
+    () => ({ user, ready, login, signup, logout, devBypass, isLocalhost }),
+    [user, ready, login, signup, logout, devBypass],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

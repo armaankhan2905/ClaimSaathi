@@ -7,7 +7,8 @@ import { PolicyCard } from "../components/PolicyCard";
 import { RecentCases } from "../components/RecentCases";
 import { useI18n } from "../i18n/I18nProvider";
 import type { StringKey } from "../i18n/strings";
-import { api, type Policy } from "../lib/api";
+import { api, type Policy, type User } from "../lib/api";
+import { useAuth } from "../lib/auth";
 
 const FEATURES: { to: string; icon: IconName; eyebrow: StringKey; title: StringKey; items: StringKey[] }[] = [
   {
@@ -62,30 +63,36 @@ function PolicySkeleton() {
   );
 }
 
-function usePolicies() {
+function usePolicies(user: User | null) {
   const [policies, setPolicies] = useState<Policy[] | null>(null);
   const [failed, setFailed] = useState(false);
   const load = useCallback(() => {
+    if (!user) {
+      setPolicies(null);
+      setFailed(false);
+      return;
+    }
     setFailed(false);
     setPolicies(null);
     api.listPolicies().then(setPolicies).catch(() => setFailed(true));
-  }, []);
+  }, [user]);
   useEffect(load, [load]);
 
   // Refresh quietly while a policy is still being read, so its card fills in by itself.
   const reading = policies?.some((p) => p.status === "processing" || p.analysis_status === "running") ?? false;
   useEffect(() => {
-    if (!reading) return;
+    if (!reading || !user) return;
     const id = setInterval(() => api.listPolicies().then(setPolicies).catch(() => {}), 2000);
     return () => clearInterval(id);
-  }, [reading]);
+  }, [reading, user]);
 
   return { policies, failed, reload: load };
 }
 
 export function Home() {
   const { t } = useI18n();
-  const { policies, failed, reload } = usePolicies();
+  const { user } = useAuth();
+  const { policies, failed, reload } = usePolicies(user);
   usePageTitle();
 
   return (
@@ -144,44 +151,69 @@ export function Home() {
         ))}
       </div>
 
-      {/* Saved policies */}
-      <div className="mt-[34px] mb-3.5 flex flex-wrap items-baseline justify-between gap-3">
-        <h2>{t("your_policies")}</h2>
-      </div>
-      {failed ? (
-        <div className="panel flex flex-wrap items-center gap-3">
-          <Icon name="alert" className="h-5 w-5 text-bad" />
-          <p className="flex-1">{t("load_error")}</p>
-          <button type="button" className="btn" onClick={reload}>
-            {t("retry")}
-          </button>
-        </div>
-      ) : policies === null ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          <PolicySkeleton />
-          <PolicySkeleton />
-        </div>
-      ) : policies.length === 0 ? (
-        <div className="panel grid justify-items-center gap-2 py-10 text-center">
-          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[var(--accent-soft)] text-accent">
-            <Icon name="doc" className="h-7 w-7" />
-          </span>
-          <h3 className="mt-1 text-lg">{t("no_policies_title")}</h3>
-          <p className="muted max-w-[44ch] text-sm">{t("no_policies_text")}</p>
-          <Link to="/policy" className="btn primary mt-2">
-            <Icon name="upload" />
-            {t("cta_upload")}
-          </Link>
+      {!user ? (
+        <div className="panel mt-8 flex flex-col items-center justify-between gap-4 py-7 sm:flex-row">
+          <div className="flex items-center gap-3.5">
+            <span className="grid h-12 w-12 flex-none place-items-center rounded-2xl bg-[var(--accent-soft)] text-accent">
+              <Icon name="shield" className="h-6 w-6" />
+            </span>
+            <div>
+              <h3 className="text-base font-semibold">{t("guest_cta_title")}</h3>
+              <p className="muted text-sm">{t("guest_cta_sub")}</p>
+            </div>
+          </div>
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            <Link to="/login" className="btn primary flex-1 sm:flex-none">
+              <Icon name="user" />
+              {t("sign_in")}
+            </Link>
+            <Link to="/signup" className="btn flex-1 sm:flex-none">
+              {t("sign_up")}
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {policies.map((p, i) => (
-            <PolicyCard key={p.id} policy={p} index={i} />
-          ))}
-        </div>
-      )}
+        <>
+          {/* Saved policies */}
+          <div className="mt-[34px] mb-3.5 flex flex-wrap items-baseline justify-between gap-3">
+            <h2>{t("your_policies")}</h2>
+          </div>
+          {failed ? (
+            <div className="panel flex flex-wrap items-center gap-3">
+              <Icon name="alert" className="h-5 w-5 text-bad" />
+              <p className="flex-1">{t("load_error")}</p>
+              <button type="button" className="btn" onClick={reload}>
+                {t("retry")}
+              </button>
+            </div>
+          ) : policies === null ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              <PolicySkeleton />
+              <PolicySkeleton />
+            </div>
+          ) : policies.length === 0 ? (
+            <div className="panel grid justify-items-center gap-2 py-10 text-center">
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[var(--accent-soft)] text-accent">
+                <Icon name="doc" className="h-7 w-7" />
+              </span>
+              <h3 className="mt-1 text-lg">{t("no_policies_title")}</h3>
+              <p className="muted max-w-[44ch] text-sm">{t("no_policies_text")}</p>
+              <Link to="/policy" className="btn primary mt-2">
+                <Icon name="upload" />
+                {t("cta_upload")}
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {policies.map((p, i) => (
+                <PolicyCard key={p.id} policy={p} index={i} />
+              ))}
+            </div>
+          )}
 
-      <RecentCases />
+          <RecentCases />
+        </>
+      )}
 
       <p className="disclaimer">{t("disclaimer")}</p>
     </section>
