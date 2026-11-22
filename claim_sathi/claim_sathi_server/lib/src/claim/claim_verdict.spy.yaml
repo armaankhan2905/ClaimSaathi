@@ -1,0 +1,30 @@
+### Legal claim audit verdict reconciled from camera documents and voice statements.
+class: ClaimVerdict
+table: claim_verdict
+fields:
+  ### Claim tracking number
+  claimNumber: String
+  ### Policyholder full name
+  policyholderName: String
+  ### Insurance provider company
+  insurerName: String
+  ### Total claimed medical or vehicle repair amount in INR
+  claimedAmount: double
+  ### Audit verdict: OVERTURN_REJECTION, FULLY_PAYABLE, DISPUTE_RECOMMENDED
+  verdictStatus: String
+  ### Insurance policy clause wrongfully invoked by insurer
+  disputedClause: String
+  ### Legal statute or IRDAI regulation protecting the policyholder
+  legalBasis: String
+  ### Audible verbal defense script in Hindi for playback via Speaker
+  spokenDefenseHindi: String
+  ### Audible verbal defense script in English for playback via Speaker
+  spokenDefenseEnglish: String
+  ### Formatted legal grievance notice to Insurance Ombudsman and Insurer
+  grievanceLetterMarkdown: String
+  ### Total count of supporting camera evidence items linked
+  evidenceCount: int
+  ### Total count of supporting voice statements linked
+  voiceStatementsCount: int
+  ### Timestamp of audit evaluation
+  timestamp: DateTime

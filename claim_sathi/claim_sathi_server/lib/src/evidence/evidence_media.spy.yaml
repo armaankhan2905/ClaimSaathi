@@ -1,0 +1,16 @@
+### Evidence media item captured via camera or uploaded as proof.
+class: EvidenceMedia
+table: evidence_media
+fields:
+  ### User-assigned or auto-generated title for this evidence item.
+  title: String
+  ### Category: vehicle_damage, hospital_bill, rejection_letter, prescription, other.
+  category: String
+  ### Media format: image, audio, or document.
+  mediaType: String
+  ### Base64 data payload or image data URI.
+  dataBase64: String
+  ### Optional user notes or voice transcript.
+  notes: String?
+  ### Timestamp when the evidence was recorded.
+  timestamp: DateTime

@@ -1,0 +1,28 @@
+emailIdp:
+  - startOtpLogin:
+  - verifyOtpLoginCode:
+  - finishOtpLogin:
+  - finishOtpRegistration:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
+jwtRefresh:
+  - refreshAccessToken:
+claim:
+  - evaluateClaim:
+  - getLatestVerdict:
+evidence:
+  - uploadEvidence:
+  - getEvidenceList:
+  - deleteEvidence:
+greeting:
+  - hello:
+voice:
+  - recordVoiceStatement:
+  - getVoiceStatements:
+  - deleteVoiceStatement:

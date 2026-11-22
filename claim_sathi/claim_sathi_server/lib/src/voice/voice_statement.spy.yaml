@@ -1,0 +1,22 @@
+### Voice statement recorded via microphone (Gnani AI transcription).
+class: VoiceStatement
+table: voice_statement
+fields:
+  ### Speaker role: policyholder, attending_doctor, surveyor, eyewitness
+  speakerRole: String
+  ### Language: hi-IN, en-IN, hinglish
+  language: String
+  ### Duration of the recorded statement in seconds
+  durationSeconds: int
+  ### Transcribed text of the voice note
+  transcript: String
+  ### Key factual entities extracted from statement (e.g. onset, emergency, symptoms)
+  extractedKeyFacts: String?
+  ### Confidence score of the speech-to-text recognition (0.0 - 1.0)
+  confidenceScore: double
+  ### Base64 encoded audio or data URI
+  audioDataBase64: String?
+  ### Timestamp when the voice statement was recorded
+  timestamp: DateTime
+  ### Associated claim ID reference if available
+  claimId: String?

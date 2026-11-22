@@ -26,3 +26,21 @@ backend/models/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Dart / Flutter / Serverpod
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.serverpod/
+passwords.yaml
+.agents/
+.dart_skills/
+.checkpoints/
+.claude/
+.pre-pull-*/
+
