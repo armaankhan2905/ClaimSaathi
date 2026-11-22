@@ -139,9 +139,10 @@ export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenC
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+      setError("ask_mic_unsupported");
       return;
     }
+    setError(null);
 
     try {
       if (recognitionRef.current) {
@@ -172,6 +173,8 @@ export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenC
       rec.onerror = (event: any) => {
         console.warn("Speech recognition error:", event.error);
         setListening(false);
+        if (event.error === "aborted") return; // stopped on purpose
+        setError(event.error === "not-allowed" || event.error === "service-not-allowed" ? "ask_mic_denied" : "ask_mic_error");
       };
 
       rec.onend = () => {

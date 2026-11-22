@@ -23,6 +23,21 @@ export function CameraScannerModal({
   const [streaming, setStreaming] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Whether the Flutter app is actually running, so the tab never claims a connection that isn't there.
+  const [flutterUp, setFlutterUp] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!isOpen || tab !== "flutter") return;
+    let cancelled = false;
+    setFlutterUp(null);
+    // An opaque no-cors response still means something answered; a refused connection rejects.
+    fetch(FLUTTER_APP_URL, { mode: "no-cors", cache: "no-store" })
+      .then(() => !cancelled && setFlutterUp(true))
+      .catch(() => !cancelled && setFlutterUp(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, tab]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -206,7 +221,11 @@ export function CameraScannerModal({
                 <div className="flex items-center justify-between rounded-xl bg-accent/10 px-3.5 py-2.5 text-xs text-accent">
                   <span className="flex items-center gap-2">
                     <Icon name="shield" className="h-4 w-4" />
-                    Dart / Flutter Evidence Screen (Connected on port 5174)
+                    {flutterUp === null
+                      ? "Dart / Flutter Evidence Screen (checking port 5174…)"
+                      : flutterUp
+                        ? "Dart / Flutter Evidence Screen (Connected on port 5174)"
+                        : "Dart / Flutter app isn't running on port 5174"}
                   </span>
                   <a
                     href={FLUTTER_APP_URL}
@@ -218,14 +237,26 @@ export function CameraScannerModal({
                     {t("flutter_open_app")}
                   </a>
                 </div>
-                <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-line bg-black">
-                  <iframe
-                    src={FLUTTER_APP_URL}
-                    title="ClaimSaathi Flutter App Scanner"
-                    className="h-full w-full border-0"
-                    allow="camera; microphone; display-capture"
-                  />
-                </div>
+                {flutterUp === false ? (
+                  <div className="grid h-[420px] w-full place-content-center gap-2 rounded-xl border border-line bg-surface-2 p-6 text-center text-[13px]">
+                    <p className="m-0 font-semibold">Start the Flutter app to use this screen:</p>
+                    <code className="rounded-lg bg-surface px-3 py-2 text-[12px]">
+                      cd claim_sathi/claim_sathi_flutter &amp;&amp; flutter run -d chrome --web-port 5174
+                    </code>
+                    <p className="muted m-0">The live camera tab works without it.</p>
+                  </div>
+                ) : (
+                  <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-line bg-black">
+                    {flutterUp && (
+                      <iframe
+                        src={FLUTTER_APP_URL}
+                        title="ClaimSaathi Flutter App Scanner"
+                        className="h-full w-full border-0"
+                        allow="camera; microphone; display-capture"
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center">

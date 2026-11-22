@@ -152,3 +152,67 @@ def test_real_sample_documents_are_recognised():
         if (samples / name).exists():
             text = "\n\n".join(p.text for p in extract((samples / name).read_bytes(), "application/pdf"))
             assert suggest_kind(text) == kind, name
+
+
+MOTOR_WORDING = [["DriveSure Comprehensive - Policy Wording", "Kavach Motor Insurance Company Limited", "1. Own damage",
+                  "We cover loss or damage to the insured vehicle and its accessories.", "2. Exclusions",
+                  "Engine damage from water entry is not covered without the engine protect add-on."]]
+
+
+def test_document_for_another_kind_of_policy_gets_its_own_card(client, db_session):
+    """A motor wording uploaded while the health policy was selected must not mix into it."""
+    seed(db_session)
+    demo = demo_headers(client)
+    suraksha = next(p for p in _policies(client, demo) if p["name"] == "Suraksha Health Plus")
+    upload(client, demo, text_pdf(WORDING), name="suraksha-wording.pdf", policy_id=suraksha["id"])
+    upload(client, demo, text_pdf(MOTOR_WORDING), name="drivesure-wording.pdf", policy_id=suraksha["id"])
+
+    clauses = client.get(f"/api/policies/{suraksha['id']}/clauses", headers=demo).json()
+    assert [c["ref"] for c in clauses] == ["1", "2.1", "4.1", "4.2", "5"]  # only the health wording's clauses
+    docs = {d["filename"]: d["policy_id"] for d in client.get("/api/documents", headers=demo).json()}
+    drivesure = next(p for p in _policies(client, demo) if p["name"] == "DriveSure Comprehensive")
+    assert docs["drivesure-wording.pdf"] == drivesure["id"]  # merged into the matching motor card
+
+
+def test_one_failed_label_batch_keeps_the_other_explanations(client, auth_headers, monkeypatch):
+    from app.ai import AIError
+
+    def respond(schema, prompt):
+        if schema is PolicyTerms:
+            return PolicyTerms(policy_name="Suraksha Health Plus", category="health")
+        if 'ref="4.2"' in prompt:
+            raise AIError("rate limited")  # this batch fails both attempts
+        refs = [r for r in ("1", "2.1", "4.1", "4.2", "5") if f'ref="{r}"' in prompt]
+        return ClauseLabels(items=[ClauseLabel(ref=r, category="coverage", plain_en=f"Plain {r}", plain_hi="h", plain_hn="n") for r in refs])
+
+    fake = FakeAI(respond)
+    fake.clause_batch_size = 2  # batches: [1, 2.1], [4.1, 4.2], [5]
+    monkeypatch.setattr("app.understanding.pipeline.get_ai", lambda: fake)
+    upload(client, auth_headers, text_pdf(WORDING), name="w.pdf")
+    p = _policies(client, auth_headers)[0]
+    assert p["analysis_mode"] == "ai"
+    plain = {c["ref"]: c["plain"] for c in client.get(f"/api/policies/{p['id']}/clauses", headers=auth_headers).json()}
+    assert plain["1"]["en"] == "Plain 1" and plain["5"]["en"] == "Plain 5"
+    assert plain["4.1"] is None and plain["4.2"] is None
+
+
+def test_policy_without_any_explanations_is_not_called_ai(client, auth_headers, monkeypatch):
+    from app.ai import AIError
+
+    def respond(schema, prompt):
+        if schema is PolicyTerms:
+            return PolicyTerms(policy_name="Suraksha Health Plus", category="health")
+        raise AIError("rate limited")
+
+    monkeypatch.setattr("app.understanding.pipeline.get_ai", lambda: FakeAI(respond))
+    upload(client, auth_headers, text_pdf(WORDING), name="w.pdf")
+    assert _policies(client, auth_headers)[0]["analysis_mode"] == "basic"  # so the app offers "Read again"
+
+
+def test_same_file_uploaded_twice_lists_clauses_once(client, auth_headers):
+    pdf = text_pdf(WORDING)
+    upload(client, auth_headers, pdf, name="w.pdf")
+    [p] = _policies(client, auth_headers)
+    upload(client, auth_headers, pdf, name="w-again.pdf", policy_id=p["id"])
+    clauses = client.get(f"/api/policies/{p['id']}/clauses", headers=auth_headers).json()
+    assert [c["ref"] for c in clauses] == ["1", "2.1", "4.1", "4.2", "5"]

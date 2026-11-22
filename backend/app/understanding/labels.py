@@ -87,20 +87,31 @@ def label_clauses(clauses: list[SplitClause], ai: AIClientProtocol | None) -> tu
         return basic, "basic"
 
     size = ai.clause_batch_size  # sized per provider (Groq's free plan needs small requests)
-    batches = [clauses[i : i + size] for i in range(0, len(clauses), size)]
-    try:
-        with ThreadPoolExecutor(max_workers=ai.parallel_requests) as pool:
-            labelled: dict[str, ClauseLabel] = {}
-            for part in pool.map(lambda b: _label_batch(ai, b), batches):
-                labelled.update(part)
-    except AIError as e:
-        log.warning("AI clause labelling failed (%s); using basic mode", e)
+    batches = [list(range(i, min(i + size, len(clauses)))) for i in range(0, len(clauses), size)]
+
+    def run(idx: list[int]) -> dict[int, ClauseLabel]:
+        # One retry, and a failed batch only costs its own clauses their explanations (a single
+        # rate-limit error used to drop every explanation in the policy).
+        batch = [clauses[i] for i in idx]
+        for attempt in (1, 2):
+            try:
+                by_ref = _label_batch(ai, batch)
+                return {i: by_ref[clauses[i].ref] for i in idx if clauses[i].ref in by_ref}
+            except AIError as e:
+                log.warning("AI clause labelling failed for %s (attempt %s): %s", [c.ref for c in batch], attempt, e)
+        return {}
+
+    labelled: dict[int, ClauseLabel] = {}
+    with ThreadPoolExecutor(max_workers=ai.parallel_requests) as pool:
+        for part in pool.map(run, batches):
+            labelled.update(part)
+    if not labelled:
         return basic, "basic"
 
     out = []
-    for c, fallback in zip(clauses, basic):
-        item = labelled.get(c.ref)
-        if item is None:  # the model skipped a clause: keep the rule-based category, no explanation
+    for i, fallback in enumerate(basic):
+        item = labelled.get(i)
+        if item is None:  # the model skipped a clause or its batch failed: rule-based category, no explanation
             out.append(fallback)
         else:
             out.append((item.category, {"en": item.plain_en, "hi": item.plain_hi, "hn": item.plain_hn}))

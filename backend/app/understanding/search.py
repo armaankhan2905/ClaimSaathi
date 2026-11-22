@@ -69,6 +69,36 @@ def _tokens(s: str) -> list[str]:
     return [w for w in re.findall(r"[a-z0-9ऀ-ॿ]+", s.lower()) if w not in _STOP and len(w) > 1]
 
 
+# Everyday Hindi / Hinglish words people use for what policies say in English. The multilingual
+# model only loosely links "ghutne ka operation" to "knee replacement surgery", so the English words
+# are added to the question before searching.
+_GLOSSARY: dict[str, str] = {
+    "ghutna": "knee joint", "ghutne": "knee joint", "ghutno": "knee joint", "घुटना": "knee joint", "घुटने": "knee joint",
+    "operation": "surgery", "opreshan": "surgery", "ऑपरेशन": "surgery", "सर्जरी": "surgery",
+    "motiyabind": "cataract", "मोतियाबिंद": "cataract",
+    "daant": "dental", "dant": "dental", "दांत": "dental", "दाँत": "dental",
+    "kamra": "room", "kamre": "room", "कमरा": "room", "कमरे": "room", "kiraya": "rent", "किराया": "rent",
+    "delivery": "maternity childbirth", "prasav": "maternity childbirth", "प्रसव": "maternity childbirth",
+    "bachcha": "maternity newborn", "बच्चा": "maternity newborn", "pregnancy": "maternity",
+    "sugar": "diabetes", "madhumeh": "diabetes", "मधुमेह": "diabetes", "शुगर": "diabetes",
+    "pathri": "stones", "पथरी": "stones",
+    "bharti": "hospitalisation admission", "भर्ती": "hospitalisation admission",
+    "ilaj": "treatment", "ilaaj": "treatment", "इलाज": "treatment",
+    "bimari": "illness disease", "beemari": "illness disease", "बीमारी": "illness disease",
+    "purani": "pre-existing", "पुरानी": "pre-existing",
+    "durghatna": "accident", "दुर्घटना": "accident", "hadsa": "accident", "हादसा": "accident",
+    "dawai": "medicines pharmacy", "दवाई": "medicines pharmacy", "दवा": "medicines pharmacy",
+    "intezaar": "waiting period", "इंतज़ार": "waiting period", "इंतजार": "waiting period",
+    "claim": "claim", "kharcha": "expenses", "खर्चा": "expenses", "खर्च": "expenses",
+}
+
+
+def expand_query(query: str) -> str:
+    """The question plus English words for the Hindi / Hinglish ones in it."""
+    extra = [_GLOSSARY[w] for w in re.findall(r"[a-zऀ-ॿ]+", query.lower()) if w in _GLOSSARY]
+    return f"{query} {' '.join(extra)}" if extra else query
+
+
 @dataclass
 class SearchDoc:
     """What search needs from a clause (kept independent of the database model)."""
@@ -83,6 +113,7 @@ def search(query: str, docs: list[SearchDoc], k: int = 5) -> list[tuple[int, flo
     """Returns [(doc key, score 0..1)], best first."""
     if not docs or not query.strip():
         return []
+    query = expand_query(query)
 
     # Keyword part: IDF-weighted overlap, scaled to 0..1
     doc_tokens = [set(_tokens(d.text)) for d in docs]

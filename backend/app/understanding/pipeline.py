@@ -23,7 +23,7 @@ from .dates import parse_date
 from .kinds import is_policy_document, suggest_kind
 from .labels import label_clauses
 from .search import clause_search_text, embed, to_bytes
-from .terms import PolicyTerms, extract_terms
+from .terms import PolicyTerms, basic_terms, extract_terms
 
 log = logging.getLogger(__name__)
 # One user's policies are understood one at a time, so two uploads finishing together can't
@@ -48,6 +48,14 @@ def after_document_read(document_id: int, session_factory: sessionmaker) -> None
         if doc is None or doc.status != "ready":
             return
         doc.suggested_kind = suggest_kind(_doc_text(doc))
+        if is_policy_document(doc.kind, doc.suggested_kind) and doc.policy_id is not None:
+            chosen = db.get(Policy, doc.policy_id)
+            if chosen is not None and _belongs_to_another_policy(doc, chosen):
+                # e.g. a motor wording uploaded while a health policy was selected: give it its own
+                # card (merged below into the matching policy, if the user has one) instead of
+                # mixing its clauses into the wrong policy.
+                log.info("Document %s doesn't match policy %s; giving it its own card", doc.id, chosen.id)
+                doc.policy_id = None
         if is_policy_document(doc.kind, doc.suggested_kind) and doc.policy_id is None:
             policy = Policy(
                 owner_id=doc.owner_id,
@@ -83,6 +91,9 @@ def understand_policy(policy_id: int, session_factory: sessionmaker) -> None:
             if any(d.status == "processing" for d in docs):
                 return  # runs again when the last one is read
             docs = sorted((d for d in docs if d.status == "ready"), key=lambda d: (d.created_at, d.id))
+            # The same file uploaded twice must not list every clause twice.
+            seen: set[str] = set()
+            docs = [d for d in docs if not (d.sha256 in seen or seen.add(d.sha256))]
             if not docs:
                 policy.clauses = []
                 policy.terms = None
@@ -160,7 +171,8 @@ def _analyse(db: Session, policy: Policy, docs: list[Document]) -> int | None:
     ]
     _apply_terms(policy, terms)
     policy.terms = terms.model_dump()
-    policy.analysis_mode = "ai" if "ai" in (terms_mode, label_mode) else "basic"
+    # "ai" means the clause explanations exist: AI key terms alone would show an empty "What it means".
+    policy.analysis_mode = label_mode if split else terms_mode
     policy.analysis_status = "ready"
     policy.analysis_error = None
     policy.analyzed_at = datetime.now(timezone.utc)
@@ -170,6 +182,23 @@ def _analyse(db: Session, policy: Policy, docs: list[Document]) -> int | None:
 
 def _norm(s: str | None) -> str:
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
+
+def _belongs_to_another_policy(doc: Document, policy: Policy) -> bool:
+    """True only when the document clearly describes a different policy than the one it was
+    uploaded to: another kind of insurance, or a policy number this policy has never had."""
+    text = _doc_text(doc)
+    is_schedule = doc.kind in ("policy_schedule", "previous_policy")
+    found = basic_terms(text if is_schedule else "", "" if is_schedule else text, [])
+    known = {"health", "motor", "life", "travel"}
+    if found.category in known and policy.category in known and found.category != policy.category:
+        return True
+    if found.policy_number and policy.policy_number:
+        numbers = {_norm(policy.policy_number)}
+        numbers |= {_norm(p.get("policy_number") or "") for p in ((policy.terms or {}).get("policy_history") or [])}
+        if _norm(found.policy_number) not in numbers:
+            return True  # renewals of this policy are in its history; any other number is another policy
+    return False
 
 
 def _find_twin(db: Session, policy: Policy, terms: PolicyTerms) -> Policy | None:

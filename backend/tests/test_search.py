@@ -62,3 +62,11 @@ def test_multilingual_semantic_search(question, expected_ref, monkeypatch):
     docs = _docs(with_vectors=True)
     best = search(question, docs, k=1)[0][0]
     assert docs[best].ref == expected_ref
+
+
+def test_hinglish_and_hindi_words_are_expanded_to_english():
+    from app.understanding.search import expand_query
+
+    assert "knee" in expand_query("ghutne ka operation") and "surgery" in expand_query("ghutne ka operation")
+    assert "cataract" in expand_query("मोतियाबिंद का इलाज")
+    assert expand_query("room rent limit") == "room rent limit"  # English questions are left alone

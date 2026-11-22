@@ -22,7 +22,7 @@ function Cite({ refId, onOpen }: { refId: string; onOpen: (ref: string) => void 
 
 function Fact({ label, value, sub }: { label: string; value: ReactNode; sub?: ReactNode }) {
   return (
-    <div className="min-w-0 bg-surface px-4 py-3.5">
+    <div className="min-w-0 bg-surface px-4 py-3.5 shadow-[1px_1px_0_0_var(--line)]">
       <dt className="text-[12px] text-muted">{label}</dt>
       <dd className="m-0 mt-1 text-[15.5px] font-semibold">
         {value}
@@ -119,7 +119,9 @@ export function DetailsTab({
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-      <dl className="num m-0 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-px overflow-hidden rounded-xl border border-line bg-line">
+      {/* Lines are drawn by each cell (not by gaps over a grey background), so a short last row
+          leaves plain card colour instead of a grey block. */}
+      <dl className="num m-0 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] overflow-hidden rounded-xl border border-line bg-surface">
         <Fact
           label={isMotor ? t("idv") : t("sum_insured")}
           value={sumInsured ? formatRupees(sumInsured, lang) : missing}

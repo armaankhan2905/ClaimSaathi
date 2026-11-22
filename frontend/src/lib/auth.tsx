@@ -48,22 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const r = await api.devBypass();
       applySession(r);
     } catch (e) {
-      console.warn("API dev-bypass failed, falling back to demo login or mock user:", e);
-      try {
-        const r = await api.login({ email: "rohit.demo@example.com", password: "demo-pass-2026" });
-        applySession(r);
-      } catch {
-        const mockUser: User = {
-          id: 1,
-          email: "rohit.demo@example.com",
-          full_name: "Rohit Sharma (Dev Demo)",
-          preferred_language: lang,
-        };
-        tokenStore.set("dev-mock-token-" + Date.now());
-        setUser(mockUser);
-      }
+      // Backend unreachable: let the error reach the page ("Can't reach the server") instead of
+      // pretending to be signed in, which would only make every page fail afterwards.
+      if (e instanceof ApiError && e.status === 0) throw e;
+      console.warn("API dev-bypass failed, falling back to demo login:", e);
+      applySession(await api.login({ email: "rohit.demo@example.com", password: "demo-pass-2026" }));
     }
-  }, [applySession, lang]);
+  }, [applySession]);
 
   // Restore the session from a saved token.
   useEffect(() => {
