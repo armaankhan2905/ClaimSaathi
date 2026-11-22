@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..config import BASE_DIR, get_settings
+from ..config import get_settings
 
 log = logging.getLogger(__name__)
 _model = None
@@ -35,7 +35,7 @@ def _get_model():
             try:
                 from fastembed import TextEmbedding
 
-                _model = TextEmbedding(get_settings().embedding_model, cache_dir=str(BASE_DIR / "models"))
+                _model = TextEmbedding(get_settings().embedding_model, cache_dir=str(get_settings().models_dir))
             except Exception:  # offline on first run, disk full, ...: fall back to keywords
                 log.exception("Embedding model unavailable; clause search will use keywords only")
                 _model_failed = True

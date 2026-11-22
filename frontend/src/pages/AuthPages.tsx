@@ -2,12 +2,14 @@ import { motion } from "motion/react";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { Icon } from "../components/Icon";
+import { usePageTitle } from "../components/PageHead";
 import { useI18n } from "../i18n/I18nProvider";
 import { LANG_OPTIONS, type Lang, type StringKey } from "../i18n/strings";
 import { ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
 function AuthCard({ title, sub, children }: { title: string; sub: string; children: ReactNode }) {
+  usePageTitle(title);
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -66,7 +68,7 @@ export function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const target = useRedirectTarget();
-  const { busy, error, run } = useSubmit({ 401: "err_wrong_login", 422: "err_invalid" });
+  const { busy, error, run } = useSubmit({ 401: "err_wrong_login", 422: "err_invalid", 429: "err_too_many" });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 

@@ -2,11 +2,12 @@ import { motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Icon, type IconName } from "../components/Icon";
+import { usePageTitle } from "../components/PageHead";
 import { PolicyCard } from "../components/PolicyCard";
+import { RecentCases } from "../components/RecentCases";
 import { useI18n } from "../i18n/I18nProvider";
 import type { StringKey } from "../i18n/strings";
 import { api, type Policy } from "../lib/api";
-import { useAuth } from "../lib/auth";
 
 const FEATURES: { to: string; icon: IconName; eyebrow: StringKey; title: StringKey; items: StringKey[] }[] = [
   {
@@ -84,19 +85,15 @@ function usePolicies() {
 
 export function Home() {
   const { t } = useI18n();
-  const { user } = useAuth();
   const { policies, failed, reload } = usePolicies();
-  const firstName = user?.full_name.split(/\s+/)[0];
+  usePageTitle();
 
   return (
     <section aria-labelledby="h-home">
       {/* Hero */}
       <div className="relative grid items-center gap-6 overflow-hidden rounded-[28px] border border-line bg-[linear-gradient(165deg,var(--hero-from)_0%,var(--hero-mid)_60%,var(--hero-to)_100%)] px-5 py-7 md:grid-cols-[1.4fr_1fr] md:px-10 md:py-11">
         <div className="relative">
-          <span className="eyebrow">
-            {firstName ? `${t("greeting")}, ${firstName}` : t("hero_eyebrow")}
-          </span>
-          <h1 id="h-home" className="mt-2.5">
+          <h1 id="h-home">
             {t("hero_title_1")}
             <br />
             <span className="text-accent">{t("hero_title_2")}</span>
@@ -183,6 +180,8 @@ export function Home() {
           ))}
         </div>
       )}
+
+      <RecentCases />
 
       <p className="disclaimer">{t("disclaimer")}</p>
     </section>

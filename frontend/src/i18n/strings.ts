@@ -14,7 +14,6 @@ const en = {
   theme_to_dark: "Switch to dark mode",
   theme_to_light: "Switch to light mode",
 
-  hero_eyebrow: "Your insurance rights companion",
   hero_title_1: "Understand your coverage.",
   hero_title_2: "Defend your rights.",
   hero_sub:
@@ -31,9 +30,6 @@ const en = {
   comp_eyebrow: "Act",
   comp_sub:
     "ClaimSaathi drafts the complaint from your Rejection Check, lists the documents to attach and shows where to file it next.",
-  building_title: "This section is being built",
-  building_text: "You'll be able to use it here soon. Your saved policies are on the home page.",
-  back_home: "Back to home",
 
   feat_policy_1: "Policy details and key limits",
   feat_policy_2: "Every clause in plain language",
@@ -72,7 +68,6 @@ const en = {
   disclaimer:
     "ClaimSaathi gives guidance based on your documents. It does not decide legal entitlement or replace professional advice.",
 
-  greeting: "Namaste",
   sign_in: "Sign in",
   sign_up: "Create account",
   sign_out: "Sign out",
@@ -517,6 +512,16 @@ const en = {
   comp_status_sent: "Sent",
   comp_status_resolved: "Resolved",
   comp_disclaimer: "ClaimSaathi prepares a draft for you to review. You decide what to send. Timelines are general guidance; check the current IRDAI rules for your case.",
+  err_page_title: "Something went wrong on this page",
+  err_page_text: "Your documents and checks are safe. Reload the page to try again.",
+  err_page_reload: "Reload page",
+  err_too_many: "Too many wrong attempts. Wait a few minutes and try again.",
+  your_cases: "Your cases",
+  case_check: "Rejection check",
+  case_complaint: "Complaint",
+  case_new_check: "New check",
+  case_not_checked: "Not checked yet",
+  case_reply_due: "reply due {date}",
   rej_new: "New check",
 };
 
@@ -536,7 +541,6 @@ const hi: Dict = {
   theme_to_dark: "डार्क मोड चालू करें",
   theme_to_light: "लाइट मोड चालू करें",
 
-  hero_eyebrow: "आपके बीमा अधिकारों का साथी",
   hero_title_1: "अपना कवरेज समझें।",
   hero_title_2: "अपने अधिकारों की रक्षा करें।",
   hero_sub:
@@ -552,9 +556,6 @@ const hi: Dict = {
   comp_eyebrow: "कार्रवाई",
   comp_sub:
     "ClaimSaathi आपकी रिजेक्शन जाँच से शिकायत का ड्राफ्ट बनाता है, ज़रूरी दस्तावेज़ बताता है और आगे कहाँ शिकायत करनी है, यह दिखाता है।",
-  building_title: "यह हिस्सा अभी बन रहा है",
-  building_text: "जल्द ही आप इसे यहाँ इस्तेमाल कर पाएँगे। आपकी सेव की गई पॉलिसी होम पेज पर हैं।",
-  back_home: "होम पर जाएँ",
 
   feat_policy_1: "पॉलिसी की जानकारी और मुख्य सीमाएँ",
   feat_policy_2: "हर शर्त आसान भाषा में",
@@ -593,7 +594,6 @@ const hi: Dict = {
   disclaimer:
     "ClaimSaathi आपके दस्तावेज़ों के आधार पर मार्गदर्शन देता है। यह कानूनी हक़ तय नहीं करता और पेशेवर सलाह की जगह नहीं लेता।",
 
-  greeting: "नमस्ते",
   sign_in: "साइन इन करें",
   sign_up: "खाता बनाएँ",
   sign_out: "साइन आउट",
@@ -1038,6 +1038,16 @@ const hi: Dict = {
   comp_status_sent: "भेजी गई",
   comp_status_resolved: "हल हुई",
   comp_disclaimer: "ClaimSaathi आपके देखने के लिए ड्राफ्ट तैयार करता है। क्या भेजना है, यह आप तय करते हैं। समय-सीमाएँ सामान्य मार्गदर्शन हैं; अपने मामले के लिए IRDAI के मौजूदा नियम देखें।",
+  err_page_title: "इस पेज पर कुछ गड़बड़ हो गई",
+  err_page_text: "आपके दस्तावेज़ और जाँच सुरक्षित हैं। फिर से कोशिश करने के लिए पेज रीलोड करें।",
+  err_page_reload: "पेज रीलोड करें",
+  err_too_many: "बहुत बार गलत कोशिश हुई। कुछ मिनट रुककर फिर से कोशिश करें।",
+  your_cases: "आपके मामले",
+  case_check: "रिजेक्शन जाँच",
+  case_complaint: "शिकायत",
+  case_new_check: "नई जाँच",
+  case_not_checked: "अभी जाँच नहीं हुई",
+  case_reply_due: "जवाब {date} तक",
   rej_new: "नई जाँच",
 };
 
@@ -1054,7 +1064,6 @@ const hn: Dict = {
   theme_to_dark: "Dark mode on karo",
   theme_to_light: "Light mode on karo",
 
-  hero_eyebrow: "Aapka insurance rights saathi",
   hero_title_1: "Apna coverage samjho.",
   hero_title_2: "Apne rights ke liye lado.",
   hero_sub:
@@ -1071,9 +1080,6 @@ const hn: Dict = {
   comp_eyebrow: "Action",
   comp_sub:
     "ClaimSaathi aapke Rejection Check se complaint draft karta hai, attach karne wale documents batata hai aur aage kahan file karna hai, yeh dikhata hai.",
-  building_title: "Yeh section abhi ban raha hai",
-  building_text: "Jaldi hi aap ise yahan use kar paoge. Aapki saved policies home page par hain.",
-  back_home: "Home par jao",
 
   feat_policy_1: "Policy details aur main limits",
   feat_policy_2: "Har clause simple bhasha mein",
@@ -1112,7 +1118,6 @@ const hn: Dict = {
   disclaimer:
     "ClaimSaathi aapke documents ke basis par guidance deta hai. Yeh legal haq decide nahi karta aur professional advice ki jagah nahi leta.",
 
-  greeting: "Namaste",
   sign_in: "Sign in karo",
   sign_up: "Account banao",
   sign_out: "Sign out",
@@ -1557,6 +1562,16 @@ const hn: Dict = {
   comp_status_sent: "Bheji gayi",
   comp_status_resolved: "Solve hui",
   comp_disclaimer: "ClaimSaathi aapke dekhne ke liye draft taiyaar karta hai. Kya bhejna hai, yeh aap decide karte ho. Timelines general guidance hain; apne case ke liye IRDAI ke current rules dekho.",
+  err_page_title: "Is page par kuch gadbad ho gayi",
+  err_page_text: "Aapke documents aur checks safe hain. Dobara try karne ke liye page reload karo.",
+  err_page_reload: "Page reload karo",
+  err_too_many: "Bahut baar galat try hua. Kuch minute ruk ke dobara try karo.",
+  your_cases: "Aapke cases",
+  case_check: "Rejection check",
+  case_complaint: "Complaint",
+  case_new_check: "Naya check",
+  case_not_checked: "Abhi check nahi hua",
+  case_reply_due: "reply {date} tak",
   rej_new: "Naya check",
 };
 

@@ -6,7 +6,7 @@ ClaimSaathi is an AI-powered insurance companion for Indian policyholders. You u
 
 Built by **OverCooked Brains** for The Builder's Theory 1.0 (Finance & FinTech track).
 
-> **Status:** the full app is being built in `frontend/` and `backend/`. Accounts, saved policies, languages, dark mode, document upload (with OCR for scans and photos) and policy understanding (clauses, key terms, waiting-period dates, clause search) work so far; the screens for these insights and the claim features are in progress. The original clickable demo is in `demo/`. All policies, insurers, people and claims in the sample data are fictional.
+> **Status:** the full app works end to end in `frontend/` and `backend/`: accounts, document upload with OCR, Policy Insights (details, clauses, Compare, Ask ClaimSaathi), Rejection Check with an evidence report, and File a Complaint with tracking and escalation, in English, Hindi and Hinglish, light and dark. The original clickable demo is in `demo/`. All policies, insurers, people and claims in the sample data are fictional.
 
 ---
 
@@ -56,7 +56,7 @@ The home page introduces ClaimSaathi and shows the user's saved policies (in the
 3. **Findings.** The user sees:
    - an overall assessment (for example, "Possible inconsistency found") with a short explanation,
    - a **coverage timeline** from the first policy to the rejection date,
-   - an **evidence map** that lists each of the insurer's grounds, what the policy actually says, the user's evidence and a status (contradicted, no break, or ask the insurer),
+   - an **evidence map** that lists each of the insurer's grounds, what the policy actually says, the user's evidence and a status (not supported by your policy, supported, or ask the insurer),
    - an evidence checklist and the questions to raise with the insurer,
    - a downloadable evidence report.
 
@@ -64,7 +64,7 @@ The home page introduces ClaimSaathi and shows the user's saved policies (in the
 
 1. **Choose where to file.** Based on where the user is in the process, ClaimSaathi recommends the next step: the insurer's grievance officer first, then IRDAI's Bima Bharosa portal, then the Insurance Ombudsman.
 2. **Review draft.** The complaint is pre-filled from the Rejection Check: the grounds for review, the clause references and the attached documents. The user can edit every field and sees a live preview of the letter.
-3. **Track complaint.** After sending, the user gets a reference number, a tracker with the reply deadline, reminders by SMS, WhatsApp or email, and an option to escalate to Bima Bharosa if the insurer does not resolve it.
+3. **Track complaint.** The user sends the letter themselves (email, post or the portal; ClaimSaathi never sends anything on their behalf) and records the date and reference. They get a tracker with the reply deadline, a calendar reminder, and an option to escalate to Bima Bharosa or the Ombudsman when the reply is late or doesn't resolve it.
 
 ## Example case
 
@@ -72,7 +72,7 @@ The home page introduces ClaimSaathi and shows the user's saved policies (in the
 
 Rohit's claim of ₹1,80,000 for a knee replacement is rejected. The insurer says the surgery falls within the 24-month waiting period for joint replacement.
 
-ClaimSaathi finds that the insurer counted the waiting period from the **latest renewal (2025)**, but the policy's own clause counts it from the **first policy (2022)**. Rohit's renewal receipts show continuous cover with no break, so the waiting period had ended 18 months before the surgery.
+ClaimSaathi finds that the insurer counted the waiting period from the **latest renewal (March 2026)**, but the policy's own clause counts it from the **first policy (March 2022)**. Rohit's policy schedule shows continuous cover with no break, so the waiting period ended in March 2024, two and a half years before the surgery.
 
 ClaimSaathi flags this as a possible inconsistency, builds an evidence report and drafts a complaint asking the insurer to review the decision.
 
@@ -86,22 +86,21 @@ This does not prove the claim must be paid. It gives Rohit a clear explanation, 
 - **A complete complaint package.** Grounds, clause references, a missing-documents checklist and a draft the user reviews before sending.
 - **Answers you can check.** Every answer cites the user's own policy, and the user always decides what to send.
 
-## Planned technology
-
-The demo in this repository is a front-end preview. The full product is planned on this stack:
+## Technology
 
 | Layer | Technology | Role |
 |---|---|---|
-| Frontend | React, Tailwind CSS | Responsive, accessible interface |
-| Backend | Python, FastAPI | APIs and document workflows |
-| Document reading | PyMuPDF, OCR | Reads digital and scanned documents |
-| AI | LLM with retrieval (RAG) | Understands policy language and answers with citations |
-| Clause search | pgvector | Finds the clauses relevant to a question |
-| Database | PostgreSQL | Case data and structured policy terms |
-| Verification | Python rules engine | Checks dates, waiting periods and amounts |
-| Reports | PDF generator | Evidence reports and complaint letters |
+| Frontend | React 19, TypeScript, Tailwind CSS, Motion | Responsive, accessible interface in three languages, light and dark |
+| Backend | Python, FastAPI, SQLAlchemy | APIs and document workflows |
+| Database | SQLite (PostgreSQL also works) | Accounts, policies, clauses, checks and complaints |
+| Document reading | PyMuPDF, RapidOCR | Reads digital PDFs, scanned copies and phone photos |
+| AI | Groq (gpt-oss-120b, free plan) or Claude | Reads key terms, explains clauses, answers questions with citations, checks rejection reasons |
+| Clause search | Local multilingual embeddings (fastembed) + keywords | Finds the clauses relevant to a question, in English, Hindi or Hinglish |
+| Verification | Python rules engine | Exact dates: continuous cover, waiting-period end dates, what the insurer counted from |
+| Reports | PyMuPDF | Evidence reports, complaint letters and complaint packages (PDF) |
+| Security | Argon2 passwords, JWT, Fernet encryption | Uploaded files are encrypted at rest and only visible to their owner |
 
-The AI explains complex wording, while a rules engine does the exact date and amount checks. ClaimSaathi gives guidance based on the user's documents; it does not decide legal entitlement or replace professional advice.
+The AI explains complex wording, while the rules engine does the exact date checks, and every AI answer must quote a real clause. Without an AI key, everything still works in "basic mode" using rules. ClaimSaathi gives guidance based on the user's documents; it does not decide legal entitlement or replace professional advice.
 
 ## Running the app locally
 
@@ -116,6 +115,7 @@ python -m venv .venv
 pip install -r requirements.txt
 cp .env.example .env          # then set your own JWT_SECRET
 python -m app.seed            # creates the fictional demo account and sample policies
+                              # add --with-documents to also load and read the files in samples/
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -133,6 +133,8 @@ npm run dev
 
 Open http://localhost:5173 and sign in with the demo account from `backend/.env.example`, or create your own. The frontend forwards `/api` requests to the backend.
 
+**One server instead of two:** run `npm run build` in `frontend/`, then start only the backend. It serves the built website too, at http://localhost:8000.
+
 | Folder | What's in it |
 |---|---|
 | `backend/app/` | API (`main.py`, `routers/`), database models, auth, seed data |
@@ -141,8 +143,32 @@ Open http://localhost:5173 and sign in with the demo account from `backend/.env.
 | `backend/app/extraction/` | Reads PDFs, scans and photos into clean page text (PyMuPDF + RapidOCR) |
 | `backend/app/understanding/` | Splits clauses, extracts key terms (Claude or rules), labels clauses, clause search |
 | `backend/app/rules/` | Exact date checks: continuous cover and waiting-period end dates |
+| `backend/app/understanding/claims.py` | Rejection Check: reads the letter and tests each reason |
+| `backend/app/complaints.py` | File a Complaint: letters for each stage, deadlines, reminders |
+| `backend/app/report.py`, `complaint_pdf.py` | Evidence report, complaint letter and complaint package PDFs |
 | `samples/` | Fictional policy documents for testing |
 | `demo/` | The original single-file clickable demo |
+
+## Deploying
+
+ClaimSaathi runs as **one container** that serves both the website and the API (see `Dockerfile`). It is not deployed yet; these are the steps for when you are ready.
+
+1. **Settings.** Copy `backend/.env.production.example` to `backend/.env.production` (ignored by git and Docker), or paste the values into your host's environment-variable page:
+   - `APP_ENV=production`
+   - `JWT_SECRET` and `FILE_ENCRYPTION_KEY`, generated with the commands in the file. The server refuses to start in production without them. **Back up the encryption key**, because stored documents can't be read without it.
+   - `GROQ_API_KEY` for AI (optional).
+   - `SEED_DEMO=true` with your own `DEMO_PASSWORD`, if you want the fictional demo account on the hosted site.
+2. **Build and run.**
+   ```bash
+   docker build -t claimsaathi .
+   docker run -p 8000:8000 -v claimsaathi-data:/data --env-file backend/.env.production claimsaathi
+   ```
+3. **Storage.** The database, encrypted uploads and the search model live in `/data`, so give the container a **persistent volume** there (on Render, Railway or Fly.io this is a "disk" or "volume"). Without it, everything is lost on every restart.
+4. **One instance.** Run a single instance: background reading, the AI rate limit and the sign-in limit are kept in memory.
+5. **Demo data (optional).** To load and read the sample files into the demo account, run this once inside the container: `python -m app.seed --with-documents` (a few minutes with the Groq free plan).
+6. **Check.** `/api/health` returns `{"status": "ok"}`; the container also has a built-in health check.
+
+In production the API docs (`/docs`) are switched off, security headers and HSTS are sent, and repeated wrong sign-ins are slowed down. The Docker image hasn't been test-built yet (Docker isn't installed on the build machine), so build it once before the demo.
 
 ## Running the demo
 

@@ -7,11 +7,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+DEV_JWT_SECRET = "dev-only-secret-change-me"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", env_file_encoding="utf-8", extra="ignore")
 
+    # "production" turns on the safety checks below (strong secrets, explicit encryption key).
+    app_env: str = "development"
+
     database_url: str = f"sqlite:///{(BASE_DIR / 'claimsaathi.db').as_posix()}"
-    jwt_secret: str = "dev-only-secret-change-me"
+    jwt_secret: str = DEV_JWT_SECRET
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
     cors_origins: str = "http://localhost:5173"
@@ -41,6 +47,31 @@ class Settings(BaseSettings):
     # Local embedding model for clause search (downloaded once, runs on this machine)
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     embeddings_enabled: bool = True
+    models_dir: Path = BASE_DIR / "models"
+
+    # The built website (npm run build). When the folder exists the API also serves the site,
+    # so one server runs the whole app.
+    frontend_dist: Path = BASE_DIR.parent / "frontend" / "dist"
+    # Create the fictional demo account when the server starts (handy for a hosted demo).
+    seed_demo: bool = False
+    # Failed sign-ins allowed per email and address before a short lock-out.
+    login_attempts: int = 10
+    login_window_minutes: int = 15
+
+    @property
+    def is_production(self) -> bool:
+        return self.app_env.lower() == "production"
+
+    def production_problems(self) -> list[str]:
+        """Settings that must be changed before running for real users."""
+        problems = []
+        if self.jwt_secret == DEV_JWT_SECRET or self.jwt_secret.startswith("change-me") or len(self.jwt_secret) < 32:
+            problems.append("JWT_SECRET must be a long random value (32+ characters)")
+        if not self.file_encryption_key:
+            problems.append("FILE_ENCRYPTION_KEY must be set (and backed up)")
+        if self.seed_demo and len(self.demo_password) < 8:
+            problems.append("DEMO_PASSWORD must be at least 8 characters when SEED_DEMO is on")
+        return problems
 
     @property
     def cors_origin_list(self) -> list[str]:

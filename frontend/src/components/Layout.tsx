@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Outlet, useLocation } from "react-router";
 import { useI18n } from "../i18n/I18nProvider";
 import { AppBar } from "./AppBar";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 export function Layout({ barRight }: { barRight?: ReactNode }) {
   const { t } = useI18n();
@@ -20,7 +21,9 @@ export function Layout({ barRight }: { barRight?: ReactNode }) {
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
           >
-            <Outlet />
+            <ErrorBoundary key={location.pathname}>
+              <Outlet />
+            </ErrorBoundary>
           </motion.div>
         </AnimatePresence>
       </main>

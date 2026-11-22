@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import time
+from collections import defaultdict, deque
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from ..config import get_settings
 from ..db import get_db
 from ..deps import current_user
 from ..models import User
@@ -30,11 +34,30 @@ def signup(body: SignupIn, db: Session = Depends(get_db)) -> TokenOut:
     return TokenOut(access_token=create_access_token(user.id), user=UserOut.model_validate(user))
 
 
+# Failed sign-ins per (address, email), kept in memory: slows down password guessing.
+_failures: dict[tuple[str, str], deque[float]] = defaultdict(deque)
+
+
+def _recent_failures(key: tuple[str, str]) -> deque[float]:
+    s = get_settings()
+    window = s.login_window_minutes * 60
+    q = _failures[key]
+    while q and q[0] < time.monotonic() - window:
+        q.popleft()
+    return q
+
+
 @router.post("/login", response_model=TokenOut)
-def login(body: LoginIn, db: Session = Depends(get_db)) -> TokenOut:
+def login(body: LoginIn, request: Request, db: Session = Depends(get_db)) -> TokenOut:
+    key = (request.client.host if request.client else "?", body.email.lower())
+    failures = _recent_failures(key)
+    if len(failures) >= get_settings().login_attempts:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "too_many_attempts")
     user = _find_by_email(db, body.email)
     if user is None or not verify_password(body.password, user.password_hash):
+        failures.append(time.monotonic())
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Wrong email or password")
+    _failures.pop(key, None)
     return TokenOut(access_token=create_access_token(user.id), user=UserOut.model_validate(user))
 
 

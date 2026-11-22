@@ -1,0 +1,23 @@
+# Keep secrets, local data and build output out of the image
+**/.env
+**/.env.*
+!backend/.env.example
+**/*.db
+**/*.db-journal
+backend/storage/
+backend/models/
+backend/.venv/
+**/__pycache__/
+**/.pytest_cache/
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+
+# Not needed to run the app
+.git/
+.checkpoints/
+.claude/
+demo/
+backend/tests/
+*.pptx
+COMMIT_PLAN.md
