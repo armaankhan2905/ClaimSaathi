@@ -129,8 +129,8 @@ def _analyse(db: Session, policy: Policy, docs: list[Document]) -> int | None:
 
     split = []
     owner_doc = []
-    for d in wording_docs:
-        for c in split_clauses([(p.page_number, p.text) for p in d.pages]):
+    for d, doc_clauses in _without_duplicate_wordings(wording_docs):
+        for c in doc_clauses:
             split.append(c)
             owner_doc.append(d.id)
     for i, c in enumerate(split):
@@ -150,7 +150,7 @@ def _analyse(db: Session, policy: Policy, docs: list[Document]) -> int | None:
             db.commit()
             return twin.id
 
-    labels, label_mode = label_clauses(split, ai)
+    labels, label_mode = _label_reusing_previous(policy, split, ai)
     vectors = embed([clause_search_text(c.ref, c.title, c.section_title, c.text) for c in split])
 
     policy.clauses = [
@@ -182,6 +182,56 @@ def _analyse(db: Session, policy: Policy, docs: list[Document]) -> int | None:
 
 def _norm(s: str | None) -> str:
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
+
+def _clause_key(ref: str, text: str) -> str:
+    return ref + "\n" + " ".join(text.split())
+
+
+def _label_reusing_previous(policy: Policy, split: list, ai) -> tuple[list[tuple[str, dict | None]], str]:
+    """Label clauses, reusing the explanations of clauses whose text hasn't changed since the last
+    reading. Adding a schedule or a scan, or "Read again", used to re-explain every clause: minutes
+    on Groq's free plan for the same result."""
+    previous = {_clause_key(c.ref, c.text): (c.category, c.plain) for c in policy.clauses if c.plain}
+    reused = [previous.get(_clause_key(c.ref, c.text)) if ai is not None else None for c in split]
+    todo = [i for i, r in enumerate(reused) if r is None]
+    if not todo:
+        return [r for r in reused if r is not None], "ai"
+    fresh, mode = label_clauses([split[i] for i in todo], ai)
+    labels = list(reused)
+    for i, label in zip(todo, fresh):
+        labels[i] = label
+    if len(todo) < len(split):
+        mode = "ai"  # most explanations were kept from the AI reading before
+    return labels, mode
+
+
+def _without_duplicate_wordings(wording_docs: list[Document]) -> list[tuple[Document, list]]:
+    """Split each wording into clauses, dropping wordings that are another copy of one already used
+    (the digital PDF and a scan of it): otherwise every clause would be listed twice. A copy read
+    from the PDF's own text beats a scan; otherwise the earlier upload wins. Endorsements add to
+    the wording, so they are always kept."""
+
+    def is_scan(d: Document) -> bool:
+        return any(p.method == "ocr" for p in d.pages)
+
+    ranked = sorted(wording_docs, key=lambda d: (d.kind != "policy_wording", is_scan(d), d.created_at, d.id))
+    kept: list[tuple[Document, list]] = []
+    kept_refs: list[set[str]] = []
+    for d in ranked:
+        clauses = split_clauses([(p.page_number, p.text) for p in d.pages])
+        refs = {c.ref for c in clauses}
+        if d.kind == "policy_wording" and len(refs) >= 5 and any(
+            len(refs & other) / max(1, min(len(refs), len(other))) >= 0.7 for other in kept_refs
+        ):
+            log.info("Document %s repeats a wording already on this policy; its clauses are not added again", d.id)
+            continue
+        kept.append((d, clauses))
+        if d.kind == "policy_wording":
+            kept_refs.append(refs)
+    # keep the original upload order for numbering and display
+    order = {d.id: i for i, d in enumerate(wording_docs)}
+    return sorted(kept, key=lambda pair: order[pair[0].id])
 
 
 def _belongs_to_another_policy(doc: Document, policy: Policy) -> bool:

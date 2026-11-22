@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useI18n } from "../../i18n/I18nProvider";
 import type { StringKey } from "../../i18n/strings";
 import { api, ApiError, type ChatMessage, type PolicyDetail } from "../../lib/api";
-import { useSpeech } from "../../lib/tts";
+import { type SpeechLang, tts, useSpeech, useStopSpeechOnLeave } from "../../lib/tts";
 import { Icon } from "../Icon";
 
 const SUGGESTIONS: Record<"health" | "motor", StringKey[]> = {
@@ -34,7 +34,7 @@ function Typing() {
 
 function Bubble({ msg, onOpenClause, onAsk }: { msg: ChatMessage; onOpenClause: (ref: string) => void; onAsk: (q: string) => void }) {
   const { t, lang } = useI18n();
-  const { activeId, toggle } = useSpeech();
+  const { activeId, toggle, supported, noVoice } = useSpeech();
   if (msg.role === "user")
     return (
       <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="max-w-[82%] self-end rounded-[14px] rounded-br-[4px] bg-accent px-3.5 py-3 text-[14.5px] whitespace-pre-wrap text-accent-ink">
@@ -45,13 +45,35 @@ function Bubble({ msg, onOpenClause, onAsk }: { msg: ChatMessage; onOpenClause: 
 
   const chip = ANSWER_CHIP[msg.answer_type ?? "answered"] ?? ANSWER_CHIP.answered!;
   const text = msg.answer_type === "search_only" ? t("search_only_intro") : msg.content || (msg.answer_type === "not_in_policy" ? t("not_in_policy_default") : "");
+  const answerId = `answer-${msg.id}`;
+  const speakingAnswer = activeId === answerId;
+  // The answer is written in the language it was asked in; app text (search_only intro) is in the current one.
+  const answerLang = (msg.answer_type === "search_only" ? lang : msg.lang || lang) as SpeechLang;
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="grid max-w-[88%] gap-2.5 self-start rounded-[14px] rounded-bl-[4px] border border-line bg-surface-2 px-3.5 py-3 text-[14.5px] max-sm:max-w-[96%]">
-      <span className={`chip ${chip.cls} justify-self-start`}>
-        <span className="dot" />
-        {t(chip.key)}
-      </span>
+      <div className="flex items-center justify-between gap-2">
+        <span className={`chip ${chip.cls}`}>
+          <span className="dot" />
+          {t(chip.key)}
+        </span>
+        {supported && text && (
+          <button
+            type="button"
+            onClick={() => toggle(answerId, text, answerLang)}
+            className={`inline-flex flex-none items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] font-medium transition-colors ${
+              speakingAnswer ? "bg-accent text-accent-ink" : "text-accent hover:bg-accent/10"
+            }`}
+            title={speakingAnswer ? t("tts_stop_reading") : t("tts_listen_answer")}
+            aria-label={speakingAnswer ? t("tts_stop_reading") : t("tts_listen_answer")}
+            aria-pressed={speakingAnswer}
+          >
+            <Icon name={speakingAnswer ? "stop" : "volume"} className="h-3.5 w-3.5" />
+            <span>{speakingAnswer ? t("tts_stop") : t("tts_listen")}</span>
+          </button>
+        )}
+      </div>
       {text && <p className="whitespace-pre-wrap">{text}</p>}
+      {noVoice && <p className="m-0 text-[12.5px] text-warn" role="status">{t("tts_no_hindi_voice")}</p>}
       {msg.citations.map((c) => {
         const citationId = `citation-${msg.id}-${c.ref}`;
         const isSpeaking = activeId === citationId;
@@ -73,18 +95,22 @@ function Bubble({ msg, onOpenClause, onAsk }: { msg: ChatMessage; onOpenClause: 
               >
                 §{c.ref} · {c.title} →
               </button>
-              <button
-                type="button"
-                onClick={() => toggle(citationId, textToRead, msg.lang || lang)}
-                className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-sans transition-colors ${
-                  isSpeaking ? "bg-accent text-accent-ink font-semibold" : "text-accent hover:bg-accent/10"
-                }`}
-                title={isSpeaking ? "Stop reading" : "Read clause aloud"}
-                aria-label={isSpeaking ? "Stop reading" : "Read clause aloud"}
-              >
-                <Icon name={isSpeaking ? "stop" : "volume"} className="h-3.5 w-3.5" />
-                <span>{isSpeaking ? "Stop" : "Read"}</span>
-              </button>
+              {supported && (
+                <button
+                  type="button"
+                  // Quotes are the policy's own English wording, so an English voice reads them.
+                  onClick={() => toggle(citationId, textToRead, "en")}
+                  className={`inline-flex flex-none items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-sans transition-colors ${
+                    isSpeaking ? "bg-accent text-accent-ink font-semibold" : "text-accent hover:bg-accent/10"
+                  }`}
+                  title={isSpeaking ? t("tts_stop_reading") : t("tts_read_clause")}
+                  aria-label={isSpeaking ? t("tts_stop_reading") : t("tts_read_clause")}
+                  aria-pressed={isSpeaking}
+                >
+                  <Icon name={isSpeaking ? "stop" : "volume"} className="h-3.5 w-3.5" />
+                  <span>{isSpeaking ? t("tts_stop") : t("tts_read")}</span>
+                </button>
+              )}
             </div>
             “{c.quote}”
           </blockquote>
@@ -105,6 +131,8 @@ function Bubble({ msg, onOpenClause, onAsk }: { msg: ChatMessage; onOpenClause: 
 
 export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenClause: (ref: string) => void }) {
   const { t, lang } = useI18n();
+  useStopSpeechOnLeave();
+  useEffect(() => tts.stop(), [policy.id]); // a different policy's chat: stop reading the old one
   const [messages, setMessages] = useState<ChatMessage[] | null>(null);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -143,6 +171,7 @@ export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenC
       return;
     }
     setError(null);
+    tts.stop(); // otherwise the microphone hears the app reading an answer aloud
 
     try {
       if (recognitionRef.current) {
@@ -156,11 +185,15 @@ export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenC
       rec.interimResults = true;
       rec.lang = lang === "hi" ? "hi-IN" : "en-IN";
 
+      // Events from an older, stopped session must not change the state of the current one.
+      const current = () => recognitionRef.current === rec;
+
       rec.onstart = () => {
-        setListening(true);
+        if (current()) setListening(true);
       };
 
       rec.onresult = (event: any) => {
+        if (!current()) return;
         let transcript = "";
         for (let i = 0; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
@@ -172,17 +205,18 @@ export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenC
 
       rec.onerror = (event: any) => {
         console.warn("Speech recognition error:", event.error);
+        if (!current()) return;
         setListening(false);
         if (event.error === "aborted") return; // stopped on purpose
         setError(event.error === "not-allowed" || event.error === "service-not-allowed" ? "ask_mic_denied" : "ask_mic_error");
       };
 
       rec.onend = () => {
-        setListening(false);
+        if (current()) setListening(false);
       };
 
+      recognitionRef.current = rec; // before start(), so its first events count as current
       rec.start();
-      recognitionRef.current = rec;
     } catch (err) {
       console.error("Speech recognition failed:", err);
       setListening(false);
@@ -201,6 +235,14 @@ export function AskTab({ policy, onOpenClause }: { policy: PolicyDetail; onOpenC
   async function ask(question: string) {
     const q = question.trim();
     if (!q || sending) return;
+    if (recognitionRef.current) {
+      // Sent while still listening: stop, or late results would put the question back in the box.
+      try {
+        recognitionRef.current.abort();
+      } catch {}
+      recognitionRef.current = null;
+      setListening(false);
+    }
     setError(null);
     setSending(true);
     setInput("");

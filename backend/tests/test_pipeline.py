@@ -216,3 +216,35 @@ def test_same_file_uploaded_twice_lists_clauses_once(client, auth_headers):
     upload(client, auth_headers, pdf, name="w-again.pdf", policy_id=p["id"])
     clauses = client.get(f"/api/policies/{p['id']}/clauses", headers=auth_headers).json()
     assert [c["ref"] for c in clauses] == ["1", "2.1", "4.1", "4.2", "5"]
+
+
+def test_scanned_copy_of_the_same_wording_lists_clauses_once(client, auth_headers):
+    """The digital wording and a scan of it are different files but the same clauses."""
+    upload(client, auth_headers, text_pdf(WORDING), name="w.pdf")
+    [p] = _policies(client, auth_headers)
+    reworded_copy = [[line + " " if i == 0 else line for i, line in enumerate(page)] for page in WORDING]  # different bytes
+    upload(client, auth_headers, text_pdf(reworded_copy), name="w-scan.pdf", policy_id=p["id"])
+    clauses = client.get(f"/api/policies/{p['id']}/clauses", headers=auth_headers).json()
+    assert [c["ref"] for c in clauses] == ["1", "2.1", "4.1", "4.2", "5"]
+
+
+def test_read_again_reuses_explanations_of_unchanged_clauses(client, auth_headers, monkeypatch):
+    def respond(schema, prompt):
+        if schema is PolicyTerms:
+            return PolicyTerms(policy_name="Suraksha Health Plus", category="health")
+        refs = [r for r in ("1", "2.1", "4.1", "4.2", "5") if f'ref="{r}"' in prompt]
+        return ClauseLabels(items=[ClauseLabel(ref=r, category="coverage", plain_en=f"Plain {r}", plain_hi="h", plain_hn="n") for r in refs])
+
+    fake = FakeAI(respond)
+    monkeypatch.setattr("app.understanding.pipeline.get_ai", lambda: fake)
+    upload(client, auth_headers, text_pdf(WORDING), name="w.pdf")
+    [p] = _policies(client, auth_headers)
+    labelled_first = sum(1 for name, _ in fake.calls if name == "ClauseLabels")
+    assert labelled_first > 0
+
+    assert client.post(f"/api/policies/{p['id']}/analyze", headers=auth_headers).status_code in (200, 202)
+    assert sum(1 for name, _ in fake.calls if name == "ClauseLabels") == labelled_first  # nothing re-explained
+    [p] = _policies(client, auth_headers)
+    assert p["analysis_mode"] == "ai"
+    plain = {c["ref"]: c["plain"] for c in client.get(f"/api/policies/{p['id']}/clauses", headers=auth_headers).json()}
+    assert plain["4.2"]["en"] == "Plain 4.2"

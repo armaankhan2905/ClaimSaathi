@@ -43,7 +43,10 @@ export function CameraScannerModal({
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const attemptRef = useRef(0); // bumped on every start/stop so a late-arriving stream can be detected
+
   const stopCamera = useCallback(() => {
+    attemptRef.current++;
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -53,9 +56,9 @@ export function CameraScannerModal({
 
   const startCamera = useCallback(async () => {
     stopCamera();
+    const attempt = ++attemptRef.current;
     setError(null);
     setLoading(true);
-    setCapturedDataUrl(null);
 
     try {
       let stream: MediaStream | null = null;
@@ -77,6 +80,12 @@ export function CameraScannerModal({
         });
       }
 
+      if (attempt !== attemptRef.current) {
+        // The scanner was closed, flipped or restarted while the camera was starting (e.g. during
+        // the permission prompt): turn this stream off, or the camera light stays on.
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -84,10 +93,11 @@ export function CameraScannerModal({
         setStreaming(true);
       }
     } catch (err) {
+      if (attempt !== attemptRef.current) return;
       console.warn("Live camera start failed:", err);
       setError(t("camera_permission_err"));
     } finally {
-      setLoading(false);
+      if (attempt === attemptRef.current) setLoading(false);
     }
   }, [facingMode, stopCamera, t]);
 
@@ -299,7 +309,7 @@ export function CameraScannerModal({
                       {loading && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 text-white/80">
                           <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-                          <span className="text-xs">Starting camera...</span>
+                          <span className="text-xs">{t("camera_starting")}</span>
                         </div>
                       )}
 
@@ -313,7 +323,7 @@ export function CameraScannerModal({
                             onClick={() => fileInputRef.current?.click()}
                           >
                             <Icon name="camera" />
-                            Take Photo with Device Camera
+                            {t("camera_device_photo")}
                           </button>
                         </div>
                       )}
@@ -335,7 +345,9 @@ export function CameraScannerModal({
                 <div className="mt-4 flex w-full flex-wrap items-center justify-between gap-2.5">
                   {capturedDataUrl ? (
                     <>
-                      <button type="button" className="btn" onClick={() => startCamera()}>
+                      {/* Clearing the photo restarts the camera through the effect above; calling
+                          startCamera() here as well opened two cameras and leaked one. */}
+                      <button type="button" className="btn" onClick={() => setCapturedDataUrl(null)}>
                         <Icon name="refresh" />
                         {t("camera_retake")}
                       </button>
@@ -371,10 +383,10 @@ export function CameraScannerModal({
                         type="button"
                         className="btn text-xs"
                         onClick={() => fileInputRef.current?.click()}
-                        title="Native Device Camera"
+                        title={t("camera_device_photo")}
                       >
                         <Icon name="upload" className="h-4 w-4" />
-                        <span className="hidden sm:inline">Device Camera</span>
+                        <span className="hidden sm:inline">{t("camera_device")}</span>
                       </button>
                     </>
                   )}

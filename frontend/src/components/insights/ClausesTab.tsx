@@ -4,7 +4,7 @@ import { useI18n } from "../../i18n/I18nProvider";
 import type { StringKey } from "../../i18n/strings";
 import { api, type Clause, type PolicyDetail } from "../../lib/api";
 import { CATEGORY_CHIP, CATEGORY_LABEL, waitingFor } from "../../lib/policy";
-import { useSpeech } from "../../lib/tts";
+import { tts, useSpeech, useStopSpeechOnLeave } from "../../lib/tts";
 import { Icon } from "../Icon";
 import { WaitingChip } from "./WaitingChip";
 
@@ -34,7 +34,7 @@ export function reflow(text: string): string {
 
 function ClauseCard({ clause, timeline, best, focused }: { clause: Clause; timeline: PolicyDetail["timeline"]; best?: boolean; focused?: boolean }) {
   const { t, lang } = useI18n();
-  const { activeId, toggle } = useSpeech();
+  const { activeId, toggle, supported, noVoice } = useSpeech();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLElement>(null);
   const long = clause.text.length > 520;
@@ -75,18 +75,22 @@ function ClauseCard({ clause, timeline, best, focused }: { clause: Clause; timel
       <div className={`min-w-0 bg-paper px-[18px] py-4 text-paper-ink transition-colors ${isSpeakingClause ? "ring-2 ring-accent inset-0" : ""}`}>
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono text-[11.5px] opacity-70 truncate">{t("clause_ref_line", { ref: clause.ref, section: clause.section_title, pages })}</span>
-          <button
-            type="button"
-            onClick={() => toggle(clauseSpeechId, `Clause ${clause.ref}. ${clause.title}. ${clause.text}`, lang)}
-            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11.5px] font-sans font-medium transition-colors ${
-              isSpeakingClause ? "bg-accent text-accent-ink" : "text-accent hover:bg-accent/10"
-            }`}
-            title={isSpeakingClause ? "Stop reading clause" : "Read clause out loud"}
-            aria-label={isSpeakingClause ? "Stop reading clause" : "Read clause out loud"}
-          >
-            <Icon name={isSpeakingClause ? "stop" : "volume"} className="h-3.5 w-3.5" />
-            <span>{isSpeakingClause ? "Stop" : "Read"}</span>
-          </button>
+          {supported && (
+            <button
+              type="button"
+              // The original wording is English whatever language the app is in, so it is read with an English voice.
+              onClick={() => toggle(clauseSpeechId, `Clause ${clause.ref}. ${clause.title}. ${clause.text}`, "en")}
+              className={`inline-flex flex-none items-center gap-1.5 rounded-md px-2 py-1 text-[11.5px] font-sans font-medium transition-colors ${
+                isSpeakingClause ? "bg-accent text-accent-ink" : "text-accent hover:bg-accent/10"
+              }`}
+              title={isSpeakingClause ? t("tts_stop_reading") : t("tts_read_clause")}
+              aria-label={isSpeakingClause ? t("tts_stop_reading") : t("tts_read_clause")}
+              aria-pressed={isSpeakingClause}
+            >
+              <Icon name={isSpeakingClause ? "stop" : "volume"} className="h-3.5 w-3.5" />
+              <span>{isSpeakingClause ? t("tts_stop") : t("tts_read")}</span>
+            </button>
+          )}
         </div>
         <h3 className="mt-1 mb-2 text-[15px]">{clause.title}</h3>
         <p className={`font-[Georgia,'Times_New_Roman',serif] text-[13.5px] leading-[1.6] whitespace-pre-wrap ${long && !open ? "line-clamp-[9]" : ""}`}>
@@ -101,22 +105,24 @@ function ClauseCard({ clause, timeline, best, focused }: { clause: Clause; timel
       <div className={`flex min-w-0 flex-col gap-2 bg-surface px-[18px] py-4 transition-colors ${isSpeakingPlain ? "ring-2 ring-accent inset-0" : ""}`}>
         <div className="flex items-center justify-between gap-2">
           <span className="eyebrow">{t("what_it_means")}</span>
-          {clause.plain && (
+          {supported && clause.plain && (
             <button
               type="button"
               onClick={() => toggle(plainSpeechId, clause.plain![lang], lang)}
-              className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-sans transition-colors ${
+              className={`inline-flex flex-none items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-sans transition-colors ${
                 isSpeakingPlain ? "bg-accent text-accent-ink font-semibold" : "text-accent hover:underline"
               }`}
-              title={isSpeakingPlain ? "Stop explanation" : "Listen to explanation"}
-              aria-label={isSpeakingPlain ? "Stop explanation" : "Listen to explanation"}
+              title={isSpeakingPlain ? t("tts_stop_reading") : t("tts_listen_explanation")}
+              aria-label={isSpeakingPlain ? t("tts_stop_reading") : t("tts_listen_explanation")}
+              aria-pressed={isSpeakingPlain}
             >
               <Icon name={isSpeakingPlain ? "stop" : "volume"} className="h-3 w-3" />
-              <span>{isSpeakingPlain ? "Stop" : "Listen"}</span>
+              <span>{isSpeakingPlain ? t("tts_stop") : t("tts_listen")}</span>
             </button>
           )}
         </div>
         {clause.plain ? <p className="text-[14.5px]">{clause.plain[lang]}</p> : <p className="muted text-[13.5px]">{t("no_plain")}</p>}
+        {noVoice && <p className="m-0 text-[12.5px] text-warn" role="status">{t("tts_no_hindi_voice")}</p>}
         <div className="mt-auto flex flex-wrap gap-2 pt-1">
           {best && (
             <span className="chip sage">
@@ -145,7 +151,9 @@ export function ClausesTab({
   onFilter: (f: ClauseFilter) => void;
   focusRef: string | null;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  useStopSpeechOnLeave();
+  useEffect(() => tts.stop(), [lang]); // switching language stops reading in the old one
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<Clause[] | null>(null);
   const [searching, setSearching] = useState(false);

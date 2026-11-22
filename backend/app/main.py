@@ -15,7 +15,7 @@ settings = get_settings()
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(app_: FastAPI):
     if settings.is_production and (problems := settings.production_problems()):
         raise RuntimeError("Refusing to start in production: " + "; ".join(problems))
     init_db()
@@ -24,6 +24,13 @@ async def lifespan(_: FastAPI):
 
         with SessionLocal() as db:
             seed(db)
+    from .db import get_session_factory
+    from .recovery import resume_interrupted
+
+    # Reads and checks a restart cut off would otherwise show "Reading…" for ever. Uses the same
+    # session factory as the routes, so tests (which override it) never touch the real database.
+    factory = app_.dependency_overrides.get(get_session_factory, get_session_factory)()
+    resume_interrupted(factory)
     yield
 
 
