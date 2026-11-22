@@ -9,7 +9,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": "http://localhost:8000",
+      // API_PORT lets a second copy run beside this one (default 8000)
+      "/api": `http://localhost:${process.env.API_PORT ?? "8000"}`,
     },
   },
 });

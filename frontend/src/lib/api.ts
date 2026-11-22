@@ -255,11 +255,15 @@ async function send(method: string, path: string, body?: unknown): Promise<Respo
     headers["Content-Type"] = "application/json";
     payload = JSON.stringify(body);
   }
+  let res: Response;
   try {
-    return await fetch(`/api${path}`, { method, headers, body: payload });
+    res = await fetch(`/api${path}`, { method, headers, body: payload });
   } catch {
     throw new ApiError(0, "network");
   }
+  // The dev server (or a hosting proxy) answers 502/503/504 when the backend isn't running.
+  if (res.status === 502 || res.status === 503 || res.status === 504) throw new ApiError(0, "network");
+  return res;
 }
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {

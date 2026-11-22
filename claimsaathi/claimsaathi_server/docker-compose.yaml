@@ -1,0 +1,44 @@
+services:
+  # Development services
+  postgres:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "8090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: claimsaathi
+      POSTGRES_PASSWORD: "0FreiMzIpUJadcWlz2um6s2Vw0HCIoKm"
+    volumes:
+      - claimsaathi_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2.6
+    ports:
+      - "8091:6379"
+    command: redis-server --requirepass "HzpulT7HVg3aBqlZsHEKxNskvxNbmr5L"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  # Test services
+  postgres_test:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "9090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: claimsaathi_test
+      POSTGRES_PASSWORD: "qs7hZf9XaYcG9sJfTKg3lqE-vvpTVYBC"
+    volumes:
+      - claimsaathi_test_data:/var/lib/postgresql/data
+
+  redis_test:
+    image: redis:6.2.6
+    ports:
+      - "9091:6379"
+    command: redis-server --requirepass "pA0g6iHpH2w3WDsNTi69dRVS3pfW32Hp"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+volumes:
+  claimsaathi_data:
+  claimsaathi_test_data:

@@ -106,6 +106,15 @@ The AI explains complex wording, while the rules engine does the exact date chec
 
 You need Python 3.12+ and Node.js 20+.
 
+**Quick start on Windows:** run these from the project folder. `setup.ps1` builds everything for your computer and is safe to re-run; `start.ps1` opens the backend and the website in two windows.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup.ps1
+powershell -ExecutionPolicy Bypass -File .\start.ps1
+```
+
+Sharing the project? Send the git repository, or a copy without `backend/.venv`, `frontend/node_modules` and `backend/.env`. A copied `.venv` points at the original computer's Python, so the backend won't start and sign-in shows "Can't reach the server". Running `setup.ps1` repairs a copied folder.
+
 **Backend** (FastAPI, runs on port 8000):
 
 ```bash
