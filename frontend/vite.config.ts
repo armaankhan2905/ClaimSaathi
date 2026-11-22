@@ -6,7 +6,7 @@ declare const process: { env: Record<string, string | undefined> };
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".");
-  const backendTarget = env.VITE_BACKEND_URL || `http://localhost:${env.API_PORT || process?.env?.API_PORT || "8000"}`;
+  const backendTarget = env.VITE_BACKEND_URL || `http://localhost:${env.API_PORT || process?.env?.API_PORT || "8001"}`;
 
   return {
     plugins: [react(), tailwindcss()],

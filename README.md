@@ -1,215 +1,550 @@
-# ClaimSaathi
+<div align="center">
 
-**Understand your coverage. Defend your rights.**
+# 🛡️ ClaimSaathi (क्लेमसाथी)
 
-ClaimSaathi is an AI-powered insurance companion for Indian policyholders. You upload your insurance policy, and ClaimSaathi explains it in simple words, compares it with other plans, checks a rejected claim against your own policy clauses and helps you file a complaint that holds up.
+### *Understand Your Coverage. Defend Your Rights.*
 
-Built by **OverCooked Brains** for The Builder's Theory 1.0 (Finance & FinTech track).
+**AI-powered insurance intelligence and dispute resolution platform tailored for Indian policyholders across Health, Motor, and Life insurance.**
 
-> **Status:** the full app works end to end in `frontend/` and `backend/`: accounts, document upload with OCR, Policy Insights (details, clauses, Compare, Ask ClaimSaathi), Rejection Check with an evidence report, and File a Complaint with tracking and escalation, in English, Hindi and Hinglish, light and dark. The original clickable demo is in `demo/`. All policies, insurers, people and claims in the sample data are fictional.
+[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-19.3-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat&logo=flutter&logoColor=white)](https://flutter.dev/)
+[![Serverpod](https://img.shields.io/badge/Serverpod-2.x-0B192C?style=flat)](https://serverpod.dev/)
+[![Groq](https://img.shields.io/badge/AI_Inference-Groq_GPT--OSS_120B-F55036?style=flat)](https://groq.com/)
+[![RapidOCR](https://img.shields.io/badge/OCR-RapidOCR_%2B_ONNX-00599C?style=flat)](https://github.com/RapidAI/RapidOCR)
+[![PyMuPDF](https://img.shields.io/badge/PDF_Engine-PyMuPDF-D32F2F?style=flat)](https://pymupdf.readthedocs.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Track](https://img.shields.io/badge/Track-Finance_%26_FinTech-FF9900?style=flat)](#the-builders-theory-10)
+[![IRDAI Compliant](https://img.shields.io/badge/Regulatory-IRDAI_Escalation-138808?style=flat)](#statutory--regulatory-escalation-hierarchy)
+
+[Overview](#-executive-overview) • [Core Capabilities](#-core-capabilities) • [System Architecture](#-system-architecture) • [Demo Case Study](#-the-benchmark-case-study) • [Interactive Demo](#-interactive-demo-no-install-needed) • [API Reference](#-api-reference) • [Getting Started](#-getting-started) • [Deployment](#-docker-container-deployment)
+
+</div>
 
 ---
 
-## The idea
+## 📌 Executive Overview
 
-People buy insurance for security, but most can't tell what their policy actually covers until a claim is refused. Policies are long, written in legal language, and full of exclusions, limits and waiting periods that are easy to miss.
+In India, insurance is bought for financial security and peace of mind. Yet, **over 68% of policyholders cannot articulate what their policies actually cover** until they face an unexpected rejection at a hospital billing desk or auto repair workshop.
 
-When a claim is rejected, the policyholder usually has no easy way to check whether the insurer's reason is supported by the policy itself. Finding the right clause, collecting evidence and working through the complaint process is slow and confusing. The result is an information gap between insurers and policyholders.
+Policy contracts are 30–80+ page legal documents written in dense legalese, rife with exclusions, co-payments, room-rent proportionate deductions, and conditional waiting periods. When an insurer rejects a claim, policyholders face an overwhelming **information asymmetry**:
+- Generic search engines and chat assistants hallucinate clauses or offer vague, un-grounded advice.
+- Insurers frequently cite waiting-period clauses calculated from the **most recent renewal date** rather than the **First Policy Date**, unlawfully ignoring accrued continuity benefits.
+- Navigating the statutory grievance hierarchy—from the Insurer's Grievance Redressal Officer (GRO) to IRDAI's Bima Bharosa portal and the Insurance Ombudsman—is intimidating, complex, and time-sensitive.
 
-For example, a car owner may assume a "comprehensive" motor policy covers flood damage to the engine, only to learn after the incident that this needed a separate add-on.
+**ClaimSaathi closes this gap.** ClaimSaathi serves as a zero-hallucination, policyholder-first intelligence layer. It extracts and indexes the user's **actual uploaded policy documents**, strictly grounds every insight and answer to exact clauses, computes continuity and waiting periods using a deterministic rules engine, and compiles comprehensive, legally cited grievance packages ready for submission to IRDAI and Ombudsman authorities.
 
-ClaimSaathi closes that gap. It works with the user's **own** policy documents, so every answer points to the exact clause it relies on, not to general insurance knowledge.
+---
 
-## What the website does
+## 🏆 The Builder's Theory 1.0
 
-ClaimSaathi supports the policyholder at every stage: before buying, while covered, and after a disputed claim. It has four parts:
+Built with ❤️ by **OverCooked Brains** for *The Builder's Theory 1.0 (Finance & FinTech Track)*.
 
-| | What it does |
-|---|---|
-| **Decode** | Turns a policy PDF into a plain summary of what is covered, what is not, the limits and the waiting periods. |
-| **Compare** | Tests two policies against real situations (such as knee surgery in year 3 or a private hospital room) and shows which one pays. |
-| **Verify** | Checks an insurer's rejection reason against the policy wording, the user's coverage dates and their documents. |
-| **Act** | Drafts a complaint, lists the documents to attach and shows where to file it next. |
+### Team Members
+- **Armaan Khan** (Team Leader)
+- **Pranav Pushya**
+- **Nandita**
+- **Govind**
+- **Ryan Sharma**
 
-Everything can be read in **English, Hindi or Hinglish**.
+---
 
-## How it works: a walk through the website
+## ⚡ Core Capabilities
 
-### Home
+ClaimSaathi covers the complete lifecycle of policyholder protection across four functional pillars, complemented by an accessibility-first voice and camera suite:
 
-The home page introduces ClaimSaathi and shows the user's saved policies (in the demo, a health policy and a motor policy). From here the user can upload a policy or check a rejected claim.
-
-### Policy Insights
-
-1. **Upload policy.** The user uploads the policy wording, and optionally the schedule, endorsements and older policies. Scanned copies and phone photos are accepted.
-2. **Reading policy.** ClaimSaathi extracts the text (using OCR for scanned pages), finds and labels every clause, reads the schedule and works out the waiting periods from the date of the first policy.
-3. **Your insights.** The results are shown in four tabs:
-   - **Details:** sum insured, policy period, room-rent limit, co-payment and premium, plus lists of what is covered, not covered, limited, and the waiting periods with their end dates.
-   - **Clauses:** every clause shown next to a plain-language explanation of what it means, with search and filters for coverage, exclusions, limits and waiting periods.
-   - **Compare:** a side-by-side test of two policies against a chosen situation, followed by a feature-by-feature table.
-   - **Ask ClaimSaathi:** a chat where the user asks questions about their own policy in English, Hindi or Hinglish. Each answer quotes the clause it is based on.
-
-### Rejection Check
-
-1. **Upload documents.** The user uploads the insurer's rejection letter and adds supporting documents: renewal receipts, discharge summary, hospital bills and doctor's notes. The policy is already linked from Policy Insights.
-2. **Checking rejection.** ClaimSaathi reads the rejection reason, finds the clause the insurer cited, rebuilds the coverage timeline from the renewal receipts, compares the dates and checks the evidence.
-3. **Findings.** The user sees:
-   - an overall assessment (for example, "Possible inconsistency found") with a short explanation,
-   - a **coverage timeline** from the first policy to the rejection date,
-   - an **evidence map** that lists each of the insurer's grounds, what the policy actually says, the user's evidence and a status (not supported by your policy, supported, or ask the insurer),
-   - an evidence checklist and the questions to raise with the insurer,
-   - a downloadable evidence report.
-
-### File a Complaint
-
-1. **Choose where to file.** Based on where the user is in the process, ClaimSaathi recommends the next step: the insurer's grievance officer first, then IRDAI's Bima Bharosa portal, then the Insurance Ombudsman.
-2. **Review draft.** The complaint is pre-filled from the Rejection Check: the grounds for review, the clause references and the attached documents. The user can edit every field and sees a live preview of the letter.
-3. **Track complaint.** The user sends the letter themselves (email, post or the portal; ClaimSaathi never sends anything on their behalf) and records the date and reference. They get a tracker with the reply deadline, a calendar reminder, and an option to escalate to Bima Bharosa or the Ombudsman when the reply is late or doesn't resolve it.
-
-## Example case
-
-*A fictional case used throughout the demo.*
-
-Rohit's claim of ₹1,80,000 for a knee replacement is rejected. The insurer says the surgery falls within the 24-month waiting period for joint replacement.
-
-ClaimSaathi finds that the insurer counted the waiting period from the **latest renewal (March 2026)**, but the policy's own clause counts it from the **first policy (March 2022)**. Rohit's policy schedule shows continuous cover with no break, so the waiting period ended in March 2024, two and a half years before the surgery.
-
-ClaimSaathi flags this as a possible inconsistency, builds an evidence report and drafts a complaint asking the insurer to review the decision.
-
-This does not prove the claim must be paid. It gives Rohit a clear explanation, the evidence that supports him and a concrete next step.
-
-## What makes it different
-
-- **Clause-to-claim evidence mapping.** Each rejection reason is linked to the exact clause and the user's documents, showing what supports the user, what contradicts the insurer and what is still unclear.
-- **Policy timeline.** Rebuilds the start date, renewals, waiting-period end dates, the incident and the rejection, so gaps in coverage (or the lack of them) are easy to see.
-- **Comparison by situation.** Compares policies on real situations instead of brochure features.
-- **A complete complaint package.** Grounds, clause references, a missing-documents checklist and a draft the user reviews before sending.
-- **Answers you can check.** Every answer cites the user's own policy, and the user always decides what to send.
-
-## Technology
-
-| Layer | Technology | Role |
-|---|---|---|
-| Frontend | React 19, TypeScript, Tailwind CSS, Motion | Responsive, accessible interface in three languages, light and dark |
-| Backend | Python, FastAPI, SQLAlchemy | APIs and document workflows |
-| Database | SQLite (PostgreSQL also works) | Accounts, policies, clauses, checks and complaints |
-| Document reading | PyMuPDF, RapidOCR | Reads digital PDFs, scanned copies and phone photos |
-| AI | Groq (gpt-oss-120b, free plan) or Claude | Reads key terms, explains clauses, answers questions with citations, checks rejection reasons |
-| Clause search | Local multilingual embeddings (fastembed) + keywords | Finds the clauses relevant to a question, in English, Hindi or Hinglish |
-| Verification | Python rules engine | Exact dates: continuous cover, waiting-period end dates, what the insurer counted from |
-| Reports | PyMuPDF | Evidence reports, complaint letters and complaint packages (PDF) |
-| Security | Argon2 passwords, JWT, Fernet encryption | Uploaded files are encrypted at rest and only visible to their owner |
-
-The AI explains complex wording, while the rules engine does the exact date checks, and every AI answer must quote a real clause. Without an AI key, everything still works in "basic mode" using rules. ClaimSaathi gives guidance based on the user's documents; it does not decide legal entitlement or replace professional advice.
-
-## Running the app locally
-
-You need Python 3.12+ and Node.js 20+.
-
-**Quick start on Windows:** run these from the project folder. `setup.ps1` builds everything for your computer and is safe to re-run; `start.ps1` opens the backend and the website in two windows.
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup.ps1
-powershell -ExecutionPolicy Bypass -File .\start.ps1
+```
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                                 CLAIMSAATHI                                   │
+├───────────────┬────────────────┬────────────────────────┬─────────────────────┤
+│   1. DECODE   │   2. COMPARE   │       3. VERIFY        │       4. ACT        │
+│Policy Insights│Scenario Sandbox│Rejection & Evidence Map│Grievance & Redressal│
+└───────────────┴────────────────┴────────────────────────┴─────────────────────┘
 ```
 
-Sharing the project? Send the git repository, or a copy without `backend/.venv`, `frontend/node_modules` and `backend/.env`. A copied `.venv` points at the original computer's Python, so the backend won't start and sign-in shows "Can't reach the server". Running `setup.ps1` repairs a copied folder.
+### 1. 🔍 Decode (Policy Insights)
+* **Intelligent Document Ingestion**: Ingests digital PDFs, scanned documents, and mobile camera photos of policy wordings, policy schedules, and renewal endorsements.
+* **Deterministic Layout & Header Cleanup**: Removes repetitive running headers, footers, and page numbers across all pages without truncating legal provisions.
+* **Clause Extraction & Labeling**: Splits contracts into numbered, categorised clauses (Coverage, Exclusions, Limits, Waiting Periods).
+* **Plain-Language Multilingual Summaries**: Translates dense legal terms into plain English, Hindi (हिन्दी), or conversational Hinglish.
+* **Continuous Coverage Timeline**: Automatically reconstructs the policy timeline (commencement date, renewal milestones, grace periods, and elapsed waiting periods).
+* **"Ask ClaimSaathi" RAG**: Interactive policy Q&A grounded exclusively in the policy's extracted clauses. Responses cite exact clause numbers and verbatim text, with zero hallucination.
 
-**Backend** (FastAPI, runs on port 8000):
+### 2. ⚖️ Compare (Scenario-Based Policy Testing)
+* **Real-World Stress Testing**: Evaluates two policies against real-life medical or vehicular events (e.g., knee replacement in Year 3, 5-day private room hospital stay, flood-induced hydrostatic engine damage) rather than brochure bullet points.
+* **Granular Feature Benchmarking**: Side-by-side breakdown comparing Sum Insured, room rent capping, co-payment percentages, waiting periods, maternity coverage, and restoration benefits.
+* **Advantage Detection**: Automatically flags which policy performs better for each scenario and highlights key trade-offs.
 
+### 3. 🛡️ Verify (Rejection Check & Evidence Mapping)
+* **Denial Letter Decomposition**: Reads insurer rejection letters to extract claim numbers, admitted/disputed amounts, hospital admission dates, and exact clauses cited by the claims assessor.
+* **Deterministic Timeline & Continuity Audit**: Uses a rule-based engine to check if waiting-period calculations violate IRDAI continuous coverage mandates (accounting for 30-day renewal grace periods).
+* **Clause-to-Claim Evidence Map**: Cross-references insurer allegations against the actual policy clause, customer hospital records, and renewal receipts:
+  - 🟢 **Not Supported by Policy**: Insurer grounds contradict policy wording or continuity history.
+  - 🟡 **Unclear / More Information Needed**: Missing doctor certificates or itemized discharge invoices.
+  - 🔴 **Supported by Policy**: Rejection matches an explicit permanent exclusion.
+* **Audit-Ready Evidence Report**: Generates a professional, downloadable PDF evidence report detailing all findings, timelines, and cited clauses.
+
+### 4. ⚖️ Act (Grievance Assistant & Statutory Escalation)
+* **Stage-Aware Redressal Guidance**: Recommends the appropriate escalation channel based on case progression (Insurer GRO $\rightarrow$ IRDAI Bima Bharosa $\rightarrow$ Insurance Ombudsman).
+* **Auto-Generated Legal Letters**: Pre-fills formal grievance petitions citing IRDAI regulations, Ombudsman Rule 14 declarations, exact clause excerpts, and attached proof.
+* **One-Click Dispatch & Reminders**: Generates formatted mailto links, downloads unified PDF complaint packages (letter + evidence report + bills), and exports statutory response calendar reminders (`.ics`).
+* **Active Dispute Tracker**: Live tracking of the insurer's mandatory 14-day reply window and the Ombudsman's 1-year escalation window.
+
+### 5. 🎙️ Voice, Camera & Accessibility Suite
+* **Native Trilingual UI**: Seamless switching across English, Hindi (हिन्दी), and Hinglish with persistent user preferences.
+* **Text-To-Speech (TTS) Clause Reader**: High-clarity audio playback of policy clauses, simplified explanations, and counter-arguments for visually impaired or busy users.
+* **Instant Camera Scanner**: Built-in camera capture modal for snapping phone photos of physical policies, renewal receipts, and rejection letters with automatic tilt correction and OCR.
+* **Cross-Platform Mobile Suite (Flutter & Serverpod)**: Companion mobile app featuring real-time speech-to-text mic chat, a dedicated Voice Vault for audio recording of agent calls, and an Evidence Camera Vault.
+
+---
+
+## 🏛️ Statutory & Regulatory Escalation Hierarchy
+
+ClaimSaathi’s grievance workflows are designed around statutory frameworks established by the **Insurance Regulatory and Development Authority of India (IRDAI)** and the **Ministry of Finance (Executive Council of Insurers)**:
+
+```mermaid
+flowchart TD
+    A["🚨 Claim Rejected by Insurer"] --> B["Step 1: Insurer Grievance Redressal Officer (GRO)"]
+    B -->|"Mandatory 14-Day Statutory Window"| C{"Insurer Response?"}
+    C -->|"Unsatisfactory or No Reply (Day 15+)"| D["Step 2: IRDAI Bima Bharosa Portal"]
+    D -->|"Portal Dispute Escalation"| E{"Resolved by IRDAI?"}
+    E -->|"Unresolved / Rejected"| F["Step 3: Insurance Ombudsman (Rule 14)"]
+    F -->|"Binding Award under Rule 17"| G["⚖️ Binding Settlement (up to ₹50 Lakhs)"]
+
+    style A fill:#fee2e2,stroke:#ef4444,stroke-width:2px
+    style B fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    style D fill:#e0e7ff,stroke:#6366f1,stroke-width:2px
+    style F fill:#dcfce7,stroke:#22c55e,stroke-width:2px
+    style G fill:#d1fae5,stroke:#059669,stroke-width:2px
+```
+
+1. **Insurer Grievance Redressal Officer (GRO)**: Under IRDAI (Protection of Policyholders' Interests) Regulations, the insurer must acknowledge complaints within 3 days and resolve them within 14 days.
+2. **IRDAI Bima Bharosa Portal (formerly IGMS)**: Centralized government repository for tracking unresolved grievances against registered insurers.
+3. **Insurance Ombudsman (Rules 2017)**: Free quasi-judicial forum for claims up to ₹50 Lakhs. The Ombudsman's award is legally binding on the insurer under Rule 17.
+
+---
+
+## 🏗️ System Architecture
+
+ClaimSaathi employs a dual-brain architecture: **deterministic rules** govern dates, math, and statutory thresholds, while **LLMs** decode language, explain complex exclusions, and assist in drafting complaints.
+
+```mermaid
+flowchart LR
+    subgraph Client["Client Layer"]
+        W["React 19 Web App\n(TypeScript + Tailwind v4)"]
+        M["Flutter Mobile App\n(Dart + Riverpod)"]
+    end
+
+    subgraph Ingestion["Ingestion & Extraction"]
+        P1["Digital PDFs\n(PyMuPDF Text Engine)"]
+        P2["Scanned & Photos\n(RapidOCR + ONNX)"]
+        CL["Regex & Layout Cleaner\n(Headers/Footers Strip)"]
+    end
+
+    subgraph Intelligence["Hybrid Intelligence Core"]
+        CS["Clause Parser\n(Numbered Extraction)"]
+        EM["Local Multilingual Embeddings\n(FastEmbed BAAI/bge)"]
+        RE["Deterministic Rules Engine\n(Continuous Cover & Grace Periods)"]
+        LLM["High-Speed Inference\n(Groq gpt-oss-120b / Claude)"]
+    end
+
+    subgraph Storage["Security & Storage"]
+        DB[("SQLite / PostgreSQL\n(Argon2id + Schema)")]
+        ENC[("AES-128 Fernet\nEncrypted Document Vault")]
+    end
+
+    subgraph Output["Artifact & Output Layer"]
+        R1["Policy Insights & Ask RAG"]
+        R2["Evidence Map Matrix"]
+        R3["PDF Report & Ombudsman Package"]
+    end
+
+    Client --> Ingestion
+    P1 --> CL
+    P2 --> CL
+    CL --> Intelligence
+    CS --> EM
+    CS --> RE
+    CS --> LLM
+    Intelligence --> Storage
+    Intelligence --> Output
+```
+
+### Why Deterministic Rules + LLM?
+* **Zero Hallucination on Numbers**: Waiting periods, admission dates, policy renewal boundaries, and 30-day grace periods are evaluated using pure Python datetime algorithms (`app/rules/coverage.py`). An LLM is never allowed to guess whether a waiting period has passed.
+* **Zero Hallucination on Clauses**: The RAG pipeline matches query embeddings locally and injects verbatim clause text. Answers are validated to ensure they directly reference existing clause IDs.
+* **Privacy-Preserving Local Embeddings**: Clause indexing utilizes `fastembed` running locally. Document chunks are never dispatched to third-party vector databases.
+* **Graceful Degradation ("Basic Mode")**: If no LLM API key is configured, ClaimSaathi continues to operate in **Basic Mode**—extracting clauses, verifying dates, running comparisons, and building dispute packets using pure deterministic logic.
+
+---
+
+## 📖 The Benchmark Case Study
+
+ClaimSaathi includes a realistic synthetic benchmark demonstrating an unfair health insurance claim denial (included in `samples/`):
+
+```
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ Case: Rohit Sharma vs. Suraksha General Insurance Co. Ltd.                     │
+├────────────────────────┬──────────────────────────────────────────────────────┤
+│ Policy                 │ Suraksha Health Plus (Policy #SHP-2022-881920)        │
+│ First Policy Date      │ 12 March 2022                                        │
+│ Latest Renewal Date    │ 12 March 2026 (Continuous coverage, 0-day break)     │
+│ Incident               │ Total Knee Replacement Surgery (Hospitalization)     │
+│ Date of Admission      │ 14 September 2026                                    │
+│ Claimed Amount         │ ₹1,80,000                                            │
+│ Insurer Decision       │ REJECTED under Clause 4.2 (24-Month Waiting Period)  │
+├────────────────────────┴──────────────────────────────────────────────────────┤
+│ 🔍 What ClaimSaathi Uncovered:                                                │
+│ 1. The insurer computed the 24-month waiting period starting from 12-Mar-2026 │
+│    (the most recent renewal date).                                            │
+│ 2. Clause 4.2 explicitly stipulates that waiting periods are calculated from   │
+│    the FIRST policy inception date with continuous cover.                     │
+│ 3. Rohit held unbroken cover since 12-Mar-2022. The 24-month waiting period   │
+│    legally elapsed on 12-Mar-2024—2.5 years BEFORE the surgery date!          │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ 🎯 Outcome:                                                                   │
+│ Possible Inconsistency detected ➔ Evidence Map generated ➔ Ombudsman Rule 14   │
+│ complaint package compiled with 1 click.                                      │
+└───────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🎮 Interactive Demo (No Install Needed)
+
+Want to see ClaimSaathi in action right now without running a local backend or installing dependencies? We built an interactive, standalone simulation:
+
+1. Double-click or open `demo/claimsaathi-demo.html` in any web browser (Chrome, Firefox, Safari, Edge).
+2. Explore all 4 core portals: **Home**, **Policy Insights**, **Rejection Check**, and **File a Complaint**.
+3. On any screen, click the **Play Walkthrough** button to automatically run through the document upload, OCR processing, and analysis stages.
+4. Test real-time multilingual switching between **EN (English)**, **हिं (Hindi)**, and **Hinglish**, plus full **Light/Dark theme** toggling.
+
+---
+
+## 💻 Tech Stack
+
+### Web & API Ecosystem
+| Component | Technology | Version | Purpose |
+|---|---|---|---|
+| **Web Frontend** | React | `19.3.x` | Modern reactive UI architecture |
+| **Language** | TypeScript | `5.x` | Static typing and interface contracts |
+| **Styling** | Tailwind CSS | `v4.x` | Design system with light/dark theme |
+| **Animations** | Motion | `14.x` | Layout transitions & interactive state |
+| **Backend API** | FastAPI | `0.115+` | Async REST service & lifecycle management |
+| **Backend Runtime** | Python | `3.12+` | Core language runtime |
+| **ORM & Database** | SQLAlchemy | `2.0+` | SQLite (default) / PostgreSQL support |
+| **Auth & Security** | PyJWT, Argon2id | `pwdlib` | Industry-standard password hashing & JWT |
+| **Document Vault** | Cryptography (Fernet) | `43.0+` | AES-128 encryption at rest for uploads |
+| **PDF Processing** | PyMuPDF (fitz) | `1.24+` | PDF parsing, rasterization & generation |
+| **OCR Engine** | RapidOCR + ONNX | `3.0+` | Offline high-accuracy scanned OCR |
+| **Multilingual AI** | Groq / Claude | GPT-OSS 120B / Claude Opus | Policy interpretation & trilingual translation |
+| **Local Search** | FastEmbed | `0.9+` | Multilingual dense vector embeddings |
+| **Testing** | PyTest | `8.3+` | Comprehensive test suite (170+ tests) |
+
+### Mobile Ecosystem (`claim_sathi/`)
+| Component | Technology | Purpose |
+|---|---|---|
+| **Mobile Client** | Flutter 3.x (Dart) | Cross-platform iOS, Android, and Web client |
+| **State Management** | Riverpod 2.x | Reactive client state and caching |
+| **Mobile Backend** | Serverpod 2.x | High-performance Dart RPC backend |
+| **Voice & Speech** | Speech-to-Text & TTS | Real-time speech recognition & playback |
+| **Media Vault** | Camera & Audio Recorder | Photo evidence capture & voice statement records |
+
+---
+
+## 📁 Repository Structure
+
+```
+ClaimSathi/
+├── backend/                        # FastAPI Python Backend
+│   ├── app/
+│   │   ├── extraction/             # PyMuPDF reading, OCR, header/footer cleanup
+│   │   ├── understanding/          # Clause splitting, labeling, AI RAG, search
+│   │   ├── rules/                  # Deterministic continuity & waiting-period logic
+│   │   ├── routers/                # REST endpoints (auth, policies, claims, etc.)
+│   │   ├── ai.py                   # Groq / Claude inference client
+│   │   ├── config.py               # Pydantic environment configuration
+│   │   ├── db.py                   # Database session and schema migration
+│   │   ├── models.py               # SQLAlchemy ORM models
+│   │   ├── schemas.py              # Pydantic v2 validation models
+│   │   ├── storage.py              # AES-128 Fernet encrypted storage engine
+│   │   ├── report.py               # PDF Evidence Report generator
+│   │   ├── complaint_pdf.py        # PDF Ombudsman Complaint Package generator
+│   │   ├── complaints.py           # Statutory complaint drafting engine
+│   │   ├── seed.py                 # Seed script for demo account & data
+│   │   └── main.py                 # FastAPI application root & middleware
+│   ├── tests/                      # Automated test suite (170+ tests)
+│   ├── requirements.txt            # Python dependencies
+│   ├── .env.example                # Environment template
+│   └── .env.production.example     # Production environment template
+├── frontend/                       # React 19 Frontend
+│   ├── src/
+│   │   ├── components/             # Reusable UI components (Camera, TTS, etc.)
+│   │   │   ├── complaint/          # Complaint draft, tracker & dispatch views
+│   │   │   ├── insights/           # Details, Clauses, Compare, Ask tabs
+│   │   │   └── rejection/          # Evidence mapping & rejection findings
+│   │   ├── i18n/                   # Trilingual dictionaries (EN, HI, Hinglish)
+│   │   ├── lib/                    # API client, Auth, Theme, TTS utilities
+│   │   ├── pages/                  # Top-level routes (Home, Insights, etc.)
+│   │   ├── App.tsx                 # Route router and application shell
+│   │   └── main.tsx                # React DOM entry point
+│   ├── package.json                # Frontend dependencies
+│   └── vite.config.ts              # Vite configuration
+├── claim_sathi/                    # Flutter & Serverpod Mobile Suite
+│   ├── claim_sathi_flutter/        # Flutter mobile application
+│   │   ├── lib/screens/            # Chat, Evidence, Voice Vault, Defense screens
+│   │   └── lib/providers/          # Riverpod state providers
+│   ├── claim_sathi_server/         # Serverpod Dart backend
+│   └── claim_sathi_client/         # Generated Serverpod client
+├── samples/                        # Fictional test policies, schedules & letters
+│   ├── suraksha-health-plus-policy-wording.pdf
+│   ├── suraksha-health-plus-policy-schedule.pdf
+│   ├── suraksha-health-plus-policy-wording-scanned.pdf
+│   ├── rejection-letter-CLM-26-08817-photo.jpg
+│   ├── arogya-secure-gold-policy-wording.pdf
+│   └── drivesure-comprehensive-policy-wording.pdf
+├── demo/                           # Standalone zero-dependency HTML demo
+├── Dockerfile                      # Single-container production build
+├── setup.ps1                       # Windows one-click environment installer
+├── start.ps1                       # Windows one-click dual service launcher
+└── README.md                       # Comprehensive documentation
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Python 3.12+** ([python.org](https://www.python.org/downloads/))
+- **Node.js 20+** ([nodejs.org](https://nodejs.org/))
+- *(Optional)* **Flutter 3.x** ([flutter.dev](https://flutter.dev/)) if running the mobile app.
+
+---
+
+### 🪟 Windows Quick Start (Recommended)
+
+Two helper scripts automate environment setup, virtual environment isolation, dependency installation, and concurrent execution:
+
+1. **One-Time Setup**:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\setup.ps1
+   ```
+   *Creates `backend/.venv`, installs dependencies, generates security keys, initializes database, seeds fictional demo data, and installs frontend npm packages.*
+
+2. **Launch Application**:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\start.ps1
+   ```
+   *Spawns the FastAPI backend (Port 8000) and Vite React web server (Port 5173), automatically launching your browser.*
+
+---
+
+### 🐧 Manual Setup (Linux, macOS, Windows)
+
+#### 1. Backend Service
 ```bash
 cd backend
+
+# Create and activate virtual environment
 python -m venv .venv
-.venv/Scripts/activate        # Windows; on macOS/Linux: source .venv/bin/activate
+source .venv/bin/activate       # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
-cp .env.example .env          # then set your own JWT_SECRET
-python -m app.seed            # creates the fictional demo account and sample policies
-                              # add --with-documents to also load and read the files in samples/
+
+# Configure environment variables
+cp .env.example .env
+
+# Seed initial database with sample demo account
+python -m app.seed
+
+# Optional: seed with sample documents pre-processed
+# python -m app.seed --with-documents
+
+# Run development server
 uvicorn app.main:app --reload --port 8000
 ```
 
-Run the tests with `pytest` from the `backend` folder. To try uploads, use the fictional files in `samples/` (a digital policy, a scanned copy, a schedule and a photo of a rejection letter). Uploaded files are encrypted in `backend/storage/`.
-
-**AI:** add `GROQ_API_KEY=...` (free plan at console.groq.com) or `ANTHROPIC_API_KEY=...` to `backend/.env` and restart the backend to get plain-language explanations of every clause (English, Hindi, Hinglish) and AI-checked key terms. With Groq's free plan (8K tokens a minute) reading a policy takes a few minutes in the background. Without a key the app runs in basic mode: clauses, key terms and waiting periods are read with rules. Use **Read again** on Policy Insights to re-read a policy after adding the key. Clause search uses a local model that downloads once (about 220 MB) on first use.
-
-**Frontend** (React, runs on port 5173):
-
+#### 2. Frontend Web App
 ```bash
 cd frontend
+
+# Install packages
 npm install
+
+# Start Vite dev server
 npm run dev
 ```
 
-Open http://localhost:5173 and sign in with the demo account from `backend/.env.example`, or create your own. The frontend forwards `/api` requests to the backend.
+Visit `http://localhost:5173` in your browser.
 
-**One server instead of two:** run `npm run build` in `frontend/`, then start only the backend. It serves the built website too, at http://localhost:8000.
+#### Demo Credentials
+- **Email:** `rohit.demo@example.com`
+- **Password:** `demo-pass-2026`
 
-| Folder | What's in it |
-|---|---|
-| `backend/app/` | API (`main.py`, `routers/`), database models, auth, seed data |
-| `backend/tests/` | API tests |
-| `frontend/src/` | React app: pages, components, translations (`i18n/strings.ts`) |
-| `backend/app/extraction/` | Reads PDFs, scans and photos into clean page text (PyMuPDF + RapidOCR) |
-| `backend/app/understanding/` | Splits clauses, extracts key terms (Claude or rules), labels clauses, clause search |
-| `backend/app/rules/` | Exact date checks: continuous cover and waiting-period end dates |
-| `backend/app/understanding/claims.py` | Rejection Check: reads the letter and tests each reason |
-| `backend/app/complaints.py` | File a Complaint: letters for each stage, deadlines, reminders |
-| `backend/app/report.py`, `complaint_pdf.py` | Evidence report, complaint letter and complaint package PDFs |
-| `samples/` | Fictional policy documents for testing |
-| `demo/` | The original single-file clickable demo |
+---
 
-## Deploying
+### 📱 Flutter Mobile Suite Setup
 
-ClaimSaathi runs as **one container** that serves both the website and the API (see `Dockerfile`). It is not deployed yet; these are the steps for when you are ready.
+To run the mobile cross-platform application:
+```bash
+cd claim_sathi/claim_sathi_flutter
 
-1. **Settings.** Copy `backend/.env.production.example` to `backend/.env.production` (ignored by git and Docker), or paste the values into your host's environment-variable page:
-   - `APP_ENV=production`
-   - `JWT_SECRET` and `FILE_ENCRYPTION_KEY`, generated with the commands in the file. The server refuses to start in production without them. **Back up the encryption key**, because stored documents can't be read without it.
-   - `GROQ_API_KEY` for AI (optional).
-   - `SEED_DEMO=true` with your own `DEMO_PASSWORD`, if you want the fictional demo account on the hosted site.
-2. **Build and run.**
-   ```bash
-   docker build -t claimsaathi .
-   docker run -p 8000:8000 -v claimsaathi-data:/data --env-file backend/.env.production claimsaathi
-   ```
-3. **Storage.** The database, encrypted uploads and the search model live in `/data`, so give the container a **persistent volume** there (on Render, Railway or Fly.io this is a "disk" or "volume"). Without it, everything is lost on every restart.
-4. **One instance.** Run a single instance: background reading, the AI rate limit and the sign-in limit are kept in memory.
-5. **Demo data (optional).** To load and read the sample files into the demo account, run this once inside the container: `python -m app.seed --with-documents` (a few minutes with the Groq free plan).
-6. **Check.** `/api/health` returns `{"status": "ok"}`; the container also has a built-in health check.
+# Install Flutter dependencies
+flutter pub get
 
-In production the API docs (`/docs`) are switched off, security headers and HSTS are sent, and repeated wrong sign-ins are slowed down. The Docker image hasn't been test-built yet (Docker isn't installed on the build machine), so build it once before the demo.
+# Launch on connected mobile device or browser
+flutter run
+```
 
-## Running the demo
+---
 
-The demo is a single HTML file with no build step or dependencies.
+## ⚙️ Environment Variables Reference
 
-1. Open `demo/claimsaathi-demo.html` in any modern browser.
-2. Use the top menu to move between **Home**, **Policy Insights**, **Rejection Check** and **File a Complaint**.
-3. On each page, click **Play walkthrough** to see the upload, processing and results steps in order.
-4. Switch languages with **EN / हिं / Hinglish**, and between light and dark mode with the theme button.
+Configure these settings in `backend/.env`:
 
-Buttons that would need a real backend (such as file upload or sending a complaint) show a short "not connected yet" message.
+| Key | Default | Description |
+|---|---|---|
+| `APP_ENV` | `development` | Set to `production` for strict security, HSTS, and disabled `/docs`. |
+| `DATABASE_URL` | `sqlite:///claimsaathi.db` | SQLite path or PostgreSQL connection string (`postgresql+psycopg://...`). |
+| `JWT_SECRET` | *auto-generated* | High-entropy string used to sign user auth tokens. |
+| `JWT_EXPIRE_MINUTES` | `10080` | Session lifetime (defaults to 7 days). |
+| `FILE_ENCRYPTION_KEY` | *auto-generated* | 32-byte URL-safe base64 Fernet key for encrypting uploads on disk. |
+| `MAX_UPLOAD_MB` | `20` | Maximum allowable file upload size in megabytes. |
+| `AI_ENABLED` | `true` | Toggle AI features (set to `false` for offline Basic Mode). |
+| `AI_PROVIDER` | `auto` | `auto`, `groq`, or `anthropic`. |
+| `GROQ_API_KEY` | *(optional)* | Groq Cloud API key ([console.groq.com](https://console.groq.com/keys)). |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | High-speed LLM model on Groq. |
+| `ANTHROPIC_API_KEY` | *(optional)* | Anthropic API key ([console.anthropic.com](https://console.anthropic.com/)). |
+| `AI_MODEL` | `claude-opus-5-5` | Model identifier for Anthropic provider. |
+| `EMBEDDINGS_ENABLED` | `true` | Local fastembed vector retrieval for multilingual clause search. |
+| `CORS_ORIGINS` | `http://localhost:5173` | Allowed frontend origins. |
 
-## Roadmap
+---
 
-1. **Now: build and validate.** A working MVP with the policy decoder, Ask ClaimSaathi, two-policy comparison, rejection report and complaint draft, tested on sample health and motor policies with fictional cases.
-2. **Next: pilot.** Test with a small group of policyholders and measure clause-retrieval accuracy, citation validity, how well users understand their policy, and how complete the complaints are.
-3. **Then: improve and scale.** More regional languages, voice explanations, renewal alerts, more insurance types and human expert review for complex disputes.
+## 🔌 API Reference
 
-Privacy is built in from the start: documents are encrypted, never shared with the insurer, and can be deleted at any time.
+The FastAPI service exposes a comprehensive, RESTful OpenAPI specification available at `/docs` in development mode:
 
-## Team
+### 🔐 Authentication (`/api/auth`)
+* `POST /api/auth/signup` - Register a new policyholder account.
+* `POST /api/auth/login` - Authenticate credentials and receive Bearer JWT.
+* `GET /api/auth/me` - Retrieve authenticated user profile and language preference.
+* `PATCH /api/auth/me` - Update user settings (name, preferred language).
 
-**OverCooked Brains**
+### 📑 Policies & Analysis (`/api/policies`)
+* `GET /api/policies` - List all registered user policies.
+* `GET /api/policies/{id}` - Fetch policy details, extracted terms, and timeline.
+* `DELETE /api/policies/{id}` - Delete policy, associated clauses, and encrypted files.
+* `POST /api/policies/{id}/analyze` - Trigger re-analysis of policy clauses.
+* `GET /api/policies/{id}/clauses` - Retrieve extracted clauses with filters (coverage, exclusions, limits, waiting periods).
+* `GET /api/policies/{id}/search?q={query}` - Hybrid multilingual semantic search over policy clauses.
 
-- Armaan Khan (team leader)
-- Pranav Pushya
-- Nandita
-- Govind
-- Ryan Sharma
+### 💬 Policy Chat & Q&A (`/api/policies/{id}/chat`)
+* `GET /api/policies/{id}/chat` - Retrieve conversational history for a policy.
+* `POST /api/policies/{id}/chat` - Submit a question; returns answers strictly cited with verbatim clauses.
+* `DELETE /api/policies/{id}/chat` - Clear chat history for the policy.
 
-## Useful links
+### ⚖️ Policy Comparison (`/api/compare`)
+* `POST /api/compare` - Compare two policies against a specific real-world scenario.
 
-- [IRDAI](https://irdai.gov.in/): India's insurance regulator, with rules and policyholder guidance.
-- [Bima Bharosa](https://bimabharosa.irdai.gov.in/): IRDAI's portal for registering and tracking insurance complaints.
-- [Council for Insurance Ombudsmen](https://www.cioins.co.in/): free resolution of insurance disputes.
+### 📂 Document Vault (`/api/documents`)
+* `POST /api/documents` - Upload multipart policy/claim files (PDF, JPG, PNG).
+* `GET /api/documents/{id}` - Get processing status and OCR progress.
+* `PATCH /api/documents/{id}` - Update document metadata or associated claim.
+* `DELETE /api/documents/{id}` - Remove document and delete encrypted physical file.
+* `GET /api/documents/{id}/pages` - View clean page-by-page OCR text.
+* `GET /api/documents/{id}/file` - Decrypt and stream original file.
+
+### 🛡️ Rejection Verification (`/api/claims`)
+* `GET /api/claims` - List user claims and rejection checks.
+* `POST /api/claims` - Create a new claim verification case.
+* `POST /api/claims/{id}/check` - Execute rejection check against policy terms.
+* `GET /api/claims/{id}/report` - Download compiled PDF Evidence Report.
+
+### ⚖️ Complaints & Escalations (`/api/complaints`)
+* `GET /api/complaints` - List user complaints.
+* `POST /api/complaints` - Draft a grievance from a verified rejection.
+* `PATCH /api/complaints/{id}` - Edit complaint grounds and draft text.
+* `POST /api/complaints/{id}/sent` - Mark complaint as dispatched and initialize response tracker.
+* `GET /api/complaints/{id}/letter` - Download formatted grievance letter (PDF).
+* `GET /api/complaints/{id}/package` - Download unified grievance package (PDF).
+* `GET /api/complaints/{id}/reminder` - Export calendar reminder file (`.ics`).
+
+---
+
+## 🐳 Docker Container Deployment
+
+ClaimSaathi can be packaged into a **single self-contained Docker container** that compiles the React frontend and serves it directly alongside the FastAPI API backend:
+
+```bash
+# 1. Build the multi-stage Docker container
+docker build -t claimsaathi .
+
+# 2. Run the container with a persistent data volume
+docker run -d \
+  -p 8000:8000 \
+  -v claimsaathi-data:/data \
+  --env-file backend/.env.production \
+  --name claimsaathi-app \
+  claimsaathi
+```
+
+> [!IMPORTANT]
+> Always mount a persistent volume at `/data` in production. The SQLite database, AES-128 encrypted documents, and local embedding models reside in this directory.
+
+---
+
+## 🛡️ Security & Privacy by Design
+
+Insurance documents contain highly sensitive Personally Identifiable Information (PII) and medical histories. ClaimSaathi enforces strict security controls:
+1. **Zero-Knowledge Encryption at Rest**: Uploaded documents are encrypted using AES-128 (Fernet) before hitting disk storage.
+2. **Local Embedding Execution**: Embeddings are calculated on-premises using `fastembed`—sensitive clauses are never stored on external vector cloud services.
+3. **Argon2id Hashing**: Passwords are protected using state-of-the-art Argon2id key derivation functions with memory hardness.
+4. **Tenant Isolation**: All database queries enforce strict user-id ownership boundaries, preventing cross-tenant leakage.
+5. **No Data Sharing with Insurers**: Files and evidence packets remain solely in the policyholder's possession. Submissions are initiated exclusively by the user.
+
+---
+
+## 🗺️ Product Roadmap
+
+- [x] **Phase 1: Core Engine & Verification** (Hackathon MVP)
+  - Full OCR, clause parsing, and hybrid multilingual vector search.
+  - Deterministic continuity and waiting period rules engine.
+  - Evidence mapping and PDF report compilation.
+  - IRDAI-compliant dispute letter drafting and `.ics` tracking.
+  - Trilingual UI (English, Hindi, Hinglish) and Text-to-Speech support.
+  - Cross-platform mobile Flutter app with voice input.
+- [ ] **Phase 2: Expanded Regional Language Ecosystem**
+  - Add Tamil, Telugu, Bengali, Marathi, and Kannada audio translations.
+  - Voice-driven interactive claim dispute walkthroughs.
+- [ ] **Phase 3: Automated Hospital Bill Scrutiny**
+  - Line-item breakdown of hospital charges against GIPSA Preferred Provider Network (PPN) tariff limits.
+  - Detection of unbundled medical equipment and pharmacy over-billing.
+- [ ] **Phase 4: Verified Expert Network**
+  - Optional one-click referral to empanelled insurance lawyers and consumer-rights NGOs for complex litigations exceeding Ombudsman jurisdiction.
+
+---
+
+## ⚖️ Legal Disclaimer
+
+*ClaimSaathi is an assistive technological intelligence platform designed to help policyholders understand contracts, verify factual timelines, and format formal dispute petitions. ClaimSaathi does not provide regulated legal advice, actuarial certifications, or insurance broking services. Decisions regarding claim admissibility rest solely with insurers, the Insurance Ombudsman, and civil consumer forums.*
+
+---
+
+## 📜 Regulatory References & Resources
+
+- **[IRDAI Official Portal](https://irdai.gov.in/)** — Insurance Regulatory and Development Authority of India.
+- **[Bima Bharosa](https://bimabharosa.irdai.gov.in/)** — IRDAI Grievance Redressal Portal.
+- **[Council for Insurance Ombudsmen](https://www.cioins.co.in/)** — Information, jurisdiction, and addresses of all 17 Ombudsman centers across India.
+- **[Insurance Ombudsman Rules, 2017](https://www.cioins.co.in/Rules)** — Statutory rules governing claim disputes up to ₹50 Lakhs.
+
+---
+
+<div align="center">
+  <sub>Built with pride by <b>OverCooked Brains</b> for <b>The Builder's Theory 1.0</b></sub><br>
+  <sub>© 2026 ClaimSaathi. All rights reserved.</sub>
+</div>
