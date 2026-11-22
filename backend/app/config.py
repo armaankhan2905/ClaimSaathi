@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     frontend_dist: Path = BASE_DIR.parent / "frontend" / "dist"
     # Create the fictional demo account when the server starts (handy for a hosted demo).
     seed_demo: bool = False
+    # Also load and read the fictional sample files for the demo account (in the background, once).
+    seed_demo_documents: bool = False
     # Failed sign-ins allowed per email and address before a short lock-out.
     login_attempts: int = 10
     login_window_minutes: int = 15

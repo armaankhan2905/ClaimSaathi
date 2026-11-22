@@ -23,7 +23,14 @@ async def lifespan(app_: FastAPI):
         from .seed import seed
 
         with SessionLocal() as db:
-            seed(db)
+            demo_id = seed(db).id
+        if settings.seed_demo_documents:
+            import threading
+
+            from .seed import load_sample_documents
+
+            # Skips files already loaded, so a restart doesn't read them again.
+            threading.Thread(target=load_sample_documents, args=(demo_id, SessionLocal), name="seed-documents", daemon=True).start()
     from .db import get_session_factory
     from .recovery import resume_interrupted
 

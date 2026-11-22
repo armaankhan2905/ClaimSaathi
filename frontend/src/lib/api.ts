@@ -2,6 +2,10 @@ import type { Lang } from "../i18n/strings";
 
 const TOKEN_KEY = "claimsaathi-token";
 
+// Where the API lives. Empty = the same site (local dev proxy, or the one-container deploy).
+// A separately hosted website (e.g. Vercel) sets VITE_API_URL to the backend's address at build time.
+const API_BASE = ((import.meta.env.VITE_API_URL as string | undefined) ?? "").replace(/\/+$/, "");
+
 export type User = { id: number; email: string; full_name: string; preferred_language: Lang };
 
 export type Policy = {
@@ -257,7 +261,7 @@ async function send(method: string, path: string, body?: unknown): Promise<Respo
   }
   let res: Response;
   try {
-    res = await fetch(`/api${path}`, { method, headers, body: payload });
+    res = await fetch(`${API_BASE}/api${path}`, { method, headers, body: payload });
   } catch {
     throw new ApiError(0, "network");
   }

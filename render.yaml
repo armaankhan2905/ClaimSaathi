@@ -1,0 +1,41 @@
+# Render Blueprint for the ClaimSaathi backend (New > Blueprint > pick this repository).
+# The website is deployed separately on Vercel and calls this service directly.
+#
+# Needs a paid instance type: the free plan has no persistent disk, so the database and the
+# encrypted uploads would be lost on every restart. Values marked sync: false are asked for when
+# the Blueprint is created (paste them from backend/.env.production, which is not in git).
+services:
+  - type: web
+    name: claimsaathi-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    region: singapore
+    healthCheckPath: /api/health
+    disk:
+      name: claimsaathi-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FILE_ENCRYPTION_KEY # a Fernet key; back it up, stored files can't be read without it
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ORIGINS # the Vercel address, e.g. https://claimsaathi.vercel.app
+        sync: false
+      - key: SEED_DEMO
+        value: "true"
+      - key: SEED_DEMO_DOCUMENTS # also load and read the fictional sample files for the demo account
+        value: "true"
+      - key: DEMO_EMAIL
+        value: rohit.demo@example.com
+      - key: DEMO_PASSWORD
+        sync: false
+      # The Starter plan has 512 MB of memory; the local clause-search model needs more.
+      # Search falls back to keywords (with the Hindi/Hinglish glossary). Turn on with 2 GB.
+      - key: EMBEDDINGS_ENABLED
+        value: "false"
