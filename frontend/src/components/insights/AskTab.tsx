@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useI18n } from "../../i18n/I18nProvider";
 import type { StringKey } from "../../i18n/strings";
 import { api, ApiError, type ChatMessage, type PolicyDetail } from "../../lib/api";
+import { useSpeech } from "../../lib/tts";
 import { Icon } from "../Icon";
 
 const SUGGESTIONS: Record<"health" | "motor", StringKey[]> = {
@@ -32,7 +33,8 @@ function Typing() {
 }
 
 function Bubble({ msg, onOpenClause, onAsk }: { msg: ChatMessage; onOpenClause: (ref: string) => void; onAsk: (q: string) => void }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const { activeId, toggle } = useSpeech();
   if (msg.role === "user")
     return (
       <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="max-w-[82%] self-end rounded-[14px] rounded-br-[4px] bg-accent px-3.5 py-3 text-[14.5px] whitespace-pre-wrap text-accent-ink">
@@ -50,14 +52,44 @@ function Bubble({ msg, onOpenClause, onAsk }: { msg: ChatMessage; onOpenClause: 
         {t(chip.key)}
       </span>
       {text && <p className="whitespace-pre-wrap">{text}</p>}
-      {msg.citations.map((c) => (
-        <blockquote key={c.ref} className="m-0 rounded-[10px] bg-paper px-3 py-2.5 font-[Georgia,'Times_New_Roman',serif] text-[13px] text-paper-ink">
-          <button type="button" onClick={() => onOpenClause(c.ref)} className="mb-1 block font-mono text-[11px] text-accent hover:underline" aria-label={t("open_clause", { ref: c.ref })}>
-            §{c.ref} · {c.title} →
-          </button>
-          “{c.quote}”
-        </blockquote>
-      ))}
+      {msg.citations.map((c) => {
+        const citationId = `citation-${msg.id}-${c.ref}`;
+        const isSpeaking = activeId === citationId;
+        const textToRead = `Clause ${c.ref}. ${c.title}. ${c.quote}`;
+
+        return (
+          <blockquote
+            key={c.ref}
+            className={`m-0 rounded-[10px] bg-paper px-3 py-2.5 font-[Georgia,'Times_New_Roman',serif] text-[13px] text-paper-ink border transition-colors ${
+              isSpeaking ? "border-accent ring-1 ring-accent" : "border-transparent"
+            }`}
+          >
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => onOpenClause(c.ref)}
+                className="font-mono text-[11px] text-accent hover:underline text-left truncate"
+                aria-label={t("open_clause", { ref: c.ref })}
+              >
+                §{c.ref} · {c.title} →
+              </button>
+              <button
+                type="button"
+                onClick={() => toggle(citationId, textToRead, msg.lang || lang)}
+                className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-sans transition-colors ${
+                  isSpeaking ? "bg-accent text-accent-ink font-semibold" : "text-accent hover:bg-accent/10"
+                }`}
+                title={isSpeaking ? "Stop reading" : "Read clause aloud"}
+                aria-label={isSpeaking ? "Stop reading" : "Read clause aloud"}
+              >
+                <Icon name={isSpeaking ? "stop" : "volume"} className="h-3.5 w-3.5" />
+                <span>{isSpeaking ? "Stop" : "Read"}</span>
+              </button>
+            </div>
+            “{c.quote}”
+          </blockquote>
+        );
+      })}
       {msg.follow_ups.length > 0 && (
         <div className="flex flex-wrap gap-1.5 pt-0.5">
           {msg.follow_ups.map((f) => (

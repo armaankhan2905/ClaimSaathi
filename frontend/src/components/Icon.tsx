@@ -87,6 +87,18 @@ const PATHS = {
       <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
     </>
   ),
+  volume: (
+    <>
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </>
+  ),
+  stop: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <rect x="9" y="9" width="6" height="6" fill="currentColor" />
+    </>
+  ),
 } as const;
 
 export type IconName = keyof typeof PATHS;

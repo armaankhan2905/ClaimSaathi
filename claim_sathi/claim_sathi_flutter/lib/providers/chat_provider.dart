@@ -207,6 +207,26 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
   }
 
+  /// Toggle speech read-aloud (TTS) for an individual clause citation
+  void toggleSpeechForCitation(String citationKey, String textToSpeak) {
+    if (state.activeSpeechMessageId == citationKey) {
+      SpeakerHelper.stop();
+      state = state.copyWith(clearActiveSpeech: true);
+    } else {
+      SpeakerHelper.stop();
+      state = state.copyWith(activeSpeechMessageId: citationKey);
+
+      final lang = state.selectedLanguage;
+      SpeakerHelper.speak(
+        textToSpeak,
+        lang: lang,
+        onEnd: () {
+          state = state.copyWith(clearActiveSpeech: true);
+        },
+      );
+    }
+  }
+
   /// Sends a prompt (typed or spoken) to ClaimSaathi AI
   Future<void> sendMessage(String text, {bool isVoice = false}) async {
     final query = text.trim();

@@ -640,7 +640,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             // Citations
             if (msg.citations.isNotEmpty) ...[
               const SizedBox(height: 12),
-              ...msg.citations.map((c) => _buildCitationBox(c)),
+              ...msg.citations.map((c) => _buildCitationBox(c, msg.id, chatState)),
             ],
 
             // Follow-up Chips
@@ -669,7 +669,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     );
   }
 
-  Widget _buildCitationBox(PolicyCitation citation) {
+  Widget _buildCitationBox(PolicyCitation citation, String msgId, ChatState chatState) {
+    final citationKey = '$msgId-${citation.ref}';
+    final isSpeaking = chatState.activeSpeechMessageId == citationKey;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 8),
@@ -677,26 +680,68 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       decoration: BoxDecoration(
         color: const Color(0xFFF9F7F1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE5DECE)),
+        border: Border.all(
+          color: isSpeaking ? Colors.teal : const Color(0xFFE5DECE),
+          width: isSpeaking ? 1.5 : 1.0,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.menu_book, size: 14, color: Colors.teal),
-              const SizedBox(width: 6),
-              Text(
-                citation.ref,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(Icons.menu_book, size: 14, color: Colors.teal),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        citation.title.isNotEmpty ? '§${citation.ref} • ${citation.title}' : '§${citation.ref}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  final textToRead = 'Clause ${citation.ref}. ${citation.title.isNotEmpty ? "${citation.title}. " : ""}${citation.quote}';
+                  ref.read(chatProvider.notifier).toggleSpeechForCitation(citationKey, textToRead);
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isSpeaking ? Icons.stop_circle : Icons.volume_up_outlined,
+                        size: 17,
+                        color: isSpeaking ? Colors.redAccent : Colors.teal.shade700,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isSpeaking ? 'Stop' : 'Read',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isSpeaking ? Colors.redAccent : Colors.teal.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             citation.quote,
             style: const TextStyle(

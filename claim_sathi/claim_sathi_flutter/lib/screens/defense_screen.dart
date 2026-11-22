@@ -15,6 +15,7 @@ class DefenseScreen extends ConsumerStatefulWidget {
 class _DefenseScreenState extends ConsumerState<DefenseScreen> {
   String _selectedLanguage = 'hi-IN'; // 'hi-IN' or 'en-IN'
   bool _isPlaying = false;
+  String? _activeSpeakingId;
 
   @override
   void dispose() {
@@ -22,24 +23,48 @@ class _DefenseScreenState extends ConsumerState<DefenseScreen> {
     super.dispose();
   }
 
-  void _toggleSpeech(ClaimVerdict verdict) {
-    if (_isPlaying) {
+  void _speakText(String id, String text) {
+    if (_activeSpeakingId == id) {
       SpeakerHelper.stop();
-      setState(() => _isPlaying = false);
+      setState(() {
+        _activeSpeakingId = null;
+        _isPlaying = false;
+      });
+    } else {
+      SpeakerHelper.stop();
+      setState(() {
+        _activeSpeakingId = id;
+        _isPlaying = true;
+      });
+
+      SpeakerHelper.speak(
+        text,
+        lang: _selectedLanguage,
+        onEnd: () {
+          if (mounted && _activeSpeakingId == id) {
+            setState(() {
+              _activeSpeakingId = null;
+              _isPlaying = false;
+            });
+          }
+        },
+      );
+    }
+  }
+
+  void _toggleSpeech(ClaimVerdict verdict) {
+    if (_isPlaying && _activeSpeakingId == 'verdict') {
+      SpeakerHelper.stop();
+      setState(() {
+        _activeSpeakingId = null;
+        _isPlaying = false;
+      });
     } else {
       final textToSpeak = _selectedLanguage == 'hi-IN'
           ? verdict.spokenDefenseHindi
           : verdict.spokenDefenseEnglish;
 
-      setState(() => _isPlaying = true);
-
-      SpeakerHelper.speak(
-        textToSpeak,
-        lang: _selectedLanguage,
-        onEnd: () {
-          if (mounted) setState(() => _isPlaying = false);
-        },
-      );
+      _speakText('verdict', textToSpeak);
     }
   }
 
@@ -359,13 +384,29 @@ class _DefenseScreenState extends ConsumerState<DefenseScreen> {
             const SizedBox(height: 14),
             const Divider(),
             const SizedBox(height: 10),
-            Text(
-              'Unlawful Clause Invoked by Insurer:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                color: Colors.grey.shade800,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Unlawful Clause Invoked by Insurer:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    _activeSpeakingId == 'clause' ? Icons.stop_circle : Icons.volume_up_outlined,
+                    size: 18,
+                    color: _activeSpeakingId == 'clause' ? Colors.redAccent : Colors.teal.shade700,
+                  ),
+                  tooltip: _activeSpeakingId == 'clause' ? 'Stop reading' : 'Read clause aloud',
+                  onPressed: () => _speakText('clause', 'Unlawful clause invoked by insurer: ${verdict.disputedClause}'),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
             Container(
@@ -373,6 +414,10 @@ class _DefenseScreenState extends ConsumerState<DefenseScreen> {
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: _activeSpeakingId == 'clause' ? Colors.teal : Colors.transparent,
+                  width: 1.2,
+                ),
               ),
               child: Text(
                 verdict.disputedClause,
@@ -380,13 +425,29 @@ class _DefenseScreenState extends ConsumerState<DefenseScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              'Statutory IRDAI Protection Basis:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                color: Colors.grey.shade800,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Statutory IRDAI Protection Basis:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: Icon(
+                    _activeSpeakingId == 'legal' ? Icons.stop_circle : Icons.volume_up_outlined,
+                    size: 18,
+                    color: _activeSpeakingId == 'legal' ? Colors.redAccent : Colors.teal.shade700,
+                  ),
+                  tooltip: _activeSpeakingId == 'legal' ? 'Stop reading' : 'Read protection basis aloud',
+                  onPressed: () => _speakText('legal', 'Statutory IRDAI Protection Basis: ${verdict.legalBasis}'),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
             Container(
@@ -394,6 +455,10 @@ class _DefenseScreenState extends ConsumerState<DefenseScreen> {
               decoration: BoxDecoration(
                 color: Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: _activeSpeakingId == 'legal' ? Colors.teal : Colors.transparent,
+                  width: 1.2,
+                ),
               ),
               child: Text(
                 verdict.legalBasis,
