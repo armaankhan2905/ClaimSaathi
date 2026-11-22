@@ -58,7 +58,7 @@ function VerdictPanel({ name, result, onOpenClause, highlight }: { name: string;
         </p>
       )}
       {result.citations.map((c) => (
-        <blockquote key={c.ref} className="m-0 rounded-[10px] bg-paper px-3 py-2.5 font-[Georgia,'Times_New_Roman',serif] text-[13px] text-paper-ink">
+        <blockquote key={c.ref} className="m-0 rounded-[10px] bg-paper px-3 py-2.5 font-mono text-[13px] text-paper-ink">
           <button type="button" onClick={() => onOpenClause(c.ref)} className="mb-1 block font-mono text-[11px] text-accent hover:underline" aria-label={t("open_clause", { ref: c.ref })}>
             §{c.ref} · {c.title} →
           </button>
@@ -158,7 +158,13 @@ export function CompareTab({ policy, policies, onOpenClause }: { policy: PolicyD
         <span className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-[var(--accent-soft)] text-accent">
           <Icon name="doc" className="h-5 w-5" />
         </span>
-        <p className="muted mt-2">{t("compare_need_other")}</p>
+        <div>
+          <p className="muted mt-2">{t("compare_need_other")}</p>
+          <button type="button" className="btn primary mt-3" onClick={() => navigate(`/policy?id=${policy.id}&tab=compare&upload=1`)}>
+            <Icon name="upload" />
+            {t("upload_documents")}
+          </button>
+        </div>
       </div>
     );
 

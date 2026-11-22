@@ -122,6 +122,15 @@ export function PolicyInsights() {
 
   const { policy, clauses, reload } = usePolicyDetail(policyId);
 
+  // "Upload documents" buttons elsewhere on the page (e.g. Compare) open the uploader at the top.
+  const wantsUpload = params.get("upload") === "1";
+  useEffect(() => {
+    if (!wantsUpload) return;
+    setUploadOpen(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    update({ upload: null });
+  }, [wantsUpload]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Reload policies when documents finish reading: an upload may have created or filled one.
   useEffect(() => {
     api.listPolicies().then(setPolicies).catch(() => setPolicies([]));

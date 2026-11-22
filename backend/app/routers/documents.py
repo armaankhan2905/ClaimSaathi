@@ -69,6 +69,18 @@ async def upload_document(
     if content_type is None:
         raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "unsupported_type")
 
+    # The very same file added again to the same policy or check would only be listed twice.
+    sha256 = hashlib.sha256(data).hexdigest()
+    same = select(Document.id).where(Document.owner_id == user.id, Document.sha256 == sha256)
+    if claim_id is not None:
+        same = same.where(Document.claim_id == claim_id)
+    elif policy_id is not None:
+        same = same.where(Document.policy_id == policy_id)
+    else:
+        same = same.where(Document.claim_id.is_(None), Document.kind == kind)
+    if db.scalar(same.limit(1)) is not None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "duplicate_file")
+
     doc = Document(
         owner_id=user.id,
         policy_id=policy_id,
@@ -77,7 +89,7 @@ async def upload_document(
         filename=_clean_filename(file.filename),
         content_type=content_type,
         size_bytes=len(data),
-        sha256=hashlib.sha256(data).hexdigest(),
+        sha256=sha256,
         storage_key=storage.save(data),
         status="processing",
     )

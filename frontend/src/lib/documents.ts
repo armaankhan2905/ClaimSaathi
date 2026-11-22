@@ -5,6 +5,7 @@ import { api, ApiError, type DocumentInfo, type DocumentKind } from "./api";
 const KNOWN_ERRORS = new Set([
   "file_too_large",
   "unsupported_type",
+  "duplicate_file",
   "empty_file",
   "password_protected",
   "unreadable_file",

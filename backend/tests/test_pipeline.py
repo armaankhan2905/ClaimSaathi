@@ -213,9 +213,17 @@ def test_same_file_uploaded_twice_lists_clauses_once(client, auth_headers):
     pdf = text_pdf(WORDING)
     upload(client, auth_headers, pdf, name="w.pdf")
     [p] = _policies(client, auth_headers)
-    upload(client, auth_headers, pdf, name="w-again.pdf", policy_id=p["id"])
+    again = upload(client, auth_headers, pdf, name="w-again.pdf", policy_id=p["id"])
+    assert again.status_code == 409 and again.json()["detail"] == "duplicate_file"
     clauses = client.get(f"/api/policies/{p['id']}/clauses", headers=auth_headers).json()
     assert [c["ref"] for c in clauses] == ["1", "2.1", "4.1", "4.2", "5"]
+    assert len(client.get("/api/documents", headers=auth_headers).json()) == 1
+
+
+def test_same_file_without_a_policy_chosen_is_refused_too(client, auth_headers):
+    pdf = text_pdf(WORDING)
+    assert upload(client, auth_headers, pdf, name="w.pdf").status_code == 201
+    assert upload(client, auth_headers, pdf, name="w2.pdf").status_code == 409
 
 
 def test_scanned_copy_of_the_same_wording_lists_clauses_once(client, auth_headers):
