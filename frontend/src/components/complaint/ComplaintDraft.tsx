@@ -25,7 +25,7 @@ function Field({ label, children, full, hint }: { label: string; children: (id: 
 /** The letter as it will be sent, rebuilt by the server after every edit. */
 export function LetterPreview({ letter }: { letter: Complaint["letter"] }) {
   return (
-    <article className="rounded-2xl border border-line bg-paper px-5 py-5 font-[Georgia,'Times_New_Roman',serif] text-[14px] leading-relaxed text-paper-ink sm:px-7" aria-live="polite">
+    <article className="rounded-2xl border border-line bg-paper px-5 py-5 font-mono text-[14px] leading-relaxed text-paper-ink sm:px-7" aria-live="polite">
       <div className="mb-3 flex flex-wrap justify-between gap-2 font-sans text-[12px] opacity-75">
         <span>To: {letter.to}</span>
         <span>{letter.date}</span>

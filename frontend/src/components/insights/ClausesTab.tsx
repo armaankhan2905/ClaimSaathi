@@ -93,7 +93,7 @@ function ClauseCard({ clause, timeline, best, focused }: { clause: Clause; timel
           )}
         </div>
         <h3 className="mt-1 mb-2 text-[15px]">{clause.title}</h3>
-        <p className={`font-[Georgia,'Times_New_Roman',serif] text-[13.5px] leading-[1.6] whitespace-pre-wrap ${long && !open ? "line-clamp-[9]" : ""}`}>
+        <p className={`font-mono text-[13.5px] leading-[1.6] whitespace-pre-wrap ${long && !open ? "line-clamp-[9]" : ""}`}>
           {reflow(clause.text)}
         </p>
         {long && (
@@ -195,7 +195,7 @@ export function ClausesTab({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("search_clauses")}
+            placeholder={t(policy.category === "motor" ? "search_clauses_motor" : "search_clauses")}
             aria-label={t("search_clauses")}
             title={t("search_hint")}
             className="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-fg outline-none"

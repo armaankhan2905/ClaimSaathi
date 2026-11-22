@@ -94,7 +94,7 @@ export function DocumentViewer({ doc, onClose }: { doc: DocumentInfo | null; onC
                       {t("ocr_note")}
                     </p>
                   )}
-                  <article className="whitespace-pre-wrap rounded-[14px] border border-line bg-paper px-6 py-5 font-[Georgia,'Times_New_Roman',serif] text-[14px] leading-[1.65] text-paper-ink">
+                  <article className="whitespace-pre-wrap rounded-[14px] border border-line bg-paper px-6 py-5 font-mono text-[14px] leading-[1.65] text-paper-ink">
                     {page.text}
                   </article>
                 </>

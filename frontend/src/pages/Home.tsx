@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
+import { StampMark } from "../components/AppBar";
 import { Icon, type IconName } from "../components/Icon";
 import { usePageTitle } from "../components/PageHead";
 import { PolicyCard } from "../components/PolicyCard";
@@ -22,30 +23,50 @@ const FEATURES: { to: string; icon: IconName; eyebrow: StringKey; title: StringK
   { to: "/complaint", icon: "flag", eyebrow: "comp_eyebrow", title: "nav_comp", items: ["feat_comp_1", "feat_comp_2", "feat_comp_3", "feat_comp_4"] },
 ];
 
-function HeroShield() {
+/** The example case as a dossier: the insurer's letter clipped over the clause that answers it,
+ *  stamped "not supported". The letter and clause are quoted documents, so they stay in English. */
+function Dossier() {
+  const { t } = useI18n();
   return (
-    <motion.svg
-      viewBox="0 0 270 330"
-      aria-hidden="true"
-      className="w-[150px] drop-shadow-[0_18px_20px_rgba(16,38,74,.3)] md:w-[190px]"
-      animate={{ y: [0, -10, 0] }}
-      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-    >
-      <defs>
-        <linearGradient id="hs-a" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#5b97e6" />
-          <stop offset="1" stopColor="#164a9a" />
-        </linearGradient>
-        <linearGradient id="hs-b" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#d6e5f9" />
-          <stop offset="1" stopColor="#7ea7dd" />
-        </linearGradient>
-      </defs>
-      <path d="M135 8 250 52v108c0 80-52 135-115 162C72 295 20 240 20 160V52z" fill="url(#hs-b)" />
-      <path d="M135 26 234 62v98c0 70-45 118-99 142C81 278 36 230 36 160V62z" fill="url(#hs-a)" />
-      <path d="M135 26 234 62v98c0 70-45 118-99 142z" fill="#000" opacity=".14" />
-      <path d="M88 168l34 36 62-76" fill="none" stroke="#fff" strokeWidth="22" strokeLinecap="round" strokeLinejoin="round" />
-    </motion.svg>
+    <figure className="relative m-0 min-h-[440px] min-w-0">
+      {/* folder behind the sheet, with its tab */}
+      <div aria-hidden="true" className="absolute inset-[18px_0_0_24px] rotate-[3deg] bg-folder shadow-[0_2px_0_rgba(0,0,0,.12)]" />
+      <div aria-hidden="true" className="absolute top-0 left-[44px] h-7 w-[140px] rotate-[3deg] bg-folder" />
+      <motion.article
+        initial={{ opacity: 0, y: 18, rotate: -1.5 }}
+        animate={{ opacity: 1, y: 0, rotate: 0 }}
+        transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+        className="relative mt-8 mr-2 border border-line bg-paper px-6 pt-7 pb-14 font-mono text-paper-ink shadow-[0_14px_30px_rgba(60,45,20,.18)] sm:px-8"
+      >
+        {/* paper clip */}
+        <svg aria-hidden="true" viewBox="0 0 34 74" className="absolute -top-5 right-12 h-[74px] w-[34px]">
+          <path d="M10 70V14a7 7 0 0 1 14 0v46a4 4 0 0 1-8 0V20" fill="none" stroke="#7d7f86" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+        <p className="text-[13px] text-paper-muted uppercase">{t("cf_letter_label")} · 03 Oct 2026</p>
+        <p lang="en" className="mt-2 text-[16px] font-bold">Re: Claim CLM-26-08817 — Repudiation</p>
+        <p lang="en" className="mt-3 text-[14.5px] leading-relaxed">
+          Your claim of ₹1,80,000 for left total knee replacement is not payable, as the treatment falls within the{" "}
+          <span className="bg-[var(--bad-bg)] px-0.5">24-month waiting period under Clause 4.2</span>, counted from 12 Mar 2026.
+        </p>
+        <hr className="my-5 border-0 border-t-[1.5px] border-dashed border-line" />
+        <p className="text-[13px] text-paper-muted uppercase">{t("cf_clause_label")}</p>
+        <p lang="en" className="mt-2 text-[14.5px] leading-relaxed">
+          “The 24 months are counted from the <b className="bg-[var(--accent-soft)] px-0.5">First Policy Date</b> and not from the start of the current Policy Period.”
+        </p>
+        <p className="mt-3 text-[13.5px] leading-snug text-accent">{t("cf_dates")}</p>
+        <motion.div
+          initial={{ opacity: 0, scale: 1.6, rotate: -4 }}
+          animate={{ opacity: 1, scale: 1, rotate: -11 }}
+          transition={{ duration: 0.35, delay: 0.55, ease: [0.3, 1.4, 0.5, 1] }}
+          className="stamp absolute right-3 -bottom-7 bg-paper text-[24px] sm:right-6"
+          role="img"
+          aria-label={`${t("cf_stamp_1")} ${t("cf_stamp_2")}`}
+        >
+          {t("cf_stamp_1")}
+          <span className="mt-1 block text-[13px] tracking-[.12em]">{t("cf_stamp_2")}</span>
+        </motion.div>
+      </motion.article>
+    </figure>
   );
 }
 
@@ -98,64 +119,90 @@ export function Home() {
   return (
     <section aria-labelledby="h-home">
       {/* Hero */}
-      <div className="relative grid items-center gap-6 overflow-hidden rounded-[28px] border border-line bg-[linear-gradient(165deg,var(--hero-from)_0%,var(--hero-mid)_60%,var(--hero-to)_100%)] px-5 py-7 md:grid-cols-[1.4fr_1fr] md:px-10 md:py-11">
-        <div className="relative">
-          <h1 id="h-home">
-            {t("hero_title_1")}
+      <div className="grid items-center gap-12 pt-1 pb-12 md:grid-cols-[1.1fr_1fr] md:gap-14">
+        <div className="min-w-0">
+          <p className="font-mono text-[14px] tracking-[.06em] text-muted uppercase">
+            {t("cf_file_no")} CLM-26-08817 · {t("cf_example")}
+          </p>
+          <h1 id="h-home" className="mt-4 text-[clamp(46px,7.2vw,94px)] leading-[0.9]">
+            {t("cf_hero_1")}
             <br />
-            <span className="text-accent">{t("hero_title_2")}</span>
+            <span className="text-stamp">{t("cf_hero_2")}</span>
           </h1>
-          <p className="muted mt-3.5 max-w-[54ch] text-[16.5px]">{t("hero_sub")}</p>
-          <div className="mt-[22px] flex flex-wrap gap-2.5">
-            <Link to="/policy" className="btn primary">
+          <p className="mt-7 max-w-[54ch] text-[18px] leading-relaxed text-fg/85">{t("hero_sub")}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/policy" className="btn primary px-6 py-3.5 text-[16px]">
               <Icon name="upload" />
               {t("cta_upload")}
             </Link>
-            <Link to="/rejection" className="btn">
+            <Link to="/rejection" className="btn px-6 py-3.5 text-[16px]">
               <Icon name="search" />
               {t("cta_check")}
             </Link>
           </div>
         </div>
-        <div className="relative hidden justify-center md:flex">
-          <div className="absolute top-1/2 left-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_40%_35%,color-mix(in_srgb,var(--accent)_25%,transparent),transparent_70%)]" />
-          <HeroShield />
+        <Dossier />
+      </div>
+
+      {/* The three tools, as exhibits in the file */}
+      <div className="-mx-4 border-y-2 border-rule bg-surface-2 px-4 py-12 md:-mx-8 md:px-8">
+        <h2 className="text-[clamp(28px,3.6vw,42px)] font-black uppercase [font-stretch:80%]">{t("cf_exhibits_title")}</h2>
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {FEATURES.map((f, i) => (
+            <motion.div key={f.to} whileHover={{ y: -3, rotate: i === 1 ? 0.4 : -0.4 }} transition={{ duration: 0.2 }}>
+              <Link
+                to={f.to}
+                className="flex h-full flex-col border-[1.5px] border-rule bg-surface p-6 text-fg no-underline shadow-[var(--shadow)] hover:text-fg"
+              >
+                <span className="eyebrow">
+                  {t("cf_exhibit")} {"ABC"[i]} · {t(f.eyebrow)}
+                </span>
+                <h3 className="mt-2.5 text-[26px] font-extrabold">{t(f.title)}</h3>
+                <ul className="m-0 mt-4 grid list-none gap-2 p-0 font-mono text-[14.5px] leading-snug">
+                  {f.items.map((k) => (
+                    <li key={k} className="flex gap-2">
+                      <span aria-hidden="true" className="flex-none font-bold text-stamp">[x]</span>
+                      {t(k)}
+                    </li>
+                  ))}
+                </ul>
+                <span className="mt-auto pt-5 font-bold text-accent">
+                  {t("open_section")} {t(f.title)} →
+                </span>
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </div>
 
-      {/* Features */}
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {FEATURES.map((f) => (
-          <motion.div key={f.to} whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-            <Link
-              to={f.to}
-              className="flex h-full flex-col gap-3 rounded-2xl border border-line bg-surface p-[22px] text-fg no-underline shadow-[var(--shadow)] transition-colors hover:border-sage"
-            >
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-[var(--accent-soft)] text-accent">
-                <Icon name={f.icon} className="h-[22px] w-[22px]" />
+      {/* Where a complaint goes, as a docket */}
+      <div className="pt-12">
+        <p className="eyebrow text-muted">{t("cf_route_title")}</p>
+        <ol className="m-0 mt-4 flex list-none flex-wrap items-center gap-3 p-0">
+          {(["stage_insurer", "stage_bima_bharosa", "stage_ombudsman"] as const).map((k, i) => (
+            <li key={k} className="flex items-center gap-3">
+              <span
+                className={`border-[3px] px-4 py-2.5 font-display text-[19px] font-extrabold uppercase [font-stretch:85%] ${
+                  i === 2 ? "border-stamp text-stamp" : "border-rule"
+                }`}
+              >
+                {i + 1} · {t(k)}
               </span>
-              <div>
-                <span className="eyebrow">{t(f.eyebrow)}</span>
-                <h2 className="mt-1.5">{t(f.title)}</h2>
-              </div>
-              <ul className="m-0 grid gap-1 pl-[18px] text-sm text-muted">
-                {f.items.map((k) => (
-                  <li key={k}>{t(k)}</li>
-                ))}
-              </ul>
-              <span className="mt-auto text-sm font-semibold text-accent">
-                {t("open_section")} {t(f.title)} →
-              </span>
-            </Link>
-          </motion.div>
-        ))}
+              {i < 2 && (
+                <span aria-hidden="true" className="text-[24px] font-black">
+                  →
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
       </div>
 
       {!user ? (
-        <div className="panel mt-8 flex flex-col items-center justify-between gap-4 py-7 sm:flex-row">
+        <div className="panel mt-12 flex flex-col items-start justify-between gap-4 py-7 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3.5">
-            <span className="grid h-12 w-12 flex-none place-items-center rounded-2xl bg-[var(--accent-soft)] text-accent">
-              <Icon name="shield" className="h-6 w-6" />
+            <span className="grid h-12 w-12 flex-none place-items-center text-stamp">
+              <StampMark className="h-12 w-12" />
             </span>
             <div>
               <h3 className="text-base font-semibold">{t("guest_cta_title")}</h3>
@@ -175,8 +222,8 @@ export function Home() {
       ) : (
         <>
           {/* Saved policies */}
-          <div className="mt-[34px] mb-3.5 flex flex-wrap items-baseline justify-between gap-3">
-            <h2>{t("your_policies")}</h2>
+          <div className="mt-12 mb-5 flex flex-wrap items-baseline justify-between gap-3 border-t-[1.5px] border-dashed border-line pt-6">
+            <h2 className="text-[clamp(26px,3vw,34px)] font-black uppercase [font-stretch:80%]">{t("your_policies")}</h2>
           </div>
           {failed ? (
             <div className="panel flex flex-wrap items-center gap-3">

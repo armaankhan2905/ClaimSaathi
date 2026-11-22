@@ -82,7 +82,7 @@ function Bubble({ msg, onOpenClause, onAsk }: { msg: ChatMessage; onOpenClause: 
         return (
           <blockquote
             key={c.ref}
-            className={`m-0 rounded-[10px] bg-paper px-3 py-2.5 font-[Georgia,'Times_New_Roman',serif] text-[13px] text-paper-ink border transition-colors ${
+            className={`m-0 rounded-[10px] bg-paper px-3 py-2.5 font-mono text-[13px] text-paper-ink border transition-colors ${
               isSpeaking ? "border-accent ring-1 ring-accent" : "border-transparent"
             }`}
           >

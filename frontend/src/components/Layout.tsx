@@ -12,7 +12,7 @@ export function Layout({ barRight }: { barRight?: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <AppBar rightSlot={barRight} />
-      <main className="wrap w-full flex-1 pt-7 pb-16">
+      <main className="wrap w-full flex-1 pt-9 pb-16">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -27,8 +27,8 @@ export function Layout({ barRight }: { barRight?: ReactNode }) {
           </motion.div>
         </AnimatePresence>
       </main>
-      <footer className="border-t border-line">
-        <div className="wrap flex flex-wrap justify-between gap-3 py-[22px] text-[12.5px] text-muted">
+      <footer className="border-t-2 border-rule bg-surface-2">
+        <div className="wrap flex flex-wrap justify-between gap-3 py-5 font-mono text-[13px] text-muted">
           <span>{t("footer_note")}</span>
           <span>{t("footer_privacy")}</span>
         </div>

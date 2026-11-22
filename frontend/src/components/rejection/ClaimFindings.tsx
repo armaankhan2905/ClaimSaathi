@@ -136,7 +136,7 @@ export function ClaimFindings({ claim, onDelete }: { claim: Claim; onDelete: () 
                 <div className="min-w-0">
                   <span className="eyebrow">{t("em_policy")}</span>
                   {r.policy_quote ? (
-                    <blockquote className="m-0 mt-1 rounded-[10px] bg-paper px-3 py-2.5 font-[Georgia,'Times_New_Roman',serif] text-[13px] text-paper-ink">
+                    <blockquote className="m-0 mt-1 rounded-[10px] bg-paper px-3 py-2.5 font-mono text-[13px] text-paper-ink">
                       {r.policy_quote && claim.policy_id ? (
                         <Link to={`/policy?id=${claim.policy_id}&tab=clauses&cat=all&ref=${encodeURIComponent(r.policy_quote.ref)}`} className="mb-1 block font-mono text-[11px] no-underline hover:underline" aria-label={t("open_clause", { ref: r.policy_quote.ref })}>
                           §{r.policy_quote.ref} · {r.policy_quote.title} →
@@ -161,10 +161,15 @@ export function ClaimFindings({ claim, onDelete }: { claim: Claim; onDelete: () 
                   )}
                 </div>
                 <div className="border-t border-line pt-3 md:col-span-3">
-                  <span className={`chip ${st.cls} font-semibold`}>
-                    <span className="dot" />
-                    {t(st.key)}
-                  </span>
+                  {r.status === "contradicted" ? (
+                    // The insurer's reason doesn't hold: stamp it, as on the case file cover.
+                    <span className="stamp mt-1.5 mb-3 ml-1 text-[18px] [transform:rotate(-3deg)]">{t(st.key)}</span>
+                  ) : (
+                    <span className={`chip ${st.cls} font-semibold`}>
+                      <span className="dot" />
+                      {t(st.key)}
+                    </span>
+                  )}
                   <p className="mt-2 text-[14.5px]">{explain(r, claim.lang)}</p>
                 </div>
               </article>
